@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-saffron: #f97316; /* Example vibrant orange */
+  --color-brand-black: #0f1115;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  
+  --animate-fade-in: fade-in 1s ease-out forwards;
+  --animate-slide-up: slide-up 0.8s ease-out forwards;
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slide-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #f97316 #0f1115;
+}
+
+
+html {
+  scroll-behavior: smooth;
+}
+
+html.gsap-auto-scroll-active {
+  scroll-behavior: auto;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: #1a0505;
+  /* NOTE: background-attachment: fixed removed — it forces full repaint on every scroll frame */
+  background-image: 
+    radial-gradient(circle at 15% 25%, rgba(249, 115, 22, 0.22) 0%, transparent 40%),
+    radial-gradient(circle at 85% 75%, rgba(249, 115, 22, 0.17) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(180, 40, 10, 0.12) 0%, transparent 60%);
+  color: white;
+  overflow-x: hidden;
+}
+
+/* GPU-promote all Framer Motion animated elements */
+[data-framer-component-type],
+.motion-safe\:will-change-transform {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Saffron gradient background overlay */
+.bg-gradient-saffron {
+  background: radial-gradient(circle at top left, rgba(249, 115, 22, 0.15) 0%, transparent 40%),
+              radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.1) 0%, transparent 40%);
+}
