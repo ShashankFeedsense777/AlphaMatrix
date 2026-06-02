@@ -21,6 +21,7 @@
 * {
   scrollbar-width: thin;
   scrollbar-color: #f97316 #0f1115;
+  user-select: none;
 }
 
 
@@ -57,4 +58,20 @@ body {
 .bg-gradient-saffron {
   background: radial-gradient(circle at top left, rgba(249, 115, 22, 0.15) 0%, transparent 40%),
               radial-gradient(circle at bottom right, rgba(249, 115, 22, 0.1) 0%, transparent 40%);
+}
+
+.employee-login-input:-webkit-autofill,
+.employee-login-input:-webkit-autofill:hover,
+.employee-login-input:-webkit-autofill:focus,
+.employee-login-input:-webkit-autofill:active {
+  -webkit-text-fill-color: #fff;
+  caret-color: #fff;
+  box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.01) inset;
+  -webkit-box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.01) inset;
+  transition: background-color 9999s ease-out, color 9999s ease-out;
+}
+
+.employee-login-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+  opacity: 1;
 }

@@ -5,11 +5,14 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import SplashScreen from './components/SplashScreen';
+import EmployeeLoginPage from './components/EmployeeLoginPage';
+import DashboardPage from './components/DashboardPage';
 import WhatWeDo from './components/WhatWeDo';
 import VisionMission from './components/VisionMission';
 import Locations from './components/Locations';
 import AboutUs from './components/AboutUs';
 import RealTimeMarket from './components/RealTimeMarket';
+import CompanyFooter from './components/CompanyFooter';
 import './index.css';
 
 gsap.registerPlugin(ScrollToPlugin);
@@ -43,6 +46,8 @@ const Section: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 const NAVBAR_OFFSET = 80;
 
 function App() {
+  const isEmployeeLoginPage = window.location.pathname === '/employee-login';
+  const isDashboardPage = window.location.pathname === '/dashboard';
   const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem('alphaMatrixSplashSeen'));
   const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(15);
@@ -152,6 +157,14 @@ function App() {
     };
   }, [isAutoScrollEnabled]);
 
+  if (isEmployeeLoginPage) {
+    return <EmployeeLoginPage />;
+  }
+
+  if (isDashboardPage) {
+    return <DashboardPage />;
+  }
+
   return (
     <div className="min-h-screen text-white font-sans selection:bg-brand-saffron selection:text-white">
       {showSplash && (
@@ -192,8 +205,12 @@ function App() {
       </Section>
 
       <Section>
-        <RealTimeMarket />
+        <CompanyFooter />
       </Section>
+
+      {/* <Section>
+        <RealTimeMarket />
+      </Section> */}
     </div>
   );
 }

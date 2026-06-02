@@ -10,61 +10,59 @@ interface Location {
   img: string;
 }
 
+
 const locations: Location[] = [
   {
     city: 'Mumbai',
-    role: 'HEADQUARTERS',
+    role: 'Headquarters',
     desc: 'The maximum city — where conviction meets velocity.',
-    coords: '19.0760° N • 72.8777° E',
-    img: 'https://images.unsplash.com/photo-1529253355930-ddbe423a2ac7?q=80&w=1000&auto=format&fit=crop',
+    coords: '19.0760° N, 72.8777° E',
+    img: 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?q=80&w=1400&auto=format&fit=crop',
   },
   {
     city: 'Dubai',
-    role: 'PARTNER DESK',
+    role: 'Partner Desk',
     desc: 'Bridging east and west capital flows.',
-    coords: '25.2048° N • 55.2708° E',
-    img: 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?q=80&w=1000&auto=format&fit=crop',
+    coords: '25.2048° N, 55.2708° E',
+    img: 'https://images.unsplash.com/photo-1546412414-8035e1776c9a?q=80&w=1400&auto=format&fit=crop',
   },
   {
     city: 'Singapore',
-    role: 'PARTNER DESK',
+    role: 'Partner Desk',
     desc: 'Asia-Pacific liquidity & infrastructure.',
-    coords: '1.3521° N • 103.8198° E',
-    img: 'https://images.unsplash.com/photo-1525625293386-3f8f99389edd?q=80&w=1000&auto=format&fit=crop',
+    coords: '1.3521° N, 103.8198° E',
+    img: 'https://images.unsplash.com/photo-1508964942454-1a56651d54ac?q=80&w=1400&auto=format&fit=crop',
   },
 ];
-
-/** Card-entry variant: composited-only opacity + y — no clip-path (avoids paint) */
 const cardReveal: Variants = {
-  hidden: { opacity: 0, y: 56 },
+  hidden: { opacity: 0, y: 48 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.85, ease: [0.22, 1, 0.36, 1] as const },
+    transition: { duration: 0.9, ease: [0.22, 1, 0.36, 1] as const },
   },
 };
 
 const Locations: React.FC = () => {
   return (
-    <section id="locations" className="py-24">
+    <section id="locations" className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 overflow-hidden">
+
       {/* Heading */}
-      <SectionReveal variants={fadeUp} className="max-w-7xl mx-auto px-6 mb-16 text-center">
-        <p className="text-xs tracking-[0.3em] text-brand-saffron uppercase font-semibold mb-4">
+      <SectionReveal variants={fadeUp} className="max-w-4xl mx-auto mb-14 sm:mb-20 text-center">
+        <p className="text-[11px] sm:text-xs tracking-[0.28em] text-brand-saffron uppercase font-semibold mb-4">
           Where We Operate
         </p>
-        <h2 className="text-3xl md:text-4xl font-light text-white leading-tight">
-          We operate from the maximum city,{' '}
-          <span className="font-bold">Mumbai</span>.<br />
-          We have partners in{' '}
-          <span className="text-brand-saffron">Dubai</span>,{' '}
-          <span className="text-brand-saffron">Singapore</span>, among other places.
+        <h2 className="text-[clamp(1.75rem,4.5vw,2.75rem)] font-light text-white leading-tight">
+          Rooted in <span className="font-bold">Mumbai</span>,{' '}
+          connected across{' '}
+          <span className="text-brand-saffron">global markets</span>.
         </h2>
       </SectionReveal>
 
-      {/* Cards — staggered clip-reveal from bottom */}
+      {/* Cards */}
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-3 gap-1"
-        variants={staggerContainer(0.16)}
+        className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-5"
+        variants={staggerContainer(0.14)}
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-60px' }}
@@ -73,52 +71,81 @@ const Locations: React.FC = () => {
           <motion.div
             key={loc.city}
             variants={cardReveal}
-            className="relative h-[60vh] group overflow-hidden cursor-pointer bg-[#0d0d0d]"
+            className="group relative min-w-0 overflow-hidden cursor-pointer"
+            style={{ borderRadius: '20px' }}
           >
-            {/* BG image: grayscale → color on hover */}
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-all duration-700 ease-in-out grayscale group-hover:grayscale-0 scale-100 group-hover:scale-105 opacity-60 group-hover:opacity-85"
-              style={{ backgroundImage: `url(${loc.img})` }}
-            />
+            {/* Image */}
+            <div className="relative min-h-[360px] h-[70svh] max-h-[460px] sm:h-[520px] sm:max-h-none xl:h-[580px] overflow-hidden" style={{ borderRadius: '20px' }}>
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out scale-100 group-hover:scale-108 grayscale-30 group-hover:grayscale-0"
+                style={{ backgroundImage: `url(${loc.img})` }}
+              />
 
-            {/* Dark gradient for legibility */}
-            <div className="absolute inset-0 bg-linear-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-55 transition-opacity duration-700" />
+              {/* Layered overlays */}
+              <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-black/10" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-            {/* Content */}
-            <div className="absolute inset-0 p-10 flex flex-col justify-between">
+              {/* Saffron tint on hover */}
+              <div
+                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                style={{ background: 'radial-gradient(ellipse 60% 40% at 50% 100%, rgba(249,115,22,0.18) 0%, transparent 70%)' }}
+              />
+
               {/* Top row */}
-              <div className="flex justify-between items-start">
-                <motion.span
-                  initial={{ opacity: 0, x: -12 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: 0.3 + index * 0.15 }}
-                  className="text-brand-saffron text-xs tracking-[0.22em] font-bold uppercase"
+              <div className="absolute top-4 sm:top-5 left-4 sm:left-5 right-4 sm:right-5 flex justify-between items-center gap-3">
+                <span
+                  className="text-[9px] sm:text-[10px] tracking-[0.18em] sm:tracking-[0.22em] font-bold uppercase px-2.5 sm:px-3 py-1.5 truncate"
+                  style={{
+                    color: index === 0 ? '#ffffff' : 'rgba(255,255,255,0.55)',
+                    background: 'rgba(255,255,255,0.06)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '100px',
+                  }}
                 >
                   {loc.role}
-                </motion.span>
-                <span className="text-white/25 text-sm font-mono tracking-widest">
-                  0{index + 1}
                 </span>
+                <span className="text-white/30 text-xs font-mono">0{index + 1}</span>
               </div>
 
-              {/* Bottom text — slides up on hover */}
-              <div className="translate-y-3 group-hover:translate-y-0 transition-transform duration-500 ease-out">
-                <h3 className="text-5xl font-serif text-white mb-3 drop-shadow-lg">
+              {/* Bottom content */}
+              <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6 lg:p-8 translate-y-0 md:translate-y-2 md:group-hover:translate-y-0 transition-transform duration-500 ease-out">
+
+                {/* Coords */}
+                <div className="flex items-center gap-2 mb-3 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500 delay-75">
+                  <span className="w-5 h-px bg-brand-saffron/60 inline-block" />
+                  <span className="min-w-0 text-[9px] sm:text-[10px] font-mono text-white/45 tracking-widest truncate">{loc.coords}</span>
+                </div>
+
+                <h3 className="text-[clamp(2.25rem,9vw,3.75rem)] font-light text-white mb-2 tracking-tight">
                   {loc.city}
                 </h3>
-                <p className="text-gray-300 font-light text-lg mb-5 max-w-sm drop-shadow">
+
+                <p className="text-sm sm:text-base text-white/65 md:text-white/55 font-light leading-relaxed max-w-xs translate-y-0 opacity-100 md:translate-y-3 md:opacity-0 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-500 delay-100">
                   {loc.desc}
                 </p>
-                <div className="text-xs font-mono text-white/45 tracking-widest flex items-center space-x-2">
-                  <span className="w-4 h-px bg-white/25 inline-block" />
-                  <span>{loc.coords}</span>
-                </div>
+
+                {/* Bottom line accent */}
+                <div
+                  className="mt-5 h-px w-0 group-hover:w-full transition-all duration-700 ease-out delay-150"
+                  style={{ background: 'linear-gradient(90deg, rgba(249,115,22,0.6), transparent)' }}
+                />
               </div>
             </div>
           </motion.div>
         ))}
       </motion.div>
+
+      {/* Footer note */}
+      <SectionReveal variants={fadeUp} className="max-w-7xl mx-auto mt-8 sm:mt-10 px-1">
+        <div className="flex items-start sm:items-center gap-3">
+          <span className="mt-1.5 sm:mt-0 w-1.5 h-1.5 rounded-full bg-brand-saffron/60 inline-block shrink-0" />
+          <p className="text-xs text-white/30 font-light tracking-wide leading-relaxed">
+            Additional partner networks across London, Hong Kong, and New York.
+          </p>
+        </div>
+      </SectionReveal>
     </section>
   );
 };

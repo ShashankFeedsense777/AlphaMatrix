@@ -50,7 +50,7 @@ const HeroSection: React.FC = () => {
   }, [currentVideo]);
 
   return (
-    <section id="hero" className="relative h-screen w-full flex items-center justify-center overflow-hidden">
+    <section id="hero" className="relative min-h-svh w-full flex items-center justify-center overflow-hidden px-4 py-28 sm:px-6 lg:py-32">
       {/* Background video sequence */}
       <AnimatePresence mode="wait">
         <motion.video
@@ -62,7 +62,7 @@ const HeroSection: React.FC = () => {
           playsInline
           preload="auto"
           onLoadedMetadata={(event) => {
-            event.currentTarget.playbackRate = 0.5;
+            event.currentTarget.playbackRate = 0.75;
           }}
           onEnded={() => {
             setCurrentVideo((prev) => (prev + 1) % orderedVideos.length);
@@ -82,43 +82,52 @@ const HeroSection: React.FC = () => {
 
       {/* Staggered hero text */}
       <motion.div
-        className="relative z-10 max-w-5xl mx-auto px-6 text-center mt-20"
+        className="relative z-10 max-w-5xl mx-auto text-center mt-8 sm:mt-14 lg:mt-20"
         variants={staggerContainer(0.18)}
         initial="hidden"
         animate="visible"
       >
         <motion.span
           variants={fadeUp}
-          className="inline-block text-2xs tracking-[0.35em] text-brand-saffron uppercase mb-6 font-semibold"
+          className="inline-block text-[10px] sm:text-xs tracking-[0.24em] sm:tracking-[0.35em] text-brand-saffron uppercase mb-4 sm:mb-6 font-semibold"
+        >
+          AI · Quant · Trading
+        </motion.span>
+
+                <motion.span
+          variants={fadeUp}
+          className="inline-block text-[10px] sm:text-xs tracking-[0.24em] sm:tracking-[0.35em] text-brand-saffron uppercase mb-4 sm:mb-6 font-semibold"
         >
           AI · Quant · Trading
         </motion.span>
 
         <motion.h1
           variants={fadeUp}
-          className="text-5xl md:text-5xl font-extrabold text-white leading-tight"
+          className="mt-5 sm:mt-8 text-[clamp(1.5rem,6vw,4rem)] text-gray-300 font-light leading-tight"
         >
           We are building the{' '}
-          <span className="text-brand-saffron block mt-2">best-in-class</span>
+          <br/>
+          <span className="text-white font-semibold">best-in-class</span>
         </motion.h1>
         
 
         <motion.p
           variants={fadeUp}
-          className="mt-8 text-7xl md:text-6xl text-gray-300 font-light"
+          className="text-[clamp(2.25rem,8vw,4.5rem)] font-extrabold text-white leading-[1.05] "
         >
-          quintessential AI ready humanoid{' '}
-          <strong className="text-white font-semibold">Quant Firm</strong>
+          quintessential AI ready 
+          <br/>
+          <strong className=" text-brand-saffron block mt-2">  humanoid{' '} Quant Firm</strong>
         </motion.p>
 
         <motion.div
           variants={fadeUp}
-          className="mt-12 flex flex-wrap justify-center gap-4"
+          className="mt-8 sm:mt-12 flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4"
         >
-          <button className="bg-brand-saffron hover:bg-orange-600 text-white px-8 py-3 rounded text-sm font-bold tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_rgba(249,115,22,0.55)] hover:shadow-[0_0_35px_rgba(249,115,22,0.8)] hover:-translate-y-0.5">
+          <button className="bg-brand-saffron hover:bg-orange-600 text-white px-6 sm:px-8 py-3 rounded text-xs sm:text-sm font-bold tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_rgba(249,115,22,0.55)] hover:shadow-[0_0_35px_rgba(249,115,22,0.8)] hover:-translate-y-0.5">
             Explore Systems
           </button>
-          <button className="border border-white/30 hover:border-brand-saffron text-white px-8 py-3 rounded text-sm font-bold tracking-widest uppercase transition-all duration-300 backdrop-blur-sm hover:-translate-y-0.5">
+          <button className="border border-white/30 hover:border-brand-saffron text-white px-6 sm:px-8 py-3 rounded text-xs sm:text-sm font-bold tracking-widest uppercase transition-all duration-300 backdrop-blur-sm hover:-translate-y-0.5">
             Our Performance
           </button>
         </motion.div>
@@ -129,12 +138,12 @@ const HeroSection: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2, duration: 1 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-3"
+        className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2 sm:gap-3"
       >
         <motion.div
           animate={{ y: [0, 10, 0] }}
           transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-          className="w-px h-14 bg-linear-to-b from-white/0 via-brand-saffron to-white/0"
+          className="w-px h-10 sm:h-14 bg-linear-to-b from-white/0 via-brand-saffron to-white/0"
         />
         <span className="text-[10px] uppercase tracking-[0.3em] text-white/40">Scroll</span>
       </motion.div>

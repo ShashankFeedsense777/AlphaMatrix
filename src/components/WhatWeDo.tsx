@@ -4,8 +4,8 @@ import SectionReveal, { fadeUp, fadeLeft, staggerContainer } from './SectionReve
 
 const WhatWeDo: React.FC = () => {
   return (
-    <section id="whatwedo" className="py-32 px-6 relative">
-      <div className="max-w-4xl mx-auto">
+    <section id="whatwedo" className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 relative" >
+      <div className="max-w-4xl mx-auto" >
 
         {/* ── Block 1: What We Do ── */}
         <motion.div
@@ -15,17 +15,17 @@ const WhatWeDo: React.FC = () => {
           viewport={{ once: true, margin: '-80px' }}
         >
           {/* Label */}
-          <motion.div variants={fadeLeft} className="flex items-center space-x-4 mb-12">
-            <h2 className="text-sm tracking-[0.3em] text-brand-saffron uppercase font-bold">
+          <motion.div variants={fadeLeft} className="flex items-center space-x-4 mb-8 sm:mb-12">
+            <h2 className="text-xs sm:text-sm tracking-[0.24em] sm:tracking-[0.3em] text-brand-saffron uppercase font-bold">
               What We Do
             </h2>
-            <div className="h-px w-24 bg-brand-saffron/50" />
+            <div className="h-px w-12 sm:w-24 bg-brand-saffron/50" />
           </motion.div>
 
           {/* Headline */}
           <motion.h3
             variants={fadeUp}
-            className="text-4xl md:text-5xl font-light text-white leading-tight mb-12"
+            className="text-[clamp(2rem,5vw,3rem)] font-light text-white leading-tight mb-8 sm:mb-12"
           >
             Built by coders, traders, and market obsessives — a next-gen trading firm
             focused on turning{' '}
@@ -41,7 +41,7 @@ const WhatWeDo: React.FC = () => {
             <motion.p
               key={i}
               variants={fadeUp}
-              className="text-xl text-gray-400 font-light leading-relaxed mb-6"
+              className="text-base sm:text-lg lg:text-xl text-gray-400 font-light leading-relaxed mb-5 sm:mb-6"
             >
               {text}
             </motion.p>
@@ -49,7 +49,7 @@ const WhatWeDo: React.FC = () => {
         </motion.div>
 
         {/* ── Divider ── */}
-        <SectionReveal className="my-24">
+        <SectionReveal className="my-14 sm:my-20 lg:my-24">
           <div className="h-px w-full bg-linear-to-r from-transparent via-brand-saffron/30 to-transparent" />
         </SectionReveal>
 
@@ -60,23 +60,23 @@ const WhatWeDo: React.FC = () => {
           whileInView="visible"
           viewport={{ once: true, margin: '-80px' }}
         >
-          <motion.div variants={fadeLeft} className="flex items-center space-x-4 mb-12">
-            <h2 className="text-sm tracking-[0.3em] text-brand-saffron uppercase font-bold">
+          <motion.div variants={fadeLeft} className="flex items-center space-x-4 mb-8 sm:mb-12">
+            <h2 className="text-xs sm:text-sm tracking-[0.24em] sm:tracking-[0.3em] text-brand-saffron uppercase font-bold">
               What We Aim
             </h2>
-            <div className="h-px w-24 bg-brand-saffron/50" />
+            <div className="h-px w-12 sm:w-24 bg-brand-saffron/50" />
           </motion.div>
 
           <motion.h3
             variants={fadeUp}
-            className="text-3xl md:text-4xl font-light text-white leading-tight mb-8"
+            className="text-[clamp(1.75rem,4vw,2.25rem)] font-light text-white leading-tight mb-6 sm:mb-8"
           >
             But for us, trading isn't just about profits.
           </motion.h3>
 
           <motion.p
             variants={fadeUp}
-            className="text-2xl text-gray-400 font-light leading-relaxed border-l-2 border-brand-saffron pl-6"
+            className="text-lg sm:text-xl lg:text-2xl text-gray-400 font-light leading-relaxed border-l-2 border-brand-saffron pl-4 sm:pl-6"
           >
             It's about pushing boundaries, solving impossible problems, and building the
             future of intelligent markets and coparticipants.

@@ -37,29 +37,29 @@ const signals = [
 
 const RealTimeMarket: React.FC = () => {
   return (
-    <section id="market" className="py-24 px-6 relative border-t border-white/5">
+    <section id="market" className="py-16 sm:py-20 lg:py-24 px-4 sm:px-6 relative border-t border-white/5" >
       <div className="max-w-7xl mx-auto">
 
         {/* ── Header row ── */}
-        <div className="flex flex-col md:flex-row justify-between items-end mb-14">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-10 sm:mb-14">
           <SectionReveal variants={fadeLeft}>
             <div className="flex items-center space-x-3 mb-3">
               <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-              <p className="text-xs tracking-[0.3em] text-white uppercase font-semibold">
+              <p className="text-[11px] sm:text-xs tracking-[0.24em] sm:tracking-[0.3em] text-white uppercase font-semibold">
                 Live Performance
               </p>
             </div>
-            <h3 className="text-4xl md:text-5xl font-light text-white">
+            <h3 className="text-[clamp(2rem,5vw,3rem)] font-light text-white">
               Alpha Generation{' '}
               <span className="text-brand-saffron font-bold">Matrix</span>
             </h3>
           </SectionReveal>
 
-          <SectionReveal variants={fadeRight} className="mt-6 md:mt-0 text-right">
+          <SectionReveal variants={fadeRight} className="text-left md:text-right">
             <div className="text-xs text-gray-500 uppercase tracking-widest mb-1">
               System Status
             </div>
-            <div className="text-green-400 font-mono font-bold tracking-widest text-lg">
+            <div className="text-green-400 font-mono font-bold tracking-widest text-sm sm:text-lg">
               OPTIMAL / ACTIVE
             </div>
           </SectionReveal>
@@ -68,9 +68,9 @@ const RealTimeMarket: React.FC = () => {
         {/* ── Chart ── */}
         <SectionReveal
           variants={fadeUp}
-          className="h-[460px] w-full bg-white/2.5 border border-white/5 rounded-2xl p-6 backdrop-blur-sm mb-10"
+          className="h-[300px] sm:h-[380px] lg:h-[460px] w-full bg-white/2.5 border border-white/5 rounded-2xl p-3 sm:p-5 lg:p-6 backdrop-blur-sm mb-8 sm:mb-10"
         >
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" >
             <AreaChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="gradAlpha" x1="0" y1="0" x2="0" y2="1">
@@ -127,7 +127,7 @@ const RealTimeMarket: React.FC = () => {
 
         {/* ── Signal tickers — staggered ── */}
         <motion.div
-          className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-20"
+          className="grid grid-cols-1 min-[420px]:grid-cols-2 lg:grid-cols-4 gap-3 mb-12 sm:mb-20"
           variants={staggerContainer(0.1)}
           initial="hidden"
           whileInView="visible"
@@ -137,7 +137,7 @@ const RealTimeMarket: React.FC = () => {
             <motion.div
               key={sig.ticker}
               variants={fadeUp}
-              className="bg-white/3 border border-white/5 rounded-xl p-5 hover:border-brand-saffron/20 transition-colors duration-300"
+              className="bg-white/3 border border-white/5 rounded-xl p-4 sm:p-5 hover:border-brand-saffron/20 transition-colors duration-300"
             >
               <div className="text-xs text-gray-500 tracking-widest uppercase mb-2">
                 {sig.ticker}
@@ -145,7 +145,7 @@ const RealTimeMarket: React.FC = () => {
               <div className="text-white font-mono font-bold text-sm mb-1">
                 {sig.status}
               </div>
-              <div className={`font-mono text-xl font-bold ${sig.color}`}>{sig.pnl}</div>
+              <div className={`font-mono text-lg sm:text-xl font-bold ${sig.color}`}>{sig.pnl}</div>
             </motion.div>
           ))}
         </motion.div>
@@ -153,7 +153,7 @@ const RealTimeMarket: React.FC = () => {
         {/* ── Footer ── */}
         <SectionReveal
           variants={fadeIn}
-          className="border-t border-white/10 pt-10 flex flex-col md:flex-row justify-between items-center"
+          className="border-t border-white/10 pt-8 sm:pt-10 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left"
         >
           <div className="text-gray-600 text-sm tracking-wide">
             &copy; 2026 Alpha Matrix. All rights reserved.
