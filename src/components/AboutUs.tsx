@@ -1,6 +1,8 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import SectionReveal, { fadeLeft, fadeRight, scaleIn, staggerContainer, fadeUp } from './SectionReveal';
+import {Person1, Person2, Person3} from '../assets/index';
+import { AnimatePresence, motion } from "framer-motion";
+
 
 const stats = [
   { label: 'Strategies Live', value: '40+' },
@@ -9,13 +11,82 @@ const stats = [
   { label: 'Founded', value: '2026' },
 ];
 
+const teamMembers = [
+  {
+    name: "Person 1",
+    image: Person1,
+    role: "Chief Quantitative Officer",
+    headings: [
+      {
+        title: "Quantitative Research",
+        text: "Develops alpha generating strategies using advanced statistical models.",
+      },
+      {
+        title: "Portfolio Construction",
+        text: "Designs systematic frameworks for capital allocation.",
+      },
+      {
+        title: "Risk Management",
+        text: "Builds adaptive risk controls across market regimes.",
+      },
+    ],
+  },
+  {
+    name: "Person 2",
+    image: Person2,
+    role: "Head of AI Research",
+    headings: [
+      {
+        title: "Machine Learning",
+        text: "Researching predictive models for market behavior.",
+      },
+      {
+        title: "Deep Learning",
+        text: "Building next generation forecasting engines.",
+      },
+      {
+        title: "Automation",
+        text: "Creating self-improving trading systems.",
+      },
+    ],
+  },
+  {
+    name: "Person 3",
+    image: Person3,
+    role: "Director of Trading Systems",
+    headings: [
+      {
+        title: "Execution",
+        text: "Ultra-low latency execution architecture.",
+      },
+      {
+        title: "Infrastructure",
+        text: "Distributed systems built for scale.",
+      },
+      {
+        title: "Monitoring",
+        text: "24/7 operational intelligence.",
+      },
+    ],
+  },
+];
+
 const AboutUs: React.FC = () => {
+  const [activeIndex, setActiveIndex] = React.useState(0);
+
+React.useEffect(() => {
+  const interval = setInterval(() => {
+    setActiveIndex((prev) => (prev + 1) % teamMembers.length);
+  }, 5000);
+
+  return () => clearInterval(interval);
+}, []);
   return (
     <section
       id="aboutus"
       className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 relative border-t border-white/5"
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
 
           {/* ── Visual side ── */}
@@ -127,6 +198,125 @@ const AboutUs: React.FC = () => {
             </motion.div>
           ))}
         </motion.div>
+        <motion.div
+  className="mt-28"
+  initial="hidden"
+  whileInView="visible"
+  viewport={{ once: true }}
+>
+  <div className="mb-12">
+    <h2 className="text-brand-saffron text-xs tracking-[0.3em] uppercase font-bold mb-4">
+      Leadership Team
+    </h2>
+
+    <h3 className="text-4xl font-light text-white">
+      The People Behind
+      <span className="block font-bold">
+        Alpha Matrix
+      </span>
+    </h3>
+  </div>
+
+  <div className="flex flex-col lg:flex-row gap-4">
+    {teamMembers.map((member, index) => {
+      const isActive = activeIndex === index;
+
+      return (
+        <motion.div
+          key={member.name}
+          layout
+          transition={{
+            duration: 0.8,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          animate={{
+            flex: isActive ? 4 : 1,
+          }}
+className="
+  relative
+  overflow-hidden
+  rounded-[28px]
+  h-[520px]
+  lg:h-[560px]
+"        >
+          {/* Card */}
+          <div className="h-full flex flex-col lg:flex-row bg-transparent overflow-hidden">
+
+            {/* Image Section */}
+            <motion.div
+              layout
+              className="relative h-[260px] lg:h-auto lg:w-[320px] shrink-0 overflow-hidden"
+            >
+              <img
+                src={member.image}
+                alt={member.name}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+              <div className="absolute bottom-0 left-0 right-0 p-5 backdrop-blur-xl bg-black/20">
+                <h4 className="text-white text-xl font-bold">
+                  {member.name}
+                </h4>
+
+                <p className="text-white/80 text-sm">
+                  {member.role}
+                </p>
+              </div>
+            </motion.div>
+
+            {/* Expanded Content */}
+            <AnimatePresence mode="wait">
+              {isActive && (
+                <motion.div
+                  key="content"
+                  initial={{
+                    opacity: 0,
+                    x: 40,
+                  }}
+                  animate={{
+                    opacity: 1,
+                    x: 0,
+                  }}
+                  exit={{
+                    opacity: 0,
+                    x: -20,
+                  }}
+                  transition={{
+                    duration: 0.45,
+                  }}
+                   className="
+    flex-1
+    bg-white
+    p-8
+    lg:p-10
+    overflow-y-auto
+                    
+                  "
+                >
+                  <div className="space-y-8">
+                    {member.headings.map((item) => (
+                      <div key={item.title}>
+                        <h5 className="text-xl font-bold mb-2">
+                          {item.title}
+                        </h5>
+
+                        <p className="text-slate-600 leading-relaxed">
+                          {item.text}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      );
+    })}
+  </div>
+</motion.div>
       </div>
     </section>
   );
