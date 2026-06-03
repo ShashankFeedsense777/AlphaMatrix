@@ -12,6 +12,7 @@ import WhatWeDo from './components/WhatWeDo';
 import VisionMission from './components/VisionMission';
 import Locations from './components/Locations';
 import AboutUs from './components/AboutUs';
+import ConnectWithUs from './components/ConnectWithUs';
 import RealTimeMarket from './components/RealTimeMarket';
 import CompanyFooter from './components/CompanyFooter';
 import PrivateRoute from './routes/PrivateRoute';
@@ -194,6 +195,10 @@ function LandingPage() {
 
       <Section>
         <AboutUs />
+      </Section>
+
+      <Section>
+        <ConnectWithUs />
       </Section>
 
       <Section>
