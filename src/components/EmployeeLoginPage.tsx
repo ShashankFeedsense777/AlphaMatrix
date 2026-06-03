@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, ArrowLeft, CheckCircle2, KeyRound, Lock, Phone, ShieldCheck, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Logo, Nature1, Nature2, Nature3 } from '../assets/index';
 import { loginAPI } from '../api/apiCalls';
 
@@ -73,6 +74,7 @@ const SLIDE_DATA = [
 ];
 
 const EmployeeLoginPage: React.FC = () => {
+  const navigate = useNavigate();
   const [mode, setMode] = useState<LoginMode>('password');
   const [otpSent, setOtpSent] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -103,8 +105,9 @@ const EmployeeLoginPage: React.FC = () => {
   };
 
   const goToDashboard = () => {
+    localStorage.setItem('loggedIn', 'true');
     window.setTimeout(() => {
-      window.location.href = '/dashboard';
+      navigate('/dashboard', { replace: true });
     }, 850);
   };
 
@@ -191,16 +194,14 @@ const EmployeeLoginPage: React.FC = () => {
               animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
               exit={{ opacity: 0, x: 24, y: -10, scale: 0.96 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className={`flex gap-3 rounded-2xl border p-4 shadow-2xl backdrop-blur-xl ${
-                toast.type === 'success'
+              className={`flex gap-3 rounded-2xl border p-4 shadow-2xl backdrop-blur-xl ${toast.type === 'success'
                   ? 'border-green-400/25 bg-green-500/12'
                   : 'border-red-400/25 bg-red-500/12'
-              }`}
+                }`}
             >
               <div
-                className={`mt-0.5 ${
-                  toast.type === 'success' ? 'text-green-400' : 'text-red-400'
-                }`}
+                className={`mt-0.5 ${toast.type === 'success' ? 'text-green-400' : 'text-red-400'
+                  }`}
               >
                 {toast.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
               </div>
@@ -220,7 +221,7 @@ const EmployeeLoginPage: React.FC = () => {
       <div className="relative z-10 flex min-h-svh flex-col px-3 py-3 min-[380px]:px-4 sm:px-6 lg:px-10">
         {/* Nav */}
         <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 border-b border-white/6 pb-3 sm:pb-4">
-          <button type="button" onClick={() => { window.location.href = '/'; }} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-3 py-2 text-[11px] font-semibold uppercase tracking-widest text-white/60 backdrop-blur-md transition-colors hover:border-brand-saffron/40 hover:text-white">
+          <button type="button" onClick={() => { navigate('/'); }} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-3 py-2 text-[11px] font-semibold uppercase tracking-widest text-white/60 backdrop-blur-md transition-colors hover:border-brand-saffron/40 hover:text-white">
             <ArrowLeft size={14} /> Home
           </button>
           <div className="flex min-w-0 items-center gap-2.5">
@@ -332,7 +333,7 @@ const EmployeeLoginPage: React.FC = () => {
                         <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all">
                           <User size={14} className="shrink-0 text-white/30" />
                           {/* Added placeholder:text-white/30 below */}
-                          <input type="text" autoComplete="username" placeholder="username" value={formValues.username} onChange={(event) => updateField('username', event.target.value)} className="employee-login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
+                          <input type="text" autoComplete="username" placeholder="username" value={formValues.username} onChange={(event) => updateField('username', event.target.value)} className="login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
                         </div>
                       </div>
                       <div className="flex flex-col gap-1.5">
@@ -340,7 +341,7 @@ const EmployeeLoginPage: React.FC = () => {
                         <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all">
                           <Lock size={14} className="shrink-0 text-white/30" />
                           {/* Added placeholder:text-white/30 below */}
-                          <input type="password" autoComplete="current-password" placeholder="password" value={formValues.password} onChange={(event) => updateField('password', event.target.value)} className="employee-login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
+                          <input type="password" autoComplete="current-password" placeholder="password" value={formValues.password} onChange={(event) => updateField('password', event.target.value)} className="login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
                         </div>
                       </div>
                     </>
@@ -351,7 +352,7 @@ const EmployeeLoginPage: React.FC = () => {
                         <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all">
                           <Phone size={14} className="shrink-0 text-white/30" />
                           {/* Added placeholder:text-white/30 below */}
-                            <input type="tel" autoComplete="tel" placeholder="+91 00000 00000" value={formValues.mobile} onChange={(event) => updateField('mobile', event.target.value)} className="employee-login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
+                          <input type="tel" autoComplete="tel" placeholder="+91 00000 00000" value={formValues.mobile} onChange={(event) => updateField('mobile', event.target.value)} className="login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
                         </div>
                       </div>
                       <AnimatePresence>
@@ -366,7 +367,7 @@ const EmployeeLoginPage: React.FC = () => {
                             <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">OTP</span>
                             <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all">
                               <KeyRound size={14} className="shrink-0 text-white/30" />
-                              <input type="text" inputMode="numeric" maxLength={6} placeholder="6 digit code" value={formValues.otp} onChange={(event) => updateField('otp', event.target.value)} className="employee-login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
+                              <input type="text" inputMode="numeric" maxLength={6} placeholder="6 digit code" value={formValues.otp} onChange={(event) => updateField('otp', event.target.value)} className="login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
                             </div>
                           </motion.div>
                         )}
@@ -384,7 +385,7 @@ const EmployeeLoginPage: React.FC = () => {
           </motion.div>
         </section>
       </div>
-      
+
     </main>
   );
 };

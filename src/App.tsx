@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+import { Navigate, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import SplashScreen from './components/SplashScreen';
@@ -13,6 +14,7 @@ import Locations from './components/Locations';
 import AboutUs from './components/AboutUs';
 import RealTimeMarket from './components/RealTimeMarket';
 import CompanyFooter from './components/CompanyFooter';
+import PrivateRoute from './routes/PrivateRoute';
 import './index.css';
 
 gsap.registerPlugin(ScrollToPlugin);
@@ -45,9 +47,7 @@ const Section: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 const NAVBAR_OFFSET = 80;
 
-function App() {
-  const isEmployeeLoginPage = window.location.pathname === '/employee-login';
-  const isDashboardPage = window.location.pathname === '/dashboard';
+function LandingPage() {
   const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem('alphaMatrixSplashSeen'));
   const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(15);
@@ -157,14 +157,6 @@ function App() {
     };
   }, [isAutoScrollEnabled]);
 
-  if (isEmployeeLoginPage) {
-    return <EmployeeLoginPage />;
-  }
-
-  if (isDashboardPage) {
-    return <DashboardPage />;
-  }
-
   return (
     <div className="min-h-screen text-white font-sans selection:bg-brand-saffron selection:text-white">
       {showSplash && (
@@ -177,7 +169,7 @@ function App() {
       )}
 
       {/* Navbar is always visible — no scroll trigger */}
-      <Navbar 
+      <Navbar
         isAutoScrollEnabled={isAutoScrollEnabled}
         setIsAutoScrollEnabled={setIsAutoScrollEnabled}
         scrollSpeed={scrollSpeed}
@@ -212,6 +204,19 @@ function App() {
         <RealTimeMarket />
       </Section> */}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/login" element={<EmployeeLoginPage />} />
+      <Route element={<PrivateRoute />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+      </Route>
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
 

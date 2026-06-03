@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-scroll';
 import { Menu, Settings, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Logo } from '../assets/index'
 
 interface NavbarProps {
@@ -20,10 +21,11 @@ const navItems = [
 
 const Navbar: React.FC<NavbarProps> = ({
   isAutoScrollEnabled = false,
-  setIsAutoScrollEnabled = () => {},
+  setIsAutoScrollEnabled = () => { },
   scrollSpeed = 15,
-  setScrollSpeed = () => {},
+  setScrollSpeed = () => { },
 }) => {
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState<String>(navItems[0].to);
   const [showSettings, setShowSettings] = useState(false);
@@ -42,7 +44,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
         setScrolled(scrollPosition > 50);
 
-        const currentSection = navItems.reduce((current:any, item) => {
+        const currentSection = navItems.reduce((current: any, item) => {
           const section = document.getElementById(item.to);
           if (!section) return current;
 
@@ -88,7 +90,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
   const openEmployeeLogin = () => {
     setIsAutoScrollEnabled(false);
-    window.location.href = '/employee-login';
+    navigate('/login');
   };
 
   return (
@@ -119,11 +121,10 @@ const Navbar: React.FC<NavbarProps> = ({
               delay={0}
               offset={-80}
               onClick={() => handleNavClick(item.to)}
-              className={`transition-colors cursor-pointer text-xs xl:text-sm tracking-wide uppercase whitespace-nowrap ${
-                activeSection === item.to
+              className={`transition-colors cursor-pointer text-xs xl:text-sm tracking-wide uppercase whitespace-nowrap ${activeSection === item.to
                   ? 'text-brand-saffron font-bold'
                   : 'text-gray-300 hover:text-brand-saffron font-medium'
-              }`}
+                }`}
             >
               {item.name}
             </Link>
@@ -134,7 +135,7 @@ const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center gap-2 sm:gap-3 lg:gap-6">
           {/* Auto Scroll Settings Dropdown */}
           <div className="relative" ref={settingsRef}>
-            <button 
+            <button
               onClick={() => setShowSettings(!showSettings)}
               className={`p-2 rounded-full transition-colors ${showSettings || isAutoScrollEnabled ? 'text-brand-saffron bg-brand-saffron/10' : 'text-gray-400 hover:text-white bg-white/5'}`}
               aria-label="Auto scroll settings"
@@ -168,11 +169,11 @@ const Navbar: React.FC<NavbarProps> = ({
                       {scrollSpeed === 10 ? 'Fast' : scrollSpeed === 15 ? 'Medium' : 'Low'}
                     </span>
                   </div>
-                  <input 
-                    type="range" 
-                    min="10" 
-                    max="20" 
-                    step="5" 
+                  <input
+                    type="range"
+                    min="10"
+                    max="20"
+                    step="5"
                     value={scrollSpeed}
                     onChange={(e) => setScrollSpeed(Number(e.target.value))}
                     className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-brand-saffron"
@@ -221,11 +222,10 @@ const Navbar: React.FC<NavbarProps> = ({
                 delay={0}
                 offset={-76}
                 onClick={() => handleNavClick(item.to)}
-                className={`px-3 py-3 rounded-md text-sm uppercase tracking-wide cursor-pointer ${
-                  activeSection === item.to
+                className={`px-3 py-3 rounded-md text-sm uppercase tracking-wide cursor-pointer ${activeSection === item.to
                     ? 'bg-brand-saffron/10 text-brand-saffron font-bold'
                     : 'text-gray-300 hover:bg-white/5'
-                }`}
+                  }`}
               >
                 {item.name}
               </Link>
