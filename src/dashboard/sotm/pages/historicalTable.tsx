@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 import {
   Box,
   Typography,
@@ -113,17 +114,24 @@ export default function HistoricalTable() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box className="p-6 space-y-6">
-        <Typography variant="h4" sx={{fontWeight:700}}>
-          Greeks History
-        </Typography>
+      <Box className="space-y-5">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+        >
+          <div className="mb-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-sky-600">Historical Filters</p>
+            <h3 className="mt-1 text-lg font-semibold text-slate-950">Snapshot table controls</h3>
+          </div>
 
-        <Box className="flex gap-4 items-end flex-wrap">
+        <Box className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[180px_150px_110px_auto] lg:items-end">
           <DatePicker
             label="Trading Date"
             value={selectedDate}
             onChange={(d) => setSelectedDate(d)}
-            slotProps={{ textField: { size: "small" } }}
+            slotProps={{ textField: { size: "small", fullWidth: true } }}
           />
 
           <TextField
@@ -132,7 +140,7 @@ export default function HistoricalTable() {
             value={timeStr}
             onChange={(e) => setTimeStr(e.target.value)}
             placeholder="09:15:00"
-            sx={{ minWidth: 150 }}
+            fullWidth
           />
 
           <TextField
@@ -142,48 +150,49 @@ export default function HistoricalTable() {
             value={nStrikes}
             onChange={(e) => setNStrikes(Math.max(1, Number(e.target.value)))}
             slotProps={{ htmlInput: { min: 1 } }}
-            sx={{ width: 100 }}
+            fullWidth
           />
 
-          <Button variant="contained" onClick={fetchSnapshot} disabled={loading}>
+          <Button variant="contained" onClick={fetchSnapshot} disabled={loading} sx={{ width:"15%",height: 40, borderRadius: 2, px: 3, bgcolor: "#f97316", "&:hover": { bgcolor: "#ea580c" } }}>
             {loading ? "Loading..." : "Fetch"}
           </Button>
         </Box>
+        </motion.div>
 
-        {error && <Alert severity="warning">{error}</Alert>}
+        {error && <Alert severity="warning" sx={{ borderRadius: 3 }}>{error}</Alert>}
 
         {loading && (
-          <Box className="flex justify-center py-12">
+          <Box className="flex justify-center rounded-3xl border border-slate-200 bg-white py-16 shadow-sm">
             <CircularProgress />
           </Box>
         )}
 
         {!loading && data && (
           <>
-            <Typography variant="subtitle1" color="text.secondary">
+            <Typography variant="subtitle1" color="text.secondary" className="rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
               Snapshot at <strong>{data.time}</strong>
             </Typography>
 
-            <Box className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card>
+            <Box className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <Card sx={{ borderRadius: 4, border: "1px solid #e2e8f0", boxShadow: "0 1px 2px rgba(15,23,42,0.04)" }}>
                 <CardContent>
                   <Typography variant="overline" color="text.secondary">N50 Spot</Typography>
                   <Typography variant="h5" sx={{fontWeight:700}}>{data.spot?.toFixed(2) ?? "—"}</Typography>
                 </CardContent>
               </Card>
-              <Card>
+              <Card sx={{ borderRadius: 4, border: "1px solid #e2e8f0", boxShadow: "0 1px 2px rgba(15,23,42,0.04)" }}>
                 <CardContent>
                   <Typography variant="overline" color="text.secondary">PCR (OI)</Typography>
                   <Typography variant="h5" sx={{fontWeight:700}}>{data.pcr?.toFixed(5) ?? "—"}</Typography>
                 </CardContent>
               </Card>
-              <Card>
+              <Card sx={{ borderRadius: 4, border: "1px solid #e2e8f0", boxShadow: "0 1px 2px rgba(15,23,42,0.04)" }}>
                 <CardContent>
                   <Typography variant="overline" color="text.secondary">Correlation</Typography>
                   <Typography variant="h5" sx={{fontWeight:700}}>{data.correlation?.toFixed(5) ?? "—"}</Typography>
                 </CardContent>
               </Card>
-              <Card>
+              <Card sx={{ borderRadius: 4, border: "1px solid #e2e8f0", boxShadow: "0 1px 2px rgba(15,23,42,0.04)" }}>
                 <CardContent>
                   <Typography variant="overline" color="text.secondary">Direction</Typography>
                   {direction ? <Chip label={direction.label} color={direction.color} /> : <Typography variant="body2">—</Typography>}
@@ -192,15 +201,15 @@ export default function HistoricalTable() {
             </Box>
 
             <Box>
-              <Typography variant="h6" sx={{ mb: 1, fontWeight:600 }}>Call Options (CE)</Typography>
-              <Box sx={{ height: 400 }}>
+              <Typography variant="h6" sx={{ mb: 1, fontWeight:600, color: "#1e293b" }}>Call Options (CE)</Typography>
+              <Box className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm" sx={{ height: 420 }}>
                 <DataGrid rows={enrich(data.ce, "CE")} columns={COLUMNS} pageSizeOptions={[10]} density="compact" disableRowSelectionOnClick />
               </Box>
             </Box>
 
             <Box>
-              <Typography variant="h6" sx={{ mb: 1, fontWeight:600 }}>Put Options (PE)</Typography>
-              <Box sx={{ height: 400 }}>
+              <Typography variant="h6" sx={{ mb: 1, fontWeight:600, color: "#1e293b" }}>Put Options (PE)</Typography>
+              <Box className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm" sx={{ height: 420 }}>
                 <DataGrid rows={enrich(data.pe, "PE")} columns={COLUMNS} pageSizeOptions={[10]} density="compact" disableRowSelectionOnClick />
               </Box>
             </Box>

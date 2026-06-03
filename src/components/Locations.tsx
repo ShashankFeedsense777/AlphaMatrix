@@ -48,7 +48,7 @@ const Locations: React.FC = () => {
     <section id="locations" className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 overflow-hidden">
 
       {/* Heading */}
-      <SectionReveal variants={fadeUp} className="max-w-4xl mx-auto mb-14 sm:mb-20 text-center">
+      <SectionReveal variants={fadeUp} className="max-w-6xl mx-auto mb-14 sm:mb-20 text-center">
         <p className="text-[11px] sm:text-xs tracking-[0.28em] text-brand-saffron uppercase font-semibold mb-4">
           Where We Operate
         </p>

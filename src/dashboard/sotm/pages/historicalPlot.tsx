@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import {
   Box,
   TextField,
@@ -166,17 +167,24 @@ export default function HistoricalPlot() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <Box className="p-6 space-y-6">
-        <Typography variant="h4" sx={{fontWeight:700}}>
-          Greeks History
-        </Typography>
+      <Box className="space-y-5">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+        >
+          <div className="mb-4">
+            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-sky-600">Historical Filters</p>
+            <h3 className="mt-1 text-lg font-semibold text-slate-950">Curve snapshot controls</h3>
+          </div>
 
-        <Box className="flex gap-4 items-start flex-wrap">
+        <Box className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[180px_160px_150px_160px_auto] xl:items-end">
           <DatePicker
             label="Select Date"
             value={selectedDate}
             onChange={(d) => setSelectedDate(d)}
-            slotProps={{ textField: { size: "small" } }}
+            slotProps={{ textField: { size: "small", fullWidth: true } }}
           />
 
           <TextField
@@ -185,7 +193,7 @@ export default function HistoricalPlot() {
             value={expiry}
             onChange={(e) => setExpiry(e.target.value.toUpperCase())}
             placeholder="e.g. 07AUG25"
-            sx={{ minWidth: 160 }}
+            fullWidth
           />
 
           <TextField
@@ -194,10 +202,10 @@ export default function HistoricalPlot() {
             value={timeStr}
             onChange={(e) => setTimeStr(e.target.value)}
             placeholder="10:16:00"
-            sx={{ minWidth: 150 }}
+            fullWidth
           />
 
-          <FormControl size="small" sx={{ minWidth: 160 }}>
+          <FormControl size="small" fullWidth>
             <InputLabel>Greek Metric</InputLabel>
             <Select value={metric} label="Greek Metric" onChange={(e) => setMetric(e.target.value)}>
               {METRICS.map((m) => (
@@ -206,28 +214,37 @@ export default function HistoricalPlot() {
             </Select>
           </FormControl>
 
-          <Button variant="contained" onClick={fetchData} disabled={loading}>
+          <Button variant="contained" onClick={fetchData} disabled={loading} sx={{ width:"15%", height: 40, borderRadius: 2, px: 3, bgcolor: "#f97316", "&:hover": { bgcolor: "#ea580c" } }}>
             {loading ? "Loading..." : "Fetch"}
           </Button>
         </Box>
+        </motion.div>
 
-        {error && <Alert severity="warning">{error}</Alert>}
+        {error && <Alert severity="warning" sx={{ borderRadius: 3 }}>{error}</Alert>}
 
         {loading && (
-          <Box className="flex justify-center py-12"><CircularProgress /></Box>
+          <Box className="flex justify-center rounded-3xl border border-slate-200 bg-white py-16 shadow-sm"><CircularProgress /></Box>
         )}
 
         {!loading && data.length === 0 && !error && (
-          <Typography color="text.secondary" className="text-center py-12">
+          <Typography color="text.secondary" className="rounded-3xl border border-dashed border-slate-300 bg-white py-16 text-center">
             Select inputs and click Fetch.
           </Typography>
         )}
 
-        {data.map((strikeData) => (
-          <Box key={strikeData.strike} className="w-full">
+        <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        {data.map((strikeData, index) => (
+          <motion.div
+            key={strikeData.strike}
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.04, duration: 0.28 }}
+            className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-3 shadow-sm"
+          >
             <HighchartsReact highcharts={Highcharts} options={buildOptions(strikeData)} />
-          </Box>
+          </motion.div>
         ))}
+        </div>
       </Box>
     </LocalizationProvider>
   );

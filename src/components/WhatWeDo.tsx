@@ -5,47 +5,123 @@ import SectionReveal, { fadeUp, fadeLeft, staggerContainer } from './SectionReve
 const WhatWeDo: React.FC = () => {
   return (
     <section id="whatwedo" className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 relative" >
-      <div className="max-w-4xl mx-auto" >
+      <div className="max-w-6xl mx-auto" >
 
         {/* ── Block 1: What We Do ── */}
         <motion.div
           variants={staggerContainer(0.14)}
           initial="hidden"
           whileInView="visible"
-          viewport={{ once: true, margin: '-80px' }}
+          viewport={{ once: true, margin: "-80px" }}
         >
-          {/* Label */}
-          <motion.div variants={fadeLeft} className="flex items-center space-x-4 mb-8 sm:mb-12">
+          {/* Section Label */}
+          <motion.div
+            variants={fadeLeft}
+            className="flex items-center space-x-4 mb-8 sm:mb-12"
+          >
             <h2 className="text-xs sm:text-sm tracking-[0.24em] sm:tracking-[0.3em] text-brand-saffron uppercase font-bold">
               What We Do
             </h2>
+
             <div className="h-px w-12 sm:w-24 bg-brand-saffron/50" />
           </motion.div>
 
-          {/* Headline */}
+          {/* Main Heading */}
           <motion.h3
             variants={fadeUp}
-            className="text-[clamp(2rem,5vw,3rem)] font-light text-white leading-tight mb-8 sm:mb-12"
+            className="text-[clamp(2rem,5vw,3.5rem)] font-light text-white leading-tight mb-12 max-w-5xl"
           >
-            Built by coders, traders, and market obsessives — a next-gen trading firm
-            focused on turning{' '}
-            <span className="font-bold text-brand-saffron">data, speed, and technology</span>{' '}
-            into an edge.
+            Built by coders, traders, and market obsessives —
+            <span className="font-semibold text-brand-saffron">
+              {" "}engineering market intelligence at scale.
+            </span>
           </motion.h3>
 
-          {/* Body paragraphs — each staggered */}
-          {[
-            'We create fully automated trading systems powered by quantitative research, machine learning, deep learning and real-time market intelligence — designed to move fast, adapt faster, and perform fastest, across changing market conditions.',
-            'From equities and derivatives to global liquid markets, we\'re building systems that can trade anything electronic, anywhere, at any timescale.',
-          ].map((text, i) => (
-            <motion.p
-              key={i}
-              variants={fadeUp}
-              className="text-base sm:text-lg lg:text-xl text-gray-400 font-light leading-relaxed mb-5 sm:mb-6"
-            >
-              {text}
-            </motion.p>
-          ))}
+          {/* Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {[
+              {
+                title: "Technology Driven",
+                text: "We are a next-generation trading firm focused on transforming data, speed, and technology into a sustainable market edge.",
+                number: "01",
+              },
+              {
+                title: "AI & Quant Research",
+                text: "Our fully automated trading systems combine quantitative research, machine learning, deep learning, and real-time intelligence to adapt continuously to changing markets.",
+                number: "02",
+              },
+              {
+                title: "Global Market Infrastructure",
+                text: "From equities and derivatives to liquid global markets, we build systems capable of trading any electronic instrument across any timeframe.",
+                number: "03",
+              },
+            ].map((item) => (
+              <motion.div
+                key={item.number}
+                variants={fadeUp}
+                whileHover={{ y: -8 }}
+                transition={{ duration: 0.25 }}
+                className="
+          relative
+          overflow-hidden
+          rounded-3xl
+          border
+          border-white/10
+          bg-black/30
+          backdrop-blur-xl
+          p-7
+          lg:p-8
+          group
+        "
+              >
+                {/* Glow */}
+                <div
+                  className="
+            absolute
+            inset-0
+            opacity-0
+            group-hover:opacity-100
+            transition-opacity
+            duration-500
+          "
+                  style={{
+                    background:
+                      "radial-gradient(circle at top left, rgba(249,115,22,0.12), transparent 60%)",
+                  }}
+                />
+
+                {/* Number */}
+                <div className="relative z-10 mb-8">
+                  <span
+                    className="
+              text-4xl
+              font-black
+              text-transparent
+              bg-clip-text
+              bg-gradient-to-b
+              from-brand-saffron
+              to-white/20
+            "
+                  >
+                    {item.number}
+                  </span>
+                </div>
+
+                {/* Accent Line */}
+                <div className="relative z-10 h-[2px] w-12 bg-brand-saffron mb-6" />
+
+                {/* Title */}
+                <h4 className="relative z-10 text-xl font-semibold text-white mb-4">
+                  {item.title}
+                </h4>
+
+                {/* Description */}
+                <p className="relative z-10 text-gray-400 leading-relaxed">
+                  {item.text}
+                </p>
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
 
         {/* ── Divider ── */}
@@ -71,7 +147,7 @@ const WhatWeDo: React.FC = () => {
             variants={fadeUp}
             className="text-[clamp(1.75rem,4vw,2.25rem)] font-light text-white leading-tight mb-6 sm:mb-8"
           >
-            But for us, trading isn't just about profits.
+            For us, trading isn't just about profits.
           </motion.h3>
 
           <motion.p

@@ -53,7 +53,7 @@ const ViewRenderer: React.FC<{ view: ActiveView }> = ({ view }) => {
 };
 
 const Layout: React.FC = () => {
-    const [activeView, setActiveView] = useState<ActiveView>(null);
+    const [activeView, setActiveView] = useState<ActiveView>('live-greeks');
     const [openMenu, setOpenMenu] = useState<string | null>(null);
     const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const navigate = useNavigate();

@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { HighchartsReact } from 'highcharts-react-official';
 import Highcharts from 'highcharts';
 import { socketClient, SocketStatus } from '../../../utils/socketClient';
@@ -168,79 +169,97 @@ export default function LivePlot() {
     <div className="space-y-5">
 
       {/* Controls */}
-      <div className="flex flex-wrap gap-3 items-end">
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
+      >
+        <div className="mb-4">
+          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-orange-500">Streaming Filters</p>
+          <h3 className="mt-1 text-lg font-semibold text-slate-950">Live curve controls</h3>
+        </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[160px_160px_160px_1fr] lg:items-end">
 
         {/* Date */}
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Date</label>
+          <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Date</label>
           <input
             type="date"
             value={selectedDate}
             onChange={e => setSelectedDate(e.target.value)}
-            className="h-9 px-3 text-sm border border-gray-200 rounded-lg bg-white text-gray-900 focus:outline-none focus:border-amber-400 transition-colors"
+            className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition-colors focus:border-orange-400 focus:bg-white"
           />
         </div>
 
         {/* Expiry */}
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Expiry</label>
+          <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Expiry</label>
           <input
             type="text"
             value={expiry}
             onChange={e => setExpiry(e.target.value.toUpperCase())}
             placeholder="e.g. 07AUG25"
-            className="h-9 px-3 text-sm border border-gray-200 rounded-lg bg-white text-gray-900 placeholder:text-gray-300 focus:outline-none focus:border-amber-400 transition-colors w-36"
+            className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-300 focus:border-orange-400 focus:bg-white"
           />
         </div>
 
         {/* Metric */}
         <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-semibold uppercase tracking-widest text-gray-500">Greek</label>
+          <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Greek</label>
           <select
             value={metric}
             onChange={e => setMetric(e.target.value)}
-            className="h-9 px-3 text-sm border border-gray-200 rounded-lg bg-white text-gray-900 focus:outline-none focus:border-amber-400 transition-colors"
+            className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition-colors focus:border-orange-400 focus:bg-white"
           >
             {METRICS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
           </select>
         </div>
 
         {/* Socket status */}
-        <div className="flex items-center gap-2 h-9 px-3 rounded-lg bg-gray-50 border border-gray-200 ml-auto">
+        <div className="flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 lg:justify-self-end">
           <span className={`w-2 h-2 rounded-full shrink-0 ${STATUS_DOT[socketStatus]}`} />
-          <span className="text-[11px] text-gray-500 capitalize">{socketStatus}</span>
-          {expiry && <span className="text-[11px] text-gray-400">· {expiry}</span>}
+          <span className="text-[11px] text-slate-500 capitalize">{socketStatus}</span>
+          {expiry && <span className="text-[11px] text-slate-400">· {expiry}</span>}
         </div>
       </div>
+      </motion.div>
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-sm">
+        <div className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
           <span className="font-semibold">⚠</span> {error}
         </div>
       )}
 
       {/* Loading */}
       {loading && (
-        <div className="flex items-center justify-center py-20">
+        <div className="flex items-center justify-center rounded-3xl border border-slate-200 bg-white py-20 shadow-sm">
           <div className="w-6 h-6 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-          <span className="ml-3 text-sm text-gray-500">Waiting for live data…</span>
+          <span className="ml-3 text-sm text-slate-500">Waiting for live data...</span>
         </div>
       )}
 
       {/* Empty */}
       {!loading && data.length === 0 && !error && (
-        <div className="text-center py-20 text-gray-400 text-sm">
+        <div className="rounded-3xl border border-dashed border-slate-300 bg-white py-20 text-center text-sm text-slate-400">
           Select a valid trading date and expiry to start streaming.
         </div>
       )}
 
       {/* Charts grid */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        {data.map(sd => (
-          <div key={sd.strike} className="rounded-xl border border-gray-200 bg-white p-2 overflow-hidden">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+        {data.map((sd, index) => (
+          <motion.div
+            key={sd.strike}
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.04, duration: 0.28 }}
+            className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-3 shadow-sm"
+          >
             <HighchartsReact highcharts={Highcharts} options={buildOptions(sd)} />
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>

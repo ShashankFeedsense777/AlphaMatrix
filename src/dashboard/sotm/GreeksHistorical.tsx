@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { BarChart2, Table2 } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Archive, BarChart2, Clock3, Table2 } from 'lucide-react';
 import HistoricalPlot from './pages/historicalPlot';
 import HistoricalTable from './pages/historicalTable';
 
@@ -9,18 +10,61 @@ const HistoricalGreeks: React.FC = () => {
   const [view, setView] = useState<View>('plot');
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Header bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-6 sm:px-8 py-5 border-b border-gray-100">
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-amber-500 mb-1">
-            State of the Market
-          </p>
-          <h2 className="text-xl font-semibold text-gray-900">Live Greeks</h2>
-        </div>
+    <div className="min-h-screen bg-[#f7f8fb] text-slate-950">
+      <div className="relative overflow-hidden border-b border-slate-200/80 bg-white">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_10%,rgba(249,115,22,0.10),transparent_28%),radial-gradient(circle_at_90%_10%,rgba(14,165,233,0.10),transparent_34%)]" />
+        <div className="relative px-4 py-6 sm:px-8 lg:px-10">
+          <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.22em] text-sky-700">
+                <Clock3 size={13} />
+                Historical Snapshot
+              </div>
+              <h2 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
+                Historical Greeks
+              </h2>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-500">
+                Review Greek curves and option-chain snapshots for selected trading sessions.
+              </p>
+            </motion.div>
 
-        {/* Toggle */}
-        <div className="flex items-center p-1 rounded-lg bg-gray-100 border border-gray-200 self-start sm:self-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.08, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+              className="grid grid-cols-2 gap-3 sm:flex"
+            >
+              {[
+                { label: 'Mode', value: 'Archive' },
+                { label: 'Surface', value: view === 'plot' ? 'Charts' : 'Table' },
+              ].map((item) => (
+                <div key={item.label} className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-sm backdrop-blur">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">{item.label}</p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">{item.value}</p>
+                </div>
+              ))}
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-4 py-5 sm:px-8 lg:px-10">
+        <div className="mb-5 flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3 px-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-white">
+              <Archive size={18} />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-950">Historical Workspace</p>
+              <p className="text-xs text-slate-500">Fetch curves or table snapshots for an exact time.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 rounded-xl border border-slate-200 bg-slate-100 p-1 sm:flex">
           {([
             { id: 'plot'  as const, label: 'Plot',  Icon: BarChart2 },
             { id: 'table' as const, label: 'Table', Icon: Table2    },
@@ -29,23 +73,38 @@ const HistoricalGreeks: React.FC = () => {
               key={id}
               type="button"
               onClick={() => setView(id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-150 ${
+              className={`relative flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
                 view === id
-                  ? 'bg-white text-gray-900 shadow-sm border border-gray-200'
-                  : 'text-gray-500 hover:text-gray-700'
+                  ? 'text-slate-950'
+                  : 'text-slate-500 hover:text-slate-700'
               }`}
             >
-              <Icon size={13} />
-              {label}
+              {view === id && (
+                <motion.span
+                  layoutId="historical-greeks-tab"
+                  className="absolute inset-0 rounded-lg bg-white shadow-sm"
+                  transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                />
+              )}
+              <Icon size={13} className="relative z-10" />
+              <span className="relative z-10">{label}</span>
             </button>
           ))}
+          </div>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="px-6 sm:px-8 py-6">
-        {view === 'plot'  && <HistoricalPlot/>}
-        {view === 'table' && <HistoricalTable/>}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={view}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+          >
+            {view === 'plot'  && <HistoricalPlot/>}
+            {view === 'table' && <HistoricalTable/>}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );

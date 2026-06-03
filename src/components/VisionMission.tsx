@@ -68,7 +68,7 @@ const VisionMission: React.FC = () => {
       {/* ── Closing statement ── */}
       <SectionReveal
         variants={scaleIn}
-        className="max-w-4xl mx-auto mt-14 sm:mt-20 lg:mt-28 text-center"
+        className="max-w-6xl mx-auto mt-14 sm:mt-20 lg:mt-28 text-center"
         margin="-40px"
       >
         <p className="text-xl sm:text-2xl lg:text-3xl text-gray-300 font-light leading-snug">

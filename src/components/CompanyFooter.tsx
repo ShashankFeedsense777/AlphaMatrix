@@ -12,23 +12,44 @@ const companyDetails = [
 
 const CompanyFooter: React.FC = () => {
   return (
-    <footer className="relative border-t border-white/10 px-4 sm:px-6 py-14 sm:py-16 lg:py-20 overflow-hidden bg-[#060608]">
+<footer className="relative overflow-hidden px-4 sm:px-6 py-14 sm:py-16 lg:py-20 border-t border-white/10">
+{/* Video Background */}
+<video
+  autoPlay
+  muted
+  loop
+  playsInline
+  className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+   onLoadedMetadata={(e) => {
+    e.currentTarget.playbackRate = 0.75;
+  }}
+>
+  <source
+    src="https://res.cloudinary.com/donk8eyno/video/upload/v1780050731/Frame1_qigxfh.mp4"
+    type="video/mp4"
+  />
+</video>
 
-      {/* Grid background */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          backgroundImage:
-            'linear-gradient(rgba(255,255,255,0.055) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.055) 1px, transparent 1px)',
-          backgroundSize: '44px 44px',
-        }}
-      />
+{/* Black Overlay */}
+<div className="absolute inset-0 bg-black/70 pointer-events-none" />
 
-      {/* Saffron radial at top */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{ background: 'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(249,115,22,0.07) 0%, transparent 70%)' }}
-      />
+{/* Premium Saffron Glow */}
+<div
+  className="absolute inset-0 pointer-events-none"
+  style={{
+    background:
+      "radial-gradient(circle at top center, rgba(249,115,22,0.18) 0%, rgba(249,115,22,0.05) 30%, transparent 70%)",
+  }}
+/>
+
+{/* Soft Vignette */}
+<div
+  className="absolute inset-0 pointer-events-none"
+  style={{
+    background:
+      "radial-gradient(circle at center, transparent 45%, rgba(0,0,0,0.85) 100%)",
+  }}
+/>
 
       {/* Vignette — fades grid toward edges */}
       <div
@@ -80,7 +101,18 @@ const CompanyFooter: React.FC = () => {
               <motion.div
                 key={detail.label}
                 variants={fadeUp}
-                className="rounded-xl border border-white/8 bg-white/3 p-5 backdrop-blur-sm"
+                className="
+rounded-2xl
+border border-white/10
+bg-white/[0.03]
+backdrop-blur-xl
+p-6
+transition-all
+duration-500
+hover:border-brand-saffron/40
+hover:bg-white/[0.05]
+hover:-translate-y-1
+"
               >
                 <p className="text-[11px] uppercase tracking-[0.24em] text-brand-saffron mb-3">
                   {detail.label}
