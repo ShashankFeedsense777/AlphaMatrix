@@ -63,7 +63,7 @@ const ConnectWithUs: React.FC = () => {
       if (video) {
         if (active === c.id) {
           video.playbackRate = 0.75;
-          video.play().catch(() => {});
+          video.play().catch(() => { });
         } else {
           video.pause();
           video.currentTime = 0;
@@ -87,8 +87,8 @@ const ConnectWithUs: React.FC = () => {
   };
 
   return (
-    <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 relative bg-white">
-      
+    <section id='contact' className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 relative bg-white">
+
       <div className="max-w-7xl mx-auto">
         <SectionReveal variants={fadeUp} className="mb-12 sm:mb-16">
           <h2 className="text-brand-saffron text-xs tracking-[0.3em] uppercase font-bold mb-4">
@@ -136,18 +136,21 @@ const ConnectWithUs: React.FC = () => {
                 </div>
 
                 {/* Label */}
-                <div className="absolute top-5 left-5 right-5 z-10 flex items-start justify-between">
+                <div
+                  className={`absolute z-10  ${isActive || isHovered
+                      ? 'top-5 left-5 right-5 flex items-center justify-between'
+                      : 'inset-0 flex flex-col items-center justify-center text-center px-6'
+                    }`}
+                >
                   <div>
-                    <h4 className="text-white text-2xl font-bold tracking-tight">{card.label}</h4>
-                    <p className="text-white/60 text-sm mt-1">{card.tagline}</p>
+                    <h4 className="text-white text-2xl font-bold tracking-tight">
+                      {card.label}
+                    </h4>
+
+                    <p className="text-white/60 text-sm mt-1">
+                      {card.tagline}
+                    </p>
                   </div>
-                  {/* <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
-                    isActive ? 'bg-white border-white' : 'border-white/40'
-                  }`}>
-                    <span className={`text-lg font-bold ${isActive ? 'text-gray-900' : 'text-white'}`}>
-                      {isActive ? '−' : '+'}
-                    </span>
-                  </div> */}
                 </div>
 
                 {/* Expanded content */}
@@ -163,9 +166,8 @@ const ConnectWithUs: React.FC = () => {
                       {/* Left — jingle */}
                       <div className="hidden lg:flex flex-col justify-end w-[38%] p-6">
                         <div className="flex items-start gap-3 mb-2">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                            isActive ? 'bg-white' : 'bg-white/20'
-                          }`}>
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isActive ? 'bg-white' : 'bg-white/20'
+                            }`}>
                             <span className={`text-lg font-bold ${isActive ? 'text-gray-900' : 'text-white'}`}>
                               {isActive ? '−' : '+'}
                             </span>
@@ -181,9 +183,8 @@ const ConnectWithUs: React.FC = () => {
                       </div>
 
                       {/* Right — form */}
-                      <div className={`ml-auto w-full lg:w-[62%] h-full p-6 backdrop-blur-sm ${
-                        isActive ? 'bg-black/20' : 'bg-black/10'
-                      }`} onClick={(e) => e.stopPropagation()}>
+                      <div className={`ml-auto w-full lg:w-[62%] h-full p-6 backdrop-blur-sm ${isActive ? 'bg-black/20' : 'bg-black/10'
+                        }`} onClick={(e) => { e.stopPropagation(); if (active == null) handleCardClick(card.id) }} >
                         <h5 className="text-white font-semibold text-sm mb-4 tracking-wide">
                           {isActive ? 'Get in touch' : 'Click to connect'}
                         </h5>
@@ -231,11 +232,10 @@ const ConnectWithUs: React.FC = () => {
                               onChange={(e) => setFormData({ ...formData, doc: e.target.files?.[0] ?? null })}
                             />
                           </label>
-                          <button className={`w-full h-10 rounded-lg text-white text-xs font-bold uppercase tracking-wider transition-colors ${
-                            isActive
+                          <button className={`w-full h-10 rounded-lg text-white text-xs font-bold uppercase tracking-wider transition-colors ${isActive
                               ? 'bg-brand-saffron hover:bg-orange-600 cursor-pointer'
                               : 'bg-brand-saffron/60 cursor-default'
-                          }`}>
+                            }`}>
                             {isActive ? 'Submit' : 'Click to fill'}
                           </button>
                         </div>

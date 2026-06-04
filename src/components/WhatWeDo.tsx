@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import SectionReveal, {
   fadeUp,
   fadeLeft,
   staggerContainer,
 } from './SectionReveal';
+
+const DottedSurface = lazy(() => import('./ui/DottedSurface'));
+
 
 const WhatWeDo: React.FC = () => {
   const cards = [
@@ -30,7 +33,10 @@ const WhatWeDo: React.FC = () => {
       id="whatwedo"
       className="relative overflow-hidden py-16 sm:py-24 lg:py-32 px-4 sm:px-6 bg-[#f7fafd] text-[#181c1e]"
     >
-      <div className="max-w-6xl mx-auto">
+      <Suspense fallback={null}>
+        <DottedSurface />
+      </Suspense>
+      <div className="max-w-6xl mx-auto relative z-10">
         {/* ───────────────────────────── */}
         {/* WHAT WE DO */}
         {/* ───────────────────────────── */}
@@ -139,15 +145,15 @@ const WhatWeDo: React.FC = () => {
 
         <SectionReveal className="my-14 sm:my-20 lg:my-24">
           <div
-            className="
-              rounded-2xl
-              border
-              border-[#e3ebf3]
-              bg-gradient-to-r
-              from-[#f1f5f9]
-              via-[#eef4f8]
-              to-[#f1f5f9]
-            "
+            // className="
+            //   rounded-2xl
+            //   border
+            //   border-[#e3ebf3]
+            //   bg-gradient-to-r
+            //   from-[#f1f5f9]
+            //   via-[#eef4f8]
+            //   to-[#f1f5f9]
+            // "
           />
         </SectionReveal>
 

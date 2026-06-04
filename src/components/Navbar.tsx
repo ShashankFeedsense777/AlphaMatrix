@@ -17,6 +17,7 @@ const navItems = [
   { name: 'Vision', to: 'vision' },
   { name: 'Locations', to: 'locations' },
   { name: 'About Us', to: 'aboutus' },
+  { name: 'Connect With Us', to: 'contact' },
 ] as const;
 
 const Navbar: React.FC<NavbarProps> = ({
@@ -95,9 +96,9 @@ const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled || showMobileMenu ? 'bg-brand-black/92 backdrop-blur-md shadow-lg py-3 md:py-4' : 'bg-transparent py-4 md:py-6'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center gap-3">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 flex justify-between items-center gap-3">
         {/* Logo Placeholder */}
-        <div className="flex min-w-0 items-center space-x-2 cursor-pointer">
+        <div className="flex min-w-fit items-center space-x-2 cursor-pointer">
           {/* <div className="w-10 h-10 border-2 border-brand-saffron flex items-center justify-center text-brand-saffron font-bold text-xl relative">
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-brand-saffron rounded-full"></span>
             A
@@ -105,7 +106,7 @@ const Navbar: React.FC<NavbarProps> = ({
           <img id="navbar-logo" src={Logo} alt="" className="h-14 w-14 sm:h-16 sm:w-16 lg:h-[50px] lg:w-[50px] shrink-0" />
           <div className="flex min-w-0 flex-col">
             <span className="text-white font-bold text-base sm:text-lg lg:text-xl tracking-[0.12em] sm:tracking-[0.18em] lg:tracking-[0.2em] uppercase leading-none truncate">Alpha Matrix</span>
-            <span className="text-brand-saffron text-[10px] sm:text-sm tracking-widest mt-1">Since 2026</span>
+            {/* <span className="text-brand-saffron text-[10px] sm:text-sm tracking-widest mt-1">Since 2026</span> */}
           </div>
         </div>
 
@@ -121,9 +122,9 @@ const Navbar: React.FC<NavbarProps> = ({
               delay={0}
               offset={-80}
               onClick={() => handleNavClick(item.to)}
-              className={`transition-colors cursor-pointer text-xs xl:text-sm tracking-wide uppercase whitespace-nowrap ${activeSection === item.to
-                  ? 'text-brand-saffron font-bold'
-                  : 'text-gray-300 hover:text-brand-saffron font-medium'
+              className={`transition-colors cursor-pointer text-sm xl:text-sm tracking-wide uppercase whitespace-nowrap ${activeSection === item.to
+                ? 'text-brand-saffron font-bold'
+                : 'text-gray-300 hover:text-brand-saffron font-medium'
                 }`}
             >
               {item.name}

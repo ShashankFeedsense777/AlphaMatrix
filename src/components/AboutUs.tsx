@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import SectionReveal, { fadeLeft, scaleIn, staggerContainer, fadeUp } from './SectionReveal';
 import { Person1, Person2, Person3 } from '../assets/index';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -12,33 +12,36 @@ const stats = [
 
 const teamMembers = [
   {
-    name: 'Person 1',
+    name: 'Khushboo Mallik',
     image: Person1,
-    role: 'Chief Quantitative Officer',
+    role: 'Director of Global Business',
+    quote: '"Alpha is not found — it is engineered, systematically."',
     headings: [
-      { title: 'Quantitative Research', text: 'Develops alpha generating strategies using advanced statistical models.' },
-      { title: 'Portfolio Construction', text: 'Designs systematic frameworks for capital allocation.' },
-      { title: 'Risk Management', text: 'Builds adaptive risk controls across market regimes.' },
+      { title: 'Marketing and Sales', text: 'Manages client relationships and business development.' },
+      { title: 'Strategic Partnerships', text: 'Forge and maintain high-value collaborations.' },
+      { title: 'Market Expansion', text: 'Drives global growth and new market penetration.' },
     ],
   },
   {
-    name: 'Person 2',
+    name: 'Rohit Mallik',
     image: Person2,
-    role: 'Head of AI Research',
+    role: 'Director of Quantitative Research',
+    quote: '"The market is a signal. We build the decoder."',
     headings: [
-      { title: 'Machine Learning', text: 'Researching predictive models for market behavior.' },
-      { title: 'Deep Learning', text: 'Building next generation forecasting engines.' },
-      { title: 'Automation', text: 'Creating self-improving trading systems.' },
+      { title: 'Research and Development', text: 'Develops cutting-edge quantitative strategies.' },
+      { title: 'Data Science', text: 'Extracting patterns from complex financial datasets.' },
+      { title: 'Backtesting Engine', text: 'Validating strategies with historical data.' },
     ],
   },
   {
-    name: 'Person 3',
+    name: 'Anil Mallik',
     image: Person3,
-    role: 'Director of Trading Systems',
+    role: 'Director',
+    quote: '"Speed without precision is noise. We build both."',
     headings: [
-      { title: 'Execution', text: 'Ultra-low latency execution architecture.' },
-      { title: 'Infrastructure', text: 'Distributed systems built for scale.' },
-      { title: 'Monitoring', text: '24/7 operational intelligence.' },
+      { title: 'Execution', text: 'Manages the execution of trades and ensures timely settlement.' },
+      { title: 'Portfolio Management', text: "Manages the company's trading portfolio and ensures optimal performance." },
+      { title: 'Compliance and Risk', text: 'Ensures regulatory compliance and manages risk.' },
     ],
   },
 ];
@@ -64,7 +67,7 @@ const AboutUs: React.FC = () => {
           // background: 'linear-gradient(160deg, #060608 0%, #130804 40%, #1f0b05 70%, #270b08 100%)',
         }}
       >
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto relative z-10">
 
           {/* ── Hero row ── */}
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
@@ -151,7 +154,7 @@ const AboutUs: React.FC = () => {
           </div>
 
           {/* ── Stats row ── */}
-          <motion.div
+          {/* <motion.div
             className="mt-14 sm:mt-20 lg:mt-24 grid grid-cols-2 lg:grid-cols-4 gap-px border border-white/5 rounded-xl overflow-hidden"
             variants={staggerContainer(0.1)}
             initial="hidden"
@@ -172,7 +175,7 @@ const AboutUs: React.FC = () => {
                 </div>
               </motion.div>
             ))}
-          </motion.div>
+          </motion.div> */}
 
           {/* ── Leadership team ── */}
           <motion.div
@@ -215,7 +218,7 @@ const AboutUs: React.FC = () => {
                         <img
                           src={member.image}
                           alt={member.name}
-                          className="absolute inset-0 w-full h-full object-cover"
+                          className={`absolute inset-0 w-full h-full object-cover ${isActive ? 'saturate-100' : 'saturate-0'}`}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
                         <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 backdrop-blur-md bg-black/25">
@@ -236,23 +239,41 @@ const AboutUs: React.FC = () => {
                             exit={{ opacity: 0, x: -20 }}
                             transition={{ duration: 0.45 }}
                             className="flex-1 p-6 sm:p-8 lg:p-10 overflow-y-auto"
-                            style={{
-                              background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%)',
-                              borderLeft: '1px solid rgba(255,255,255,0.07)',
-                            }}
+                            style={{ background: '#f5f4f2', borderLeft: '1px solid rgba(0,0,0,0.06)' }}
                           >
-                            <div className="space-y-5 sm:space-y-7">
-                              {member.headings.map((item) => (
-                                <div key={item.title}>
-                                  <h5 className="text-base sm:text-lg lg:text-xl font-bold mb-1.5 sm:mb-2 text-white">
-                                    {item.title}
-                                  </h5>
-                                  <p className="text-gray-400 text-sm sm:text-base leading-relaxed">
-                                    {item.text}
-                                  </p>
-                                </div>
+                            {/* Role pill */}
+                            <span className="inline-block bg-gray-900 text-white text-[10px] font-bold uppercase tracking-[0.18em] px-3 py-1.5 rounded-full mb-4">
+                              {member.role}
+                            </span>
+
+                            {/* Name */}
+                            <h4 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-saffron mb-4 leading-tight">
+                              {member.name}
+                            </h4>
+
+                            {/* Headings as body paragraphs */}
+                            <div className="space-y-4 mb-6">
+                              {member.headings.map((item, idx) => (
+                                <p key={item.title} className="text-gray-800 text-sm sm:text-base leading-relaxed">
+                                  {idx === 0 ? (
+                                    // First heading treated as intro paragraph
+                                    <>{item.text}</>
+                                  ) : (
+                                    <>
+                                      <span className="font-semibold text-gray-900">{item.title}. </span>
+                                      {item.text}
+                                    </>
+                                  )}
+                                </p>
                               ))}
                             </div>
+
+                            {/* Blockquote */}
+                            <blockquote className="border-l-4 border-brand-saffron pl-4 mt-6">
+                              <p className="text-brand-saffron italic text-sm sm:text-base font-medium leading-relaxed">
+                                "{member.headings[member.headings.length - 1].title} — {member.headings[member.headings.length - 1].text}"
+                              </p>
+                            </blockquote>
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -272,8 +293,8 @@ const AboutUs: React.FC = () => {
           <svg viewBox="0 0 1440 80" preserveAspectRatio="none" className="w-full h-full">
             <defs>
               <linearGradient id="waveGradient3" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%"   stopColor="#270b08" />
-                <stop offset="50%"  stopColor="#321009" />
+                <stop offset="0%" stopColor="#270b08" />
+                <stop offset="50%" stopColor="#321009" />
                 <stop offset="100%" stopColor="#3a150b" />
               </linearGradient>
             </defs>

@@ -4,6 +4,7 @@ import { AlertCircle, ArrowLeft, CheckCircle2, KeyRound, Lock, Phone, ShieldChec
 import { useNavigate } from 'react-router-dom';
 import { Logo, Nature1, Nature2, Nature3 } from '../assets/index';
 import { loginAPI } from '../api/apiCalls';
+import ShapeGrid from './ui/ShapeGrid';
 
 type LoginMode = 'password' | 'phone';
 type LoginResponse = { status: number; message?: string };
@@ -185,6 +186,17 @@ const EmployeeLoginPage: React.FC = () => {
 
   return (
     <main className="relative min-h-svh overflow-x-hidden bg-[#060608] text-white selection:bg-brand-saffron selection:text-white">
+      <div className="absolute inset-0 z-100">
+        <ShapeGrid
+          speed={0.4}
+          squareSize={55}
+          direction="diagonal"
+          borderColor="rgba(255,255,255,0.06)"
+          hoverFillColor="#F97316"
+          shape="square"
+          hoverTrailAmount={3}
+        />
+      </div>
       <div className="fixed right-3 top-3 z-[120] w-[calc(100vw-1.5rem)] max-w-sm sm:right-5 sm:top-5">
         <AnimatePresence mode="wait">
           {toast && (
@@ -215,13 +227,13 @@ const EmployeeLoginPage: React.FC = () => {
       </div>
 
       {/* Background Decor (Grid & Radials) */}
-      <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.055) 1px,transparent 1px)', backgroundSize: 'clamp(32px, 6vw, 44px) clamp(32px, 6vw, 44px)' }} />
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 0%,rgba(249,115,22,0.12) 0%,transparent 65%)' }} />
+      {/* <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.055) 1px,transparent 1px)', backgroundSize: 'clamp(32px, 6vw, 44px) clamp(32px, 6vw, 44px)' }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 0%,rgba(249,115,22,0.12) 0%,transparent 65%)' }} /> */}
 
-      <div className="relative z-10 flex min-h-svh flex-col px-3 py-3 min-[380px]:px-4 sm:px-6 lg:px-10">
+      <div className="relative  flex min-h-svh flex-col px-3 py-3 min-[380px]:px-4 sm:px-6 lg:px-10">
         {/* Nav */}
-        <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 border-b border-white/6 pb-3 sm:pb-4">
-          <button type="button" onClick={() => { navigate('/'); }} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-3 py-2 text-[11px] font-semibold uppercase tracking-widest text-white/60 backdrop-blur-md transition-colors hover:border-brand-saffron/40 hover:text-white">
+        <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3  pb-3 sm:pb-4">
+          <button type="button" onClick={() => { navigate('/'); }} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-3 py-2 text-[11px] font-semibold uppercase tracking-widest text-white/60 backdrop-blur-md transition-colors hover:border-brand-saffron/40 hover:text-white z-101">
             <ArrowLeft size={14} /> Home
           </button>
           <div className="flex min-w-0 items-center gap-2.5">
@@ -241,7 +253,7 @@ const EmployeeLoginPage: React.FC = () => {
           >
 
             {/* ── Left panel (The Nature Slider) ── */}
-            <div className="hidden md:flex min-h-[560px] flex-col justify-between p-7 lg:p-12 relative overflow-hidden">
+            <div className="hidden md:flex min-h-[560px] flex-col justify-between p-7 lg:p-12 relative overflow-hidden z-101">
 
               {/* Background Image Transition */}
               <AnimatePresence mode="wait">
@@ -306,7 +318,7 @@ const EmployeeLoginPage: React.FC = () => {
             </div>
 
             {/* ── Right panel (Login Form) ── */}
-            <div className="flex min-w-0 flex-col bg-[#07070b]/95 p-5 min-[380px]:p-6 sm:p-8 lg:p-9 backdrop-blur-xl">
+            <div className="flex min-w-0 flex-col bg-[#07070b]/95 p-5 min-[380px]:p-6 sm:p-8 lg:p-9 backdrop-blur-xl z-101">
               <div className="mb-5 flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] border border-brand-saffron/20 bg-brand-saffron/10 text-brand-saffron">
                 <ShieldCheck size={22} />
               </div>
