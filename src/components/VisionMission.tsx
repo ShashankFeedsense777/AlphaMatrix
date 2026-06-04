@@ -28,7 +28,7 @@ const cards = [
 
 const VisionMission: React.FC = () => {
   return (
-    <section id="vision" className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 relative overflow-hidden" >
+    <section id="vision" className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 relative overflow-hidden " >
 
       {/* ── Cards ── staggered side-by-side reveal */}
       <motion.div
@@ -79,6 +79,33 @@ const VisionMission: React.FC = () => {
           — that's what drives us.
         </p>
       </SectionReveal>
+       <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none pointer-events-none" style={{ height: 80 }}>
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" className="w-full h-full">
+          <defs>
+            <linearGradient
+              id="waveGradient1"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="0%"
+            >
+              <stop offset="0%" stopColor="#3d150c" />
+              <stop offset="50%" stopColor="#3d130b" />
+              <stop offset="100%" stopColor="#2d0e0a" />
+            </linearGradient>
+          </defs>
+
+          <path
+            d="M0,0 L0,30 C240,0 480,60 720,25 C960,-10 1200,55 1440,30 L1440,0 Z"
+            fill="url(#waveGradient1)"
+          />
+          {/* Dark fill below the wave — matches next section bg */}
+          <path
+            d="M0,30 C240,0 480,60 720,25 C960,-10 1200,55 1440,30 L1440,80 L0,80 Z"
+            fill="white"
+          />
+        </svg>
+      </div>
     </section>
   );
 };

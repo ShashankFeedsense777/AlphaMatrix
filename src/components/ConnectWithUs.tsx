@@ -88,6 +88,7 @@ const ConnectWithUs: React.FC = () => {
 
   return (
     <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 relative bg-white">
+      
       <div className="max-w-7xl mx-auto">
         <SectionReveal variants={fadeUp} className="mb-12 sm:mb-16">
           <h2 className="text-brand-saffron text-xs tracking-[0.3em] uppercase font-bold mb-4">
