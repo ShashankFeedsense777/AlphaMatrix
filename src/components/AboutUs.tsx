@@ -12,36 +12,68 @@ const stats = [
 
 const teamMembers = [
   {
-    name: 'Khushboo Mallik',
-    image: Person1,
-    role: 'Director of Global Business',
-    quote: '"Alpha is not found — it is engineered, systematically."',
-    headings: [
-      { title: 'Marketing and Sales', text: 'Manages client relationships and business development.' },
-      { title: 'Strategic Partnerships', text: 'Forge and maintain high-value collaborations.' },
-      { title: 'Market Expansion', text: 'Drives global growth and new market penetration.' },
-    ],
-  },
-  {
-    name: 'Rohit Mallik',
+    name: 'Rohit Aniel Malik',
     image: Person2,
-    role: 'Director of Quantitative Research',
-    quote: '"The market is a signal. We build the decoder."',
+    role: 'Founder, CEO & Chief Quantitative Strategist',
+    quote:
+      '"Our mission is to democratize institutional-grade quantitative investing through technology, research, and disciplined execution."',
     headings: [
-      { title: 'Research and Development', text: 'Develops cutting-edge quantitative strategies.' },
-      { title: 'Data Science', text: 'Extracting patterns from complex financial datasets.' },
-      { title: 'Backtesting Engine', text: 'Validating strategies with historical data.' },
+      {
+        title: 'Quantitative Trading',
+        text: 'Over 20 years of experience developing systematic trading frameworks across derivatives, algorithmic trading, and quantitative investing.',
+      },
+      {
+        title: 'AI-Powered Market Intelligence',
+        text: 'Leverages artificial intelligence and machine learning to enhance market analysis, automate decision-making, and improve strategy development.',
+      },
+      {
+        title: 'Risk & Capital Preservation',
+        text: 'Builds data-driven strategies focused on consistency, disciplined execution, robust risk controls, and long-term wealth creation.',
+      },
     ],
   },
+
   {
-    name: 'Anil Mallik',
+    name: 'Khushboo Malik',
+    image: Person1,
+    role: 'Director',
+    quote:
+      '"Innovation, integrity, and disciplined decision-making create the foundation for sustainable success in financial markets."',
+    headings: [
+      {
+        title: 'Client Empowerment',
+        text: 'Focused on providing traders and investors with the tools, knowledge, and confidence required for informed financial decisions.',
+      },
+      {
+        title: 'Technology & Innovation',
+        text: 'Advocates the adoption of AI, automation, and data-driven research to improve analysis, execution, and scalable investment solutions.',
+      },
+      {
+        title: 'Strategic Leadership',
+        text: 'Drives the firm’s vision of combining proven market principles with quantitative research and disciplined risk management.',
+      },
+    ],
+  },
+
+  {
+    name: 'Aniel Malik',
     image: Person3,
     role: 'Director',
-    quote: '"Speed without precision is noise. We build both."',
+    quote:
+      '"Trust, discipline, and long-term thinking remain the cornerstones of every successful investment journey."',
     headings: [
-      { title: 'Execution', text: 'Manages the execution of trades and ensures timely settlement.' },
-      { title: 'Portfolio Management', text: "Manages the company's trading portfolio and ensures optimal performance." },
-      { title: 'Compliance and Risk', text: 'Ensures regulatory compliance and manages risk.' },
+      {
+        title: '40+ Years of Market Experience',
+        text: 'Has navigated multiple market cycles, technological shifts, and periods of volatility while maintaining a long-term investment perspective.',
+      },
+      {
+        title: 'Mentorship & Guidance',
+        text: 'Provides strategic direction grounded in market wisdom, prudent risk management, and sustainable wealth-building principles.',
+      },
+      {
+        title: 'Trust & Excellence',
+        text: 'Dedicated to fostering lasting client relationships built on transparency, integrity, consistency, and long-term value creation.',
+      },
     ],
   },
 ];
@@ -142,14 +174,14 @@ const AboutUs: React.FC = () => {
                 computer science, and physics — all driven by the pursuit of alpha.
               </motion.p>
 
-              <motion.button
+              {/* <motion.button
                 variants={fadeUp}
                 whileHover={{ scale: 1.04, transition: { duration: 0.2 } }}
                 whileTap={{ scale: 0.97 }}
                 className="border border-brand-saffron text-brand-saffron hover:bg-brand-saffron hover:text-white px-5 sm:px-8 py-2.5 sm:py-3 rounded text-xs sm:text-sm font-bold tracking-widest uppercase transition-colors duration-300"
               >
                 Join the Matrix
-              </motion.button>
+              </motion.button> */}
             </motion.div>
           </div>
 

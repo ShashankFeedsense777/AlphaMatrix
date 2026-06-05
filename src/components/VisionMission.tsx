@@ -83,7 +83,7 @@ const VisionMission: React.FC = () => {
         margin="-40px"
       >
         <p className="text-xl sm:text-2xl lg:text-3xl text-gray-300 font-light leading-snug">
-          Simply put, turning market complexity into{' '}
+          Turning market complexity into{' '}
           <span className="inline text-white font-bold border-b-2 border-brand-saffron pb-1">
             intelligent opportunities
           </span>{' '}

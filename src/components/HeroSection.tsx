@@ -115,22 +115,12 @@ const HeroSection: React.FC = () => {
           variants={fadeUp}
           className="text-[clamp(2.25rem,8vw,4.5rem)] font-extrabold text-white leading-[1.05] "
         >
-          quintessential AI ready 
+          Quintessential AI ready 
           <br/>
-          <strong className=" text-brand-saffron block mt-2">  humanoid{' '} Quant Firm</strong>
+          <strong className=" text-brand-saffron block mt-2">  Humanoid{' '} Quant Firm</strong>
         </motion.p>
 
-        <motion.div
-          variants={fadeUp}
-          className="mt-8 sm:mt-12 flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4"
-        >
-          <button className="bg-brand-saffron hover:bg-orange-600 text-white px-6 sm:px-8 py-3 rounded text-xs sm:text-sm font-bold tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_rgba(249,115,22,0.55)] hover:shadow-[0_0_35px_rgba(249,115,22,0.8)] hover:-translate-y-0.5">
-            Explore Systems
-          </button>
-          <button className="border border-white/30 hover:border-brand-saffron text-white px-6 sm:px-8 py-3 rounded text-xs sm:text-sm font-bold tracking-widest uppercase transition-all duration-300 backdrop-blur-sm hover:-translate-y-0.5">
-            Our Performance
-          </button>
-        </motion.div>
+       
       </motion.div>
 
       {/* Scroll indicator */}

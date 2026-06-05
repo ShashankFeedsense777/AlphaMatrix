@@ -196,9 +196,9 @@ const Navbar: React.FC<NavbarProps> = ({
           >
             EMPLOYEE LOGIN
           </button>
-          <button className="hidden sm:block bg-brand-saffron text-white px-4 lg:px-6 py-2 rounded-sm text-xs lg:text-sm font-bold tracking-wider uppercase hover:bg-orange-600 transition-colors shadow-[0_0_15px_rgba(249,115,22,0.5)] whitespace-nowrap">
+          {/* <button className="hidden sm:block bg-brand-saffron text-white px-4 lg:px-6 py-2 rounded-sm text-xs lg:text-sm font-bold tracking-wider uppercase hover:bg-orange-600 transition-colors shadow-[0_0_15px_rgba(249,115,22,0.5)] whitespace-nowrap">
             Get Started
-          </button>
+          </button> */}
           <button
             type="button"
             onClick={() => setShowMobileMenu((value) => !value)}

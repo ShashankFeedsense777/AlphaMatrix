@@ -96,7 +96,7 @@ const ConnectWithUs: React.FC = () => {
           </h2>
           <h3 className="text-4xl sm:text-5xl font-light text-gray-900 leading-tight">
             Shape the future of{' '}
-            <span className="font-bold">finance.</span>
+            <span className="font-bold">finance.</span> Join the Matrix.
           </h3>
         </SectionReveal>
 
