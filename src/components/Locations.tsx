@@ -83,13 +83,13 @@ const Locations: React.FC = () => {
             >
               {/* BG image */}
               <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out scale-100 group-hover:scale-105 grayscale-[30%] group-hover:grayscale-0"
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out scale-100 group-hover:scale-105 grayscale-30 group-hover:grayscale-0"
                 style={{ backgroundImage: `url(${loc.img})` }}
               />
 
               {/* Overlays — these stay dark as they're inside the card */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-black/10" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-black/10" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               {/* Saffron tint */}
               <div

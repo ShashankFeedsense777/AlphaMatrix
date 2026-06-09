@@ -111,7 +111,7 @@ React.useEffect(() => {
                 style={{ willChange: 'transform', margin: '-32px' }}
                 className="absolute inset-0 rounded-full border border-dashed border-brand-saffron/10"
               />
-              <div className="aspect-square bg-gradient-to-tr from-[#1a0505] via-brand-saffron/10 to-brand-saffron/25 rounded-full flex items-center justify-center p-6 sm:p-8 overflow-hidden relative">
+              <div className="aspect-square bg-linear-to-tr from-[#1a0505] via-brand-saffron/10 to-brand-saffron/25 rounded-full flex items-center justify-center p-6 sm:p-8 overflow-hidden relative">
                 <video
                   autoPlay
                   muted
@@ -230,7 +230,7 @@ React.useEffect(() => {
                 alt={member.name}
                 className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${isActive ? 'saturate-100 scale-100' : 'saturate-0 scale-105'}`}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
               {/* Name overlay */}
               <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">

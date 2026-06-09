@@ -106,7 +106,7 @@ const CompanyFooter: React.FC = () => {
                 className="
                     rounded-2xl
                     border border-white/10
-                    bg-white/[0.05]
+                    bg-white/5
                     backdrop-blur-xl
                     px-4 py-3
                     transition-all

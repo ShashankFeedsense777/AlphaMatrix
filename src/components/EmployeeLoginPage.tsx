@@ -197,7 +197,7 @@ const EmployeeLoginPage: React.FC = () => {
           hoverTrailAmount={3}
         />
       </div>
-      <div className="fixed right-3 top-3 z-[120] w-[calc(100vw-1.5rem)] max-w-sm sm:right-5 sm:top-5">
+      <div className="fixed right-3 top-3 z-120 w-[calc(100vw-1.5rem)] max-w-sm sm:right-5 sm:top-5">
         <AnimatePresence mode="wait">
           {toast && (
             <motion.div

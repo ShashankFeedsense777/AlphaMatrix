@@ -116,7 +116,7 @@ const WhatWeDo: React.FC = () => {
                       font-black
                       text-transparent
                       bg-clip-text
-                      bg-gradient-to-b
+                      bg-linear-to-b
                       from-[#003f87]
                       to-[#0056b3]/25
                     "
