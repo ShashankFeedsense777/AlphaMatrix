@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { Logo } from '../assets/index';
+import { Logo1 } from '../assets/index';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -131,16 +131,16 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
         />
         <img
           ref={logoRef}
-          src={Logo}
+          src={Logo1}
           alt="Alpha Matrix"
-          className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 lg:w-52 lg:h-52 object-contain relative z-10"
+          className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 lg:w-150 lg:h-150 object-contain relative z-10"
         />
       </div>
 
       {/* Eyebrow */}
       <p
         ref={eyebrowRef}
-        className="mt-8 sm:mt-10 text-[10px] sm:text-[11px] md:text-xs font-semibold uppercase opacity-0"
+        className="mt-0 sm:mt-0 text-[10px] sm:text-[11px] md:text-xs font-semibold uppercase opacity-0"
         style={{ color: '#00f2fe', letterSpacing: '0.38em' }}
       >
         Quantitative Intelligence
@@ -148,7 +148,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
 
       {/* Brand */}
       <p className="mt-3 sm:mt-4 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extralight text-white tracking-[0.18em]">
-        ALPHA <span className="font-semibold">MATRIX</span>
+        {/* ALPHA <span className="font-semibold">MATRIX</span> */}
       </p>
 
       {/* Since */}
@@ -157,7 +157,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
         className="mt-2 text-xs sm:text-sm md:text-base font-light tracking-[0.22em] opacity-0"
         style={{ color: 'rgba(255,255,255,0.35)' }}
       >
-        Since 2026
+        {/* Since 2026 */}
       </p>
 
       {/* Divider */}

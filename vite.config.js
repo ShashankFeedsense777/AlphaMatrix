@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: [
-      "29rsab-ip-14-194-112-66.tunnelmole.net"
+     "ikszwk-ip-14-194-112-66.tunnelmole.net"
     ]
   },
 })

@@ -3,10 +3,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import SectionReveal, { fadeIn, staggerContainer, fadeUp } from './SectionReveal';
 
 const heroVideos = [
-  'https://res.cloudinary.com/donk8eyno/video/upload/v1780050731/Frame1_qigxfh.mp4',
-  'https://res.cloudinary.com/donk8eyno/video/upload/v1780050734/Frame2_pbeird.mp4',
-  'https://res.cloudinary.com/donk8eyno/video/upload/v1780050733/Frame4_hj4tuc.mp4',
-  'https://res.cloudinary.com/donk8eyno/video/upload/v1780050731/Frame3_iz8gke.mp4',
+  'https://res.cloudinary.com/drverjcjf/video/upload/v1780913982/Frame1_za36iw.mp4',
+  'https://res.cloudinary.com/drverjcjf/video/upload/v1780913981/Frame2_yqwhp2.mp4',
+  'https://res.cloudinary.com/drverjcjf/video/upload/v1780913979/Frame3_vaahnp.mp4',
+  'https://res.cloudinary.com/drverjcjf/video/upload/v1780913980/Frame4_qrqjqt.mp4',
+  'https://res.cloudinary.com/drverjcjf/video/upload/v1780913983/Frame5_iweisg.mp4',
+  // 'https://res.cloudinary.com/drverjcjf/image/upload/v1780922252/BSE_frame6_j2kwec.jpg',
+  'https://res.cloudinary.com/drverjcjf/video/upload/v1780919603/NSE_Frame7_bkz6dk.mp4',
 ];
 
 const HeroSection: React.FC = () => {
@@ -91,15 +94,15 @@ const HeroSection: React.FC = () => {
           variants={fadeUp}
           className="inline-block text-[10px] sm:text-xs tracking-[0.24em] sm:tracking-[0.35em] text-brand-saffron uppercase mb-4 sm:mb-6 font-semibold"
         >
-          AI · Quant · Trading
+          AI · Investing · Quant · Trading
         </motion.span>
 
-                <motion.span
+                {/* <motion.span
           variants={fadeUp}
           className="inline-block text-[10px] sm:text-xs tracking-[0.24em] sm:tracking-[0.35em] text-brand-saffron uppercase mb-4 sm:mb-6 font-semibold"
         >
           AI · Quant · Trading
-        </motion.span>
+        </motion.span> */}
 
         <motion.h1
           variants={fadeUp}

@@ -54,6 +54,12 @@ export default function LivePlot() {
   const [error, setError]               = useState('');
   const [socketStatus, setSocketStatus] = useState<SocketStatus>('idle');
 
+  Highcharts.setOptions({
+    time: {
+      timezone: 'Asia/Kolkata',
+    },
+  });
+
   const validateAndFetchExpiry = useCallback(async (date: string) => {
     try {
       const valRes = await fetch(`${API_BASE}/api/validate-date`, {
@@ -126,11 +132,18 @@ export default function LivePlot() {
   }, [expiry, mergeStrikeData, metric, normalizeLivePayload, selectedDate]);
 
   const getTimestamp = useCallback((time: string, dateStr: string) => {
-    const [h, m, s] = time.split(':').map(Number);
-    const d = new Date(dateStr);
-    d.setHours(h, m, s, 0);
-    return d.getTime();
-  }, []);
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const [hour, minute, second] = time.split(':').map(Number);
+
+  return new Date(
+    year,
+    month - 1,
+    day,
+    hour,
+    minute,
+    second
+  ).getTime();
+}, []);
 
   const metricLabel = useMemo(() =>
     METRICS.find(m => m.value === metric)?.label ?? metric.slice(2).toUpperCase()

@@ -8,48 +8,50 @@ const companyDetails = [
   { label: 'GST Number', value: '27AAFCM6712K1Z9' },
   { label: 'NSE Membership', value: '90415' },
   { label: 'BSE Membership', value: '6879' },
+  { label: 'SEBI Registration', value: 'INZ000318637' },
+
 ];
 
 const CompanyFooter: React.FC = () => {
   return (
-<footer className="relative overflow-hidden px-4 sm:px-6 py-14 sm:py-16 lg:py-20 border-t border-white/10">
-{/* Video Background */}
-<video
-  autoPlay
-  muted
-  loop
-  playsInline
-  className="absolute inset-0 w-full h-full object-cover pointer-events-none"
-   onLoadedMetadata={(e) => {
-    e.currentTarget.playbackRate = 0.75;
-  }}
->
-  <source
-    src="https://res.cloudinary.com/donk8eyno/video/upload/v1780050731/Frame1_qigxfh.mp4"
-    type="video/mp4"
-  />
-</video>
+    <footer className="relative overflow-hidden px-4 sm:px-6 py-14 sm:py-16 lg:py-20 border-t border-white/10">
+      {/* Video Background */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
+        onLoadedMetadata={(e) => {
+          e.currentTarget.playbackRate = 0.75;
+        }}
+      >
+        <source
+          src="https://res.cloudinary.com/drverjcjf/video/upload/v1780914015/Footer_rrbhuu.mp4"
+          type="video/mp4"
+        />
+      </video>
 
-{/* Black Overlay */}
-<div className="absolute inset-0 bg-black/70 pointer-events-none" />
+      {/* Black Overlay */}
+      <div className="absolute inset-0 bg-black/70 pointer-events-none" />
 
-{/* Premium Saffron Glow */}
-<div
-  className="absolute inset-0 pointer-events-none"
-  style={{
-    background:
-      "radial-gradient(circle at top center, rgba(249,115,22,0.18) 0%, rgba(249,115,22,0.05) 30%, transparent 70%)",
-  }}
-/>
+      {/* Premium Saffron Glow */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle at top center, rgba(249,115,22,0.18) 0%, rgba(249,115,22,0.05) 30%, transparent 70%)",
+        }}
+      />
 
-{/* Soft Vignette */}
-<div
-  className="absolute inset-0 pointer-events-none"
-  style={{
-    background:
-      "radial-gradient(circle at center, transparent 45%, rgba(0,0,0,0.85) 100%)",
-  }}
-/>
+      {/* Soft Vignette */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(circle at center, transparent 45%, rgba(0,0,0,0.85) 100%)",
+        }}
+      />
 
       {/* Vignette — fades grid toward edges */}
       <div
@@ -66,9 +68,9 @@ const CompanyFooter: React.FC = () => {
                 <h2 className="text-lg sm:text-xl font-bold uppercase tracking-[0.2em] text-white">
                   Alpha Matrix
                 </h2>
-                <p className="text-xs uppercase tracking-[0.28em] text-brand-saffron mt-1">
+                {/* <p className="text-xs uppercase tracking-[0.28em] text-brand-saffron mt-1">
                   Registered Details
-                </p>
+                </p> */}
               </div>
             </div>
 
@@ -102,17 +104,17 @@ const CompanyFooter: React.FC = () => {
                 key={detail.label}
                 variants={fadeUp}
                 className="
-rounded-2xl
-border border-white/10
-bg-white/[0.03]
-backdrop-blur-xl
-p-6
-transition-all
-duration-500
-hover:border-brand-saffron/40
-hover:bg-white/[0.05]
-hover:-translate-y-1
-"
+                    rounded-2xl
+                    border border-white/10
+                    bg-white/[0.05]
+                    backdrop-blur-xl
+                    px-4 py-3
+                    transition-all
+                    duration-500
+                    hover:border-brand-saffron/40
+                    hover:bg-white/[0.07]
+                    hover:-translate-y-1
+                    "
               >
                 <p className="text-[11px] uppercase tracking-[0.24em] text-brand-saffron mb-3">
                   {detail.label}
@@ -124,6 +126,7 @@ hover:-translate-y-1
             ))}
           </motion.div>
         </div>
+        
 
         <div className="mt-10 sm:mt-12 pt-6 border-t border-white/8 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
           <p className="text-xs sm:text-sm text-white/30">

@@ -91,7 +91,7 @@ const Navbar: React.FC<NavbarProps> = ({
 
   const openEmployeeLogin = () => {
     setIsAutoScrollEnabled(false);
-    navigate('/login');
+    window.open('/login', '_blank');
   };
 
   return (
@@ -192,9 +192,10 @@ const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={openEmployeeLogin}
-            className="hidden xl:block text-white hover:text-brand-saffron transition-colors text-sm tracking-wide font-medium whitespace-nowrap"
+            className="hidden xl:flex items-center gap-2 px-4 py-2 rounded-full border border-white/15 bg-white/5 hover:border-brand-saffron/50 hover:bg-brand-saffron/10 transition-all duration-200 text-white/70 hover:text-white text-[11px] font-semibold tracking-[0.15em] uppercase whitespace-nowrap cursor-pointer backdrop-blur-sm"
           >
-            EMPLOYEE LOGIN
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
+            Employee Login
           </button>
           {/* <button className="hidden sm:block bg-brand-saffron text-white px-4 lg:px-6 py-2 rounded-sm text-xs lg:text-sm font-bold tracking-wider uppercase hover:bg-orange-600 transition-colors shadow-[0_0_15px_rgba(249,115,22,0.5)] whitespace-nowrap">
             Get Started
@@ -224,8 +225,8 @@ const Navbar: React.FC<NavbarProps> = ({
                 offset={-76}
                 onClick={() => handleNavClick(item.to)}
                 className={`px-3 py-3 rounded-md text-sm uppercase tracking-wide cursor-pointer ${activeSection === item.to
-                    ? 'bg-brand-saffron/10 text-brand-saffron font-bold'
-                    : 'text-gray-300 hover:bg-white/5'
+                  ? 'bg-brand-saffron/10 text-brand-saffron font-bold'
+                  : 'text-gray-300 hover:bg-white/5'
                   }`}
               >
                 {item.name}

@@ -49,7 +49,9 @@ const CARDS: CardConfig[] = [
   },
 ];
 
-const VIDEO_SRC = 'https://res.cloudinary.com/donk8eyno/video/upload/v1780050731/Frame1_qigxfh.mp4';
+const VIDEO_RES_SRC = 'https://res.cloudinary.com/drverjcjf/video/upload/v1780914332/Research_people_t83yqf.mp4';
+const VIDEO_TRD_SRC = 'https://res.cloudinary.com/drverjcjf/video/upload/v1780914332/Research_people_t83yqf.mp4';
+const VIDEO_TEC_SRC = 'https://res.cloudinary.com/drverjcjf/video/upload/v1780914332/Research_people_t83yqf.mp4';
 
 const ConnectWithUs: React.FC = () => {
   const [active, setActive] = useState<CardId | null>(null);
@@ -124,7 +126,11 @@ const ConnectWithUs: React.FC = () => {
                 <div className="absolute inset-0">
                   <video
                     ref={(el) => { videoRefs.current[card.id] = el; }}
-                    src={VIDEO_SRC}
+                    src={
+                      card.id === 'research' ? VIDEO_RES_SRC :
+                        card.id === 'trader' ? VIDEO_TRD_SRC :
+                          VIDEO_TEC_SRC
+                    }
                     muted
                     loop
                     playsInline
@@ -183,7 +189,7 @@ const ConnectWithUs: React.FC = () => {
                       </div>
 
                       {/* Right — form */}
-                      <div className={`ml-auto w-full lg:w-[62%] h-full p-6 backdrop-blur-sm ${isActive ? 'bg-black/20' : 'bg-black/10'
+                      <div className={`ml-auto w-full lg:w-[62%] h-full p-6 backdrop-blur-sm ${isActive ? 'bg-white/20' : 'bg-white/10'
                         }`} onClick={(e) => { e.stopPropagation(); if (active == null) handleCardClick(card.id) }} >
                         <h5 className="text-white font-semibold text-sm mb-4 tracking-wide">
                           {isActive ? 'Get in touch' : 'Click to connect'}
