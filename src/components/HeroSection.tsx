@@ -8,8 +8,8 @@ const heroVideos = [
   'https://res.cloudinary.com/drverjcjf/video/upload/v1780913979/Frame3_vaahnp.mp4',
   'https://res.cloudinary.com/drverjcjf/video/upload/v1780913980/Frame4_qrqjqt.mp4',
   'https://res.cloudinary.com/drverjcjf/video/upload/v1780913983/Frame5_iweisg.mp4',
-  // 'https://res.cloudinary.com/drverjcjf/image/upload/v1780922252/BSE_frame6_j2kwec.jpg',
-  'https://res.cloudinary.com/drverjcjf/video/upload/v1780919603/NSE_Frame7_bkz6dk.mp4',
+  'https://res.cloudinary.com/drverjcjf/video/upload/v1781008757/Frame6_lfixvv.mp4',
+  'https://res.cloudinary.com/drverjcjf/video/upload/v1780919603/Frame7_bkz6dk.mp4',
 ];
 
 const HeroSection: React.FC = () => {

@@ -238,9 +238,9 @@ const EmployeeLoginPage: React.FC = () => {
           </button>
           <div className="flex min-w-0 items-center gap-2.5">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand-saffron/20 bg-brand-saffron/10">
-              <img src={Logo} alt="Alpha Matrix" className="h-5 w-5 object-contain" />
+              <img src={Logo} alt="AlphaMatrix" className="h-5 w-5 object-contain" />
             </div>
-            <span className="truncate text-[11px] sm:text-xs font-bold uppercase tracking-[0.14em] sm:tracking-[0.22em]">Alpha Matrix</span>
+            <span className="truncate text-[11px] sm:text-xs font-bold uppercase tracking-[0.14em] sm:tracking-[0.22em]">AlphaMatrix</span>
           </div>
         </header>
 
@@ -249,7 +249,7 @@ const EmployeeLoginPage: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid w-full max-w-[460px] overflow-hidden rounded-2xl sm:rounded-3xl border border-white/8 shadow-2xl md:max-w-none md:grid-cols-[1.05fr_0.95fr] lg:grid-cols-[1.1fr_0.9fr]"
+            className="grid w-full max-w-[460px] overflow-hidden rounded-2xl sm:rounded-3xl border border-white/20 shadow-2xl md:max-w-none md:grid-cols-[1.05fr_0.95fr] lg:grid-cols-[1.1fr_0.9fr]"
           >
 
             {/* ── Left panel (The Nature Slider) ── */}
@@ -323,7 +323,7 @@ const EmployeeLoginPage: React.FC = () => {
                 <ShieldCheck size={22} />
               </div>
               <h1 className="text-[clamp(1.55rem,7vw,2rem)] font-light text-white mb-1">Employee Login</h1>
-              <p className="text-xs text-white/35 font-light mb-6 sm:mb-7 leading-relaxed">Restricted to authorized Alpha Matrix personnel.</p>
+              <p className="text-xs text-white/35 font-light mb-6 sm:mb-7 leading-relaxed">Restricted to authorized AlphaMatrix personnel.</p>
 
               {/* Toggle */}
               <div className="mb-6 grid grid-cols-2 gap-1 rounded-full border border-white/7 bg-black/40 p-1">

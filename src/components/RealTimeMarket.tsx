@@ -156,7 +156,7 @@ const RealTimeMarket: React.FC = () => {
           className="border-t border-white/10 pt-8 sm:pt-10 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left"
         >
           <div className="text-gray-600 text-sm tracking-wide">
-            &copy; 2026 Alpha Matrix. All rights reserved.
+            &copy; 2026 AlphaMatrix. All rights reserved.
           </div>
           <button className="mt-4 md:mt-0 text-gray-500 hover:text-white transition-colors text-xs tracking-[0.2em] uppercase underline underline-offset-4 decoration-white/20">
             Secure Employee Portal

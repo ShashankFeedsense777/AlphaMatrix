@@ -63,10 +63,10 @@ const CompanyFooter: React.FC = () => {
         <div className="grid gap-10 lg:grid-cols-[1.1fr_1.4fr] lg:items-start">
           <SectionReveal variants={fadeUp}>
             <div className="flex items-center gap-3 mb-6">
-              <img src={Logo} alt="Alpha Matrix" className="h-12 w-12 sm:h-14 sm:w-14" />
+              <img src={Logo} alt="AlphaMatrix" className="h-12 w-12 sm:h-14 sm:w-14" />
               <div>
                 <h2 className="text-lg sm:text-xl font-bold uppercase tracking-[0.2em] text-white">
-                  Alpha Matrix
+                  AlphaMatrix
                 </h2>
                 {/* <p className="text-xs uppercase tracking-[0.28em] text-brand-saffron mt-1">
                   Registered Details
@@ -130,7 +130,7 @@ const CompanyFooter: React.FC = () => {
 
         <div className="mt-10 sm:mt-12 pt-6 border-t border-white/8 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
           <p className="text-xs sm:text-sm text-white/30">
-            &copy; 2026 Alpha Matrix. All rights reserved.
+            &copy; 2026 AlphaMatrix. All rights reserved.
           </p>
           <p className="text-xs uppercase tracking-[0.22em] text-white/25">
             NSE: 90415&nbsp;&nbsp;•&nbsp;&nbsp;BSE: 6879

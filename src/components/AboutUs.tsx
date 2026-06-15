@@ -4,6 +4,27 @@ import { Person1, Person2, Person3 } from '../assets/index';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const teamMembers = [
+  
+  {
+    name: 'Aniel Malik',
+    image: Person3,
+    role: 'Director — The Quintessential Mentor',
+    quote: 'Trust is the cornerstone of every enduring investment relationship.',
+    headings: [
+      {
+        title: '40+ Years of Market Wisdom',
+        text: 'Having navigated more than four decades of market cycles — from periods of remarkable growth to significant volatility and transformative technological change — Aniel brings a depth of perspective that few can match.',
+      },
+      {
+        title: 'Discipline & Long-Term Thinking',
+        text: 'These decades of experience consistently reinforce the importance of prudent risk management, disciplined execution, and maintaining a long-term perspective — principles that underpin every strategy at AlphaMatrix.',
+      },
+      {
+        title: 'Trust & Legacy',
+        text: "Dedicated to cultivating lasting relationships founded on integrity, transparency, and excellence — the firm's goal is not merely to navigate market complexities, but to help clients build wealth with confidence, clarity, and consistency.",
+      },
+    ],
+  },
   {
     name: 'Rohit Aniel Malik',
     image: Person2,
@@ -41,26 +62,6 @@ const teamMembers = [
       {
         title: 'Strategic Vision',
         text: "Drives the firm's mission of building a trusted platform where technology, expertise, and continuous learning converge — helping clients navigate markets with confidence and achieve lasting financial growth.",
-      },
-    ],
-  },
-  {
-    name: 'Aniel Malik',
-    image: Person3,
-    role: 'Director — The Quintessential Mentor',
-    quote: 'Trust is the cornerstone of every enduring investment relationship.',
-    headings: [
-      {
-        title: '40+ Years of Market Wisdom',
-        text: 'Having navigated more than four decades of market cycles — from periods of remarkable growth to significant volatility and transformative technological change — Aniel brings a depth of perspective that few can match.',
-      },
-      {
-        title: 'Discipline & Long-Term Thinking',
-        text: 'These decades of experience consistently reinforce the importance of prudent risk management, disciplined execution, and maintaining a long-term perspective — principles that underpin every strategy at Alpha Matrix.',
-      },
-      {
-        title: 'Trust & Legacy',
-        text: "Dedicated to cultivating lasting relationships founded on integrity, transparency, and excellence — the firm's goal is not merely to navigate market complexities, but to help clients build wealth with confidence, clarity, and consistency.",
       },
     ],
   },
@@ -165,7 +166,7 @@ React.useEffect(() => {
               </motion.h3>
 
               <motion.p variants={fadeUp} className="text-gray-400 text-sm sm:text-base lg:text-lg font-light leading-relaxed mb-4 sm:mb-5">
-                Alpha Matrix was founded with a singular focus: to engineer absolute returns
+                AlphaMatrix was founded with a singular focus: to engineer absolute returns
                 regardless of market climate. We employ a multidisciplinary approach,
                 combining deep financial expertise with bleeding-edge AI and robust infrastructure.
               </motion.p>
@@ -190,7 +191,7 @@ React.useEffect(() => {
     </h2>
     <h3 className="text-3xl sm:text-4xl font-light text-white">
       The People Behind
-      <span className="block font-bold text-white">Alpha Matrix</span>
+      <span className="block font-bold text-white">AlphaMatrix</span>
     </h3>
   </div>
 

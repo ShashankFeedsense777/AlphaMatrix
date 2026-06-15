@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { LogOut } from 'lucide-react';
 import LiveGreeks from '../sotm/GreeksLive';
 import HistoricalGreeks from '../sotm/GreeksHistorical';
+import MarginCalculator from '../marginCalculator/MarginCalculator';
 import { Logo } from '../../assets';
 import { useNavigate } from 'react-router-dom';
 
@@ -39,7 +40,7 @@ const NAV_ITEMS: NavItem[] = [
         label: 'Margin Calculator',
         description: 'Margin & exposure\ncalculator',
         children: [
-            { label: 'Margin Calculator', view: 'margin-calculator', available: false },
+            { label: 'Margin Calculator', view: 'margin-calculator', available: true },
         ],
     },
 ];
@@ -48,6 +49,7 @@ const ViewRenderer: React.FC<{ view: ActiveView }> = ({ view }) => {
     switch (view) {
         case 'live-greeks': return <LiveGreeks />;
         case 'historical-greeks': return <HistoricalGreeks />;
+        case 'margin-calculator': return <MarginCalculator />;
         default: return null;
     }
 };
@@ -87,10 +89,10 @@ const Layout: React.FC = () => {
                     {/* Logo */}
                     <div className="flex items-center gap-2.5 mr-2 shrink-0">
                         <div className="w-10 h-10 flex items-center justify-center">
-                            <img src={Logo} alt="Alpha Matrix" className="h-9 w-9 object-contain" />
+                            <img src={Logo} alt="AlphaMatrix" className="h-9 w-9 object-contain" />
                         </div>
                         <span className="text-[16px] font-bold uppercase tracking-[0.18em] text-white hidden sm:block">
-                            Alpha Matrix
+                            AlphaMatrix
                         </span>
                     </div>
 

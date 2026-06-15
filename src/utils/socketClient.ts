@@ -9,7 +9,7 @@ interface SocketMessage<T = unknown> {
   payload?: T;
   data?: T;
 }
-const DEFAULT_SOCKET_URL = `wss://receipt-incredible-sodium-gibson.trycloudflare.com/ws`;
+const DEFAULT_SOCKET_URL = `ws://localhost:8000/ws`;
 
 class SocketClient {
   private socket: WebSocket | null = null;

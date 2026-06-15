@@ -9,29 +9,28 @@ interface Location {
   coords: string;
   img: string;
 }
-
 const locations: Location[] = [
   {
     city: 'Mumbai',
     role: 'Headquarters',
     desc: 'The maximum city — where conviction meets velocity.',
     coords: '19.0760° N, 72.8777° E',
-    img: 'https://images.unsplash.com/photo-1567157577867-05ccb1388e66?q=80&w=1400&auto=format&fit=crop',
+    img: 'https://res.cloudinary.com/drverjcjf/image/upload/v1781084361/Mumbai_f3jgrf.png',
   },
   {
-    city: 'Dubai',
+    city: 'Delhi',
     role: 'Partner Desk',
-    desc: 'Bridging east and west capital flows.',
-    coords: '25.2048° N, 55.2708° E',
-    img: 'https://images.unsplash.com/photo-1546412414-8035e1776c9a?q=80&w=1400&auto=format&fit=crop',
+    desc: 'Where Capital Flows Meet Intelligent Strategies.',
+    coords: '28.7041° N, 77.1025° E',
+    img: 'https://res.cloudinary.com/drverjcjf/image/upload/v1781084587/Delhi_y2scu1.png',
   },
   {
-    city: 'Singapore',
+    city: 'Kolkata',
     role: 'Partner Desk',
-    desc: 'Asia-Pacific liquidity & infrastructure.',
-    coords: '1.3521° N, 103.8198° E',
-    img: 'https://images.unsplash.com/photo-1508964942454-1a56651d54ac?q=80&w=1400&auto=format&fit=crop',
-  },
+    desc: 'Where heritage meets modern market opportunities.',
+    coords: '22.5726° N, 88.3639° E',
+    img: 'https://res.cloudinary.com/drverjcjf/image/upload/v1781096157/victoria_sdviwv.png',
+  } 
 ];
 
 const cardReveal: Variants = {
@@ -88,8 +87,8 @@ const Locations: React.FC = () => {
               />
 
               {/* Overlays — these stay dark as they're inside the card */}
-              <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-black/10" />
-              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/10 via-black/10 to-black/10" />
+              <div className="absolute inset-0 bg-linear-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
               {/* Saffron tint */}
               <div
@@ -144,14 +143,14 @@ const Locations: React.FC = () => {
       </motion.div>
 
       {/* Footer note */}
-      <SectionReveal variants={fadeUp} className="max-w-7xl mx-auto mt-8 sm:mt-10 px-1">
+      {/* <SectionReveal variants={fadeUp} className="max-w-7xl mx-auto mt-8 sm:mt-10 px-1">
         <div className="flex items-start sm:items-center gap-3">
           <span className="mt-1.5 sm:mt-0 w-1.5 h-1.5 rounded-full bg-brand-saffron/60 inline-block shrink-0" />
           <p className="text-xs text-gray-400 font-light tracking-wide leading-relaxed">
             Additional partner networks across London, Hong Kong, and New York.
           </p>
         </div>
-      </SectionReveal>
+      </SectionReveal> */}
 
       {/* Bottom wave */}
       <div
