@@ -1,7 +1,7 @@
 export const endpoint = {
     login : "/auth/login",
     register:"/auth/register",
-    requestOtp:"/auth/request-otp",
-    validateOtp:"/auth/validate-otp",
+    requestOtp:"/api/request-otp",
+    validateOtp:"/api/validate-otp",
     
 }

@@ -1,632 +1,735 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    Box, Typography, Stack, Paper, Chip, Slider,
-    TextField, InputAdornment, ToggleButton, ToggleButtonGroup,
-    Divider, LinearProgress,
+    Box, Typography, Stack, Paper, MenuItem, Select,
+    FormControl, RadioGroup, FormControlLabel, Radio,
+    IconButton, Chip, Divider, Tooltip,
 } from '@mui/material';
-import { TrendingUp } from '@mui/icons-material';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
+type Exchange = 'NFO' | 'BFO';
+type Segment  = 'Futures' | 'Options';
+type Action   = 'B' | 'S';
 
-type InstrumentType = 'equity-futures' | 'index-futures' | 'equity-options' | 'index-options';
-type PositionType   = 'buy' | 'sell';
-type OptionType     = 'CE' | 'PE';
-
-interface MarginInputs {
-    instrument:    InstrumentType;
-    position:      PositionType;
-    optionType:    OptionType;
-    symbol:        string;
-    lotSize:       number;
-    lots:          number;
-    spotPrice:     number;
-    strikePrice:   number;
-    premium:       number;
-    daysToExpiry:  number;
-    volatility:    number;
+interface Scrip {
+    symbol:   string;
+    expiry:   string;
+    lotSize:  number;
+    price:    number;       // approximate underlying price
+    strikePrice?: number;   // for options
 }
 
-interface MarginBreakdown {
-    spanMargin:          number;
-    exposureMargin:      number;
-    premiumMargin:       number;
-    totalInitialMargin:  number;
-    maintenanceMargin:   number;
-    orderMargin:         number;
-    totalMargin:         number;
+interface TableRow {
+    id:            number;
+    exchange:      Exchange;
+    scrip:         Scrip;
+    segment:       Segment;
+    strike:        string;
+    quantity:      number;
+    action:        Action;
+    spanMargin:    number;
+    exposure:      number;
+    total:         number;
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const ORANGE = '#f97316';
-const DARK   = '#0f1115';
-
-const POPULAR_SYMBOLS: Record<InstrumentType, { symbol: string; lotSize: number; approxPrice: number }[]> = {
-    'index-futures':  [
-        { symbol: 'NIFTY',      lotSize: 25,  approxPrice: 24500 },
-        { symbol: 'BANKNIFTY',  lotSize: 15,  approxPrice: 52000 },
-        { symbol: 'FINNIFTY',   lotSize: 40,  approxPrice: 23500 },
-        { symbol: 'MIDCPNIFTY', lotSize: 75,  approxPrice: 12500 },
-        { symbol: 'SENSEX',     lotSize: 10,  approxPrice: 80000 },
-    ],
-    'equity-futures': [
-        { symbol: 'RELIANCE',  lotSize: 250,  approxPrice: 2900 },
-        { symbol: 'TCS',       lotSize: 150,  approxPrice: 4100 },
-        { symbol: 'INFY',      lotSize: 400,  approxPrice: 1800 },
-        { symbol: 'HDFCBANK',  lotSize: 550,  approxPrice: 1750 },
-        { symbol: 'ICICIBANK', lotSize: 700,  approxPrice: 1300 },
-        { symbol: 'SBIN',      lotSize: 1500, approxPrice: 820  },
-        { symbol: 'WIPRO',     lotSize: 1500, approxPrice: 570  },
-    ],
-    'index-options':  [
-        { symbol: 'NIFTY',      lotSize: 25,  approxPrice: 24500 },
-        { symbol: 'BANKNIFTY',  lotSize: 15,  approxPrice: 52000 },
-        { symbol: 'FINNIFTY',   lotSize: 40,  approxPrice: 23500 },
-        { symbol: 'MIDCPNIFTY', lotSize: 75,  approxPrice: 12500 },
-        { symbol: 'SENSEX',     lotSize: 10,  approxPrice: 80000 },
-    ],
-    'equity-options': [
-        { symbol: 'RELIANCE',  lotSize: 250, approxPrice: 2900 },
-        { symbol: 'TCS',       lotSize: 150, approxPrice: 4100 },
-        { symbol: 'INFY',      lotSize: 400, approxPrice: 1800 },
-        { symbol: 'HDFCBANK',  lotSize: 550, approxPrice: 1750 },
-        { symbol: 'ICICIBANK', lotSize: 700, approxPrice: 1300 },
-    ],
+// ─── Data ─────────────────────────────────────────────────────────────────────
+const SCRIPS: Record<Exchange, Record<Segment, Scrip[]>> = {
+    NFO: {
+        Futures: [
+            { symbol: 'NIFTY',      expiry: '30-Jun-26', lotSize: 75,  price: 24600 },
+            { symbol: 'BANKNIFTY',  expiry: '30-Jun-26', lotSize: 30,  price: 52200 },
+            { symbol: 'FINNIFTY',   expiry: '30-Jun-26', lotSize: 65,  price: 23800 },
+            { symbol: 'MIDCPNIFTY', expiry: '30-Jun-26', lotSize: 75,  price: 12600 },
+            { symbol: 'RELIANCE',   expiry: '30-Jun-26', lotSize: 250, price: 2920  },
+            { symbol: 'TCS',        expiry: '30-Jun-26', lotSize: 150, price: 4120  },
+            { symbol: 'HDFCBANK',   expiry: '30-Jun-26', lotSize: 550, price: 1760  },
+            { symbol: 'ICICIBANK',  expiry: '30-Jun-26', lotSize: 700, price: 1310  },
+            { symbol: 'SBIN',       expiry: '30-Jun-26', lotSize: 1500,price: 825   },
+            { symbol: 'INFY',       expiry: '30-Jun-26', lotSize: 400, price: 1805  },
+        ],
+        Options: [
+            { symbol: 'NIFTY',     expiry: '30-Jun-26', lotSize: 75,  price: 24600, strikePrice: 24500 },
+            { symbol: 'BANKNIFTY', expiry: '30-Jun-26', lotSize: 30,  price: 52200, strikePrice: 52000 },
+            { symbol: 'FINNIFTY',  expiry: '30-Jun-26', lotSize: 65,  price: 23800, strikePrice: 23800 },
+            { symbol: 'RELIANCE',  expiry: '30-Jun-26', lotSize: 250, price: 2920,  strikePrice: 2900  },
+            { symbol: 'TCS',       expiry: '30-Jun-26', lotSize: 150, price: 4120,  strikePrice: 4100  },
+        ],
+    },
+    BFO: {
+        Futures: [
+            { symbol: 'SENSEX',    expiry: '30-Jun-26', lotSize: 10,  price: 80500 },
+            { symbol: 'BANKEX',    expiry: '30-Jun-26', lotSize: 15,  price: 57000 },
+        ],
+        Options: [
+            { symbol: 'SENSEX',    expiry: '30-Jun-26', lotSize: 10,  price: 80500, strikePrice: 80000 },
+            { symbol: 'BANKEX',    expiry: '30-Jun-26', lotSize: 15,  price: 57000, strikePrice: 57000 },
+        ],
+    },
 };
 
-const SPAN_RATES: Record<InstrumentType, number> = {
-    'index-futures':  0.08,
-    'equity-futures': 0.12,
-    'index-options':  0.09,
-    'equity-options': 0.135,
+// ─── Margin engine (SPAN-like approximation) ──────────────────────────────────
+// NFO Futures: SPAN ~8%, Exposure ~3%
+// NFO Options sell: SPAN ~9%, Exposure ~3%; buy: premium only
+const SPAN_RATE: Record<Exchange, Record<Segment, number>> = {
+    NFO: { Futures: 0.08,  Options: 0.09  },
+    BFO: { Futures: 0.095, Options: 0.105 },
+};
+const EXP_RATE: Record<Exchange, Record<Segment, number>> = {
+    NFO: { Futures: 0.03,  Options: 0.03  },
+    BFO: { Futures: 0.035, Options: 0.035 },
 };
 
-const EXPOSURE_RATES: Record<InstrumentType, number> = {
-    'index-futures':  0.03,
-    'equity-futures': 0.05,
-    'index-options':  0.03,
-    'equity-options': 0.05,
-};
+function computeMargin(
+    exchange: Exchange,
+    segment:  Segment,
+    scrip:    Scrip,
+    qty:      number,
+    action:   Action,
+): { span: number; exposure: number; total: number } {
+    const notional    = scrip.price * qty;
+    const spanRate    = SPAN_RATE[exchange][segment];
+    const expRate     = EXP_RATE[exchange][segment];
 
-// ─── Margin Engine ────────────────────────────────────────────────────────────
-
-function calculateMargin(inputs: MarginInputs): MarginBreakdown {
-    const { instrument, position, lotSize, lots, spotPrice, strikePrice, premium, volatility, daysToExpiry } = inputs;
-    const totalQty       = lotSize * lots;
-    const isOptions      = instrument === 'equity-options' || instrument === 'index-options';
-    const isBuyOption    = isOptions && position === 'buy';
-    const notionalValue  = spotPrice * totalQty;
-    const spanRate       = SPAN_RATES[instrument];
-    const exposureRate   = EXPOSURE_RATES[instrument];
-    const volMultiplier  = 1 + Math.max(0, (volatility - 15) / 100);
-    const dteAdjust      = isOptions ? 1 : Math.max(0.85, 1 - (30 - Math.min(daysToExpiry, 30)) / 300);
-
-    let spanMargin = 0, exposureMargin = 0, premiumMargin = 0;
-    if (isBuyOption) {
-        premiumMargin = premium * totalQty;
-    } else if (isOptions) {
-        const strikeBased = strikePrice > 0 ? strikePrice : spotPrice;
-        spanMargin        = strikeBased * totalQty * spanRate * volMultiplier * dteAdjust;
-        exposureMargin    = notionalValue * exposureRate;
-        premiumMargin     = premium * totalQty;
-    } else {
-        spanMargin     = notionalValue * spanRate * volMultiplier * dteAdjust;
-        exposureMargin = notionalValue * exposureRate;
+    // Options Buy: only premium margin (indicative ~2% of notional)
+    if (segment === 'Options' && action === 'B') {
+        const premium = notional * 0.02;
+        return { span: 0, exposure: 0, total: premium };
     }
 
-    const totalInitialMargin = spanMargin + exposureMargin + premiumMargin;
-    const maintenanceMargin  = totalInitialMargin * 0.75;
-    const orderMargin        = totalInitialMargin * 0.1;
-    const totalMargin        = totalInitialMargin + orderMargin;
-    return { spanMargin, exposureMargin, premiumMargin, totalInitialMargin, maintenanceMargin, orderMargin, totalMargin };
+    const span     = Math.round(notional * spanRate);
+    const exposure = Math.round(notional * expRate);
+    return { span, exposure, total: span + exposure };
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+const fmtINR = (n: number) =>
+    n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-const fmt = (n: number) =>
-    n >= 1e7 ? `₹${(n / 1e7).toFixed(2)} Cr`
-    : n >= 1e5 ? `₹${(n / 1e5).toFixed(2)} L`
-    : `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+// ─── Styled sub-components ────────────────────────────────────────────────────
+const NAVY  = '#0a1628';
+const BLUE  = '#1565c0';
+const LBLUE = '#e8f0fe';
+const BORDER= '#d0d9e8';
+const BG    = '#f0f4fa';
 
-const fmtFull = (n: number) =>
-    `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
-
-// ─── Shared sx helpers ────────────────────────────────────────────────────────
-
-const sectionLabel = {
-    fontSize: '0.68rem',
-    fontWeight: 700,
-    letterSpacing: '0.08em',
-    textTransform: 'uppercase' as const,
-    color: '#94a3b8',
-    mb: 1,
-};
-
-const cardSx = {
-    borderRadius: 3,
-    border: '1px solid',
-    borderColor: 'grey.200',
-    boxShadow: 'none',
-    p: 2,
+const selectSx = {
     bgcolor: '#fff',
+    fontSize: 14,
+    fontWeight: 600,
+    color: NAVY,
+    borderRadius: '50px',
+    '& .MuiOutlinedInput-notchedOutline': { borderColor: BORDER, borderWidth: 1.5 },
+    '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#8dacd4' },
+    '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: BLUE, borderWidth: 2 },
+    '& .MuiSelect-select': { py: '9px', px: '16px' },
 };
 
-const tfSx = {
-    '& .MuiOutlinedInput-root': {
-        fontSize: 14,
-        fontWeight: 600,
-        color: '#0f1115',
-        bgcolor: '#fff',
-        borderRadius: 2,
-        '& fieldset': { borderColor: '#e2e8f0' },
-        '&:hover fieldset': { borderColor: '#cbd5e1' },
-        '&.Mui-focused fieldset': { borderColor: '#f97316', borderWidth: '1.5px' },
-    },
-    '& input': { py: '9px' },
+// ─── Autocomplete scrip input ─────────────────────────────────────────────────
+interface ScripInputProps {
+    options: Scrip[];
+    value:   string;
+    onChange:(s: Scrip) => void;
+    error?:  boolean;
+}
+const ScripInput: React.FC<ScripInputProps> = ({ options, value, onChange, error }) => {
+    const [open, setOpen]   = useState(false);
+    const [query, setQuery] = useState(value);
+    const ref               = useRef<HTMLDivElement>(null);
+
+    useEffect(() => { setQuery(value); }, [value]);
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    const filtered = options.filter(o =>
+        `${o.symbol} ${o.expiry}`.toLowerCase().includes(query.toLowerCase())
+    );
+
+    return (
+        <Box ref={ref} sx={{ position: 'relative' }}>
+            <Box
+                component="input"
+                value={query}
+                placeholder="Search scrip e.g. NIFTY"
+                onChange={e => { setQuery(e.target.value); setOpen(true); }}
+                onFocus={() => setOpen(true)}
+                style={{
+                    width: '100%', boxSizing: 'border-box',
+                    border: `1.5px solid ${error ? '#d32f2f' : BORDER}`,
+                    borderRadius: 50, fontSize: 14, fontWeight: 600,
+                    color: NAVY, padding: '9px 18px', outline: 'none',
+                    fontFamily: 'inherit', background: '#fff',
+                }}
+                onMouseEnter={e => { (e.target as HTMLInputElement).style.borderColor = '#8dacd4'; }}
+                onMouseLeave={e => { (e.target as HTMLInputElement).style.borderColor = error ? '#d32f2f' : BORDER; }}
+            />
+            {error && (
+                <Typography sx={{ fontSize: 11, color: '#d32f2f', mt: 0.5, ml: 1.5 }}>
+                    Please enter symbol
+                </Typography>
+            )}
+            <AnimatePresence>
+                {open && filtered.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.13 }}
+                        style={{
+                            position: 'absolute', top: '110%', left: 0, right: 0,
+                            background: '#fff', border: `1px solid ${BORDER}`,
+                            borderRadius: 12, zIndex: 200,
+                            boxShadow: '0 8px 24px rgba(10,22,40,0.12)',
+                            overflow: 'hidden', maxHeight: 260, overflowY: 'auto',
+                        }}
+                    >
+                        {filtered.map((s, i) => (
+                            <Box
+                                key={i}
+                                onMouseDown={() => {
+                                    onChange(s);
+                                    setQuery(`${s.symbol} ${s.expiry}`);
+                                    setOpen(false);
+                                }}
+                                sx={{
+                                    px: 2.5, py: 1.25, cursor: 'pointer', display: 'flex',
+                                    justifyContent: 'space-between', alignItems: 'center',
+                                    '&:hover': { bgcolor: LBLUE },
+                                    borderBottom: i < filtered.length - 1 ? `1px solid ${BG}` : 'none',
+                                }}
+                            >
+                                <Box>
+                                    <Typography sx={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
+                                        {s.symbol}
+                                    </Typography>
+                                    <Typography sx={{ fontSize: 11, color: '#6b7fa3' }}>{s.expiry}</Typography>
+                                </Box>
+                                <Typography sx={{ fontSize: 11, color: '#6b7fa3' }}>
+                                    Lot: {s.lotSize}
+                                </Typography>
+                            </Box>
+                        ))}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </Box>
+    );
 };
 
 // ─── Main Component ───────────────────────────────────────────────────────────
+let nextId = 1;
 
 const MarginCalculator: React.FC = () => {
-    const [inputs, setInputs] = useState<MarginInputs>({
-        instrument: 'index-futures', position: 'buy', optionType: 'CE',
-        symbol: 'NIFTY', lotSize: 25, lots: 1,
-        spotPrice: 24500, strikePrice: 24500, premium: 200,
-        daysToExpiry: 7, volatility: 15,
-    });
+    const [exchange, setExchange] = useState<Exchange>('NFO');
+    const [segment,  setSegment]  = useState<Segment>('Futures');
+    const [scrip,    setScrip]    = useState<Scrip | null>(null);
+    const [action,   setAction]   = useState<Action>('B');
+    const [quantity, setQuantity] = useState<number>(0);
+    const [rows,     setRows]     = useState<TableRow[]>([]);
+    const [errors,   setErrors]   = useState<{ exchange?: boolean; scrip?: boolean }>({});
+    const [segOpen,  setSegOpen]  = useState(false);
 
-    const set = <K extends keyof MarginInputs>(key: K, val: MarginInputs[K]) =>
-        setInputs(prev => ({ ...prev, [key]: val }));
+    const scripOptions = SCRIPS[exchange]?.[segment] ?? [];
+    const lotSize      = scrip?.lotSize ?? (scripOptions[0]?.lotSize ?? 1);
 
-    const isOptions   = inputs.instrument === 'equity-options' || inputs.instrument === 'index-options';
-    const isBuyOption = isOptions && inputs.position === 'buy';
+    // combined margin shown in right panel = sum of table rows
+    const combined = useMemo(() => {
+        if (rows.length === 0 && scrip) {
+            // preview of current form inputs
+            const qty = quantity > 0 ? quantity : lotSize;
+            const { span, exposure, total } = computeMargin(exchange, segment, scrip, qty, action);
+            return { span, exposure, total, benefit: 0 };
+        }
+        const span     = rows.reduce((a, r) => a + r.spanMargin, 0);
+        const exposure = rows.reduce((a, r) => a + r.exposure,   0);
+        const total    = rows.reduce((a, r) => a + r.total,      0);
+        return { span, exposure, total, benefit: 0 };
+    }, [rows, scrip, quantity, exchange, segment, action, lotSize]);
 
-    const handleInstrumentChange = (_: React.MouseEvent<HTMLElement>, val: string | null) => {
-        if (!val) return;
-        const inst  = val as InstrumentType;
-        const first = POPULAR_SYMBOLS[inst][0];
-        setInputs(prev => ({ ...prev, instrument: inst, symbol: first.symbol, lotSize: first.lotSize, spotPrice: first.approxPrice, strikePrice: first.approxPrice }));
+    const handleExchangeChange = (val: Exchange) => {
+        setExchange(val);
+        setScrip(null);
+        setQuantity(0);
+        setErrors({});
     };
 
-    const handleSymbol = (symbol: string) => {
-        const match = POPULAR_SYMBOLS[inputs.instrument].find(s => s.symbol === symbol);
-        if (match) setInputs(prev => ({ ...prev, symbol, lotSize: match.lotSize, spotPrice: match.approxPrice, strikePrice: match.approxPrice }));
+    const handleSegmentChange = (val: Segment) => {
+        setSegment(val);
+        setScrip(null);
+        setQuantity(0);
     };
 
-    const margin        = useMemo(() => calculateMargin(inputs), [inputs]);
-    const notionalValue = inputs.spotPrice * inputs.lotSize * inputs.lots;
-    const leverageRatio = notionalValue > 0 ? notionalValue / Math.max(margin.totalMargin, 1) : 0;
-    const marginPct     = notionalValue > 0 ? (margin.totalMargin / notionalValue) * 100 : 0;
-    const meterFill     = Math.min(100, marginPct * 4);
-    const meterColor    = meterFill < 30 ? '#16a34a' : meterFill < 60 ? '#d97706' : '#dc2626';
+    const handleAddToTable = () => {
+        const newErrors: typeof errors = {};
+        if (!scrip) newErrors.scrip = true;
+        if (Object.keys(newErrors).length) { setErrors(newErrors); return; }
+        setErrors({});
 
-    const breakdownItems = [
-        { label: 'SPAN Margin',        value: margin.spanMargin,       color: ORANGE,    show: !isBuyOption },
-        { label: 'Exposure Margin',    value: margin.exposureMargin,   color: '#6366f1', show: !isBuyOption },
-        { label: isBuyOption ? 'Premium Payable' : 'Premium Margin', value: margin.premiumMargin, color: '#0ea5e9', show: isOptions },
-        { label: 'Order Margin (10%)', value: margin.orderMargin,      color: '#10b981', show: true },
-    ].filter(i => i.show && i.value > 0);
+        const qty = quantity > 0 ? quantity : lotSize;
+        const { span, exposure, total } = computeMargin(exchange, segment, scrip!, qty, action);
 
-    const positionColor = inputs.position === 'buy' ? '#16a34a' : '#dc2626';
+        const row: TableRow = {
+            id:         nextId++,
+            exchange,
+            scrip:      scrip!,
+            segment,
+            strike:     scrip?.strikePrice ? String(scrip.strikePrice) : 'N/A',
+            quantity:   qty,
+            action,
+            spanMargin: span,
+            exposure,
+            total,
+        };
+        setRows(prev => [...prev, row]);
+        // reset form
+        setScrip(null);
+        setQuantity(0);
+    };
+
+    const handleReset = () => {
+        setRows([]);
+        setScrip(null);
+        setQuantity(0);
+        setExchange('NFO');
+        setSegment('Futures');
+        setAction('B');
+        setErrors({});
+    };
+
+    const handleDelete = (id: number) => {
+        setRows(prev => prev.filter(r => r.id !== id));
+    };
+
+    const grandTotal = rows.reduce((a, r) => a + r.total, 0);
+
+    // preview combined (live, from form)
+    const previewMargin = useMemo(() => {
+        if (!scrip) return null;
+        const qty = quantity > 0 ? quantity : lotSize;
+        return computeMargin(exchange, segment, scrip, qty, action);
+    }, [scrip, quantity, exchange, segment, action, lotSize]);
+
+    const displayMargin = rows.length > 0
+        ? { span: combined.span, exposure: combined.exposure, total: combined.total }
+        : (previewMargin ?? { span: 0, exposure: 0, total: 0 });
 
     return (
-        <Box sx={{ minHeight: '100vh', bgcolor: '#f8fafc', fontFamily: '"Inter", sans-serif' }}>
-
-            {/* ── Page header ── */}
-            <Box sx={{ bgcolor: '#fff', borderBottom: '1px solid', borderColor: 'grey.200', px: 3.5, py: 2 }}>
-                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
+        <Box sx={{ minHeight: '100vh', bgcolor: BG, fontFamily: '"Inter", "Roboto", sans-serif' }}>
+            {/* ── Header ── */}
+            <Box sx={{ bgcolor: '#fff', borderBottom: `1px solid ${BORDER}`, px: 3, py: 2 }}>
+                                <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
                     <Box sx={{
-                        width: 36, height: 36, borderRadius: 2,
-                        bgcolor: ORANGE, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: 34, height: 34, borderRadius: 2,
+                        background: `linear-gradient(135deg, ${BLUE}, #0d47a1)`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                        <TrendingUp sx={{ color: '#fff', fontSize: 20 }} />
+                        <TrendingUpIcon sx={{ color: '#fff', fontSize: 18 }} />
                     </Box>
-                    <Box>
-                        <Typography sx={{ fontSize: 15, fontWeight: 700, color: DARK, lineHeight: 1.2, letterSpacing: '-0.01em' }}>
-                            F&O Margin Calculator
-                        </Typography>
-                        <Typography sx={{ fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>
-                            NSE · BSE · Indicative
-                        </Typography>
-                    </Box>
+                    <Typography sx={{ fontSize: 20, fontWeight: 800, color: NAVY, letterSpacing: '-0.02em' }}>
+                        F&O Margin Calculator
+                    </Typography>
                 </Stack>
             </Box>
 
-            {/* ── Two-column body ── */}
-            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'minmax(0,1fr) 340px' }, minHeight: 'calc(100vh - 69px)' }}>
+            {/* ── Main card ── */}
+            <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1200, mx: 'auto' }}>
+                <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${BORDER}`, overflow: 'hidden', bgcolor: '#fff' }}>
+                    {/* Top form area */}
+                    <Box sx={{ p: { xs: 2.5, md: 3 } }}>
+                        <Box sx={{
+                            display: 'grid',
+                            gridTemplateColumns: { xs: '1fr', md: '1fr 1fr 1fr auto' },
+                            gap: 3,
+                            alignItems: 'start',
+                        }}>
+                            {/* Left inputs */}
+                            <Box sx={{ gridColumn: { xs: '1', md: '1 / 3' } }}>
+                                <Box sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '1fr 1fr',
+                                    gap: 2,
+                                    mb: 2.5,
+                                }}>
+                                    {/* Exchange */}
+                                    <Box>
+                                        <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#6b7fa3', mb: 0.75, ml: 0.5 }}>
+                                            Exchange
+                                        </Typography>
+                                        <FormControl fullWidth size="small">
+                                            <Select
+                                                value={exchange}
+                                                onChange={e => handleExchangeChange(e.target.value as Exchange)}
+                                                sx={selectSx}
+                                            >
+                                                <MenuItem value="NFO">NFO</MenuItem>
+                                                <MenuItem value="BFO">BFO</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Box>
+                                    {/* Segment */}
+                                    <Box>
+                                        <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#6b7fa3', mb: 0.75, ml: 0.5 }}>
+                                            Segment
+                                        </Typography>
+                                        <FormControl fullWidth size="small">
+                                            <Select
+                                                value={segment}
+                                                open={segOpen}
+                                                onOpen={() => setSegOpen(true)}
+                                                onClose={() => setSegOpen(false)}
+                                                onChange={e => handleSegmentChange(e.target.value as Segment)}
+                                                sx={selectSx}
+                                            >
+                                                <MenuItem value="Futures">Futures</MenuItem>
+                                                <MenuItem value="Options">Options</MenuItem>
+                                            </Select>
+                                        </FormControl>
+                                    </Box>
+                                </Box>
 
-                {/* ─── LEFT: Inputs ─── */}
-                <Box sx={{ p: { xs: 2, md: 3 }, borderRight: { lg: '1px solid' }, borderColor: { lg: 'grey.200' }, bgcolor: '#fff', overflowY: 'auto' }}>
-                    <Stack spacing={3} sx={{ maxWidth: 600 }}>
-
-                        {/* Instrument */}
-                        <Box>
-                            <Typography sx={sectionLabel}>Instrument Type</Typography>
-                            <ToggleButtonGroup
-                                exclusive fullWidth size="small"
-                                value={inputs.instrument}
-                                onChange={handleInstrumentChange}
-                                sx={{
-                                    border: '1px solid', borderColor: 'grey.200', borderRadius: 2, overflow: 'hidden',
-                                    '& .MuiToggleButton-root': {
-                                        border: 'none', borderRight: '1px solid', borderColor: 'grey.200',
-                                        fontSize: 12, fontWeight: 600, textTransform: 'none', color: '#64748b', py: 1,
-                                        '&.Mui-selected': { bgcolor: DARK, color: '#fff', '&:hover': { bgcolor: '#1e2330' } },
-                                        '&:last-of-type': { borderRight: 'none' },
-                                    },
-                                }}
-                            >
-                                <ToggleButton value="index-futures">Index Fut</ToggleButton>
-                                <ToggleButton value="equity-futures">Equity Fut</ToggleButton>
-                                <ToggleButton value="index-options">Index Opt</ToggleButton>
-                                <ToggleButton value="equity-options">Equity Opt</ToggleButton>
-                            </ToggleButtonGroup>
-                        </Box>
-
-                        {/* Position + Option type row */}
-                        <Stack direction="row" spacing={2}>
-                            <Box sx={{ flex: 1 }}>
-                                <Typography sx={sectionLabel}>Position</Typography>
-                                <ToggleButtonGroup
-                                    exclusive fullWidth size="small"
-                                    value={inputs.position}
-                                    onChange={(_, v) => v && set('position', v as PositionType)}
-                                    sx={{
-                                        border: '1px solid', borderColor: 'grey.200', borderRadius: 2, overflow: 'hidden',
-                                        '& .MuiToggleButton-root': {
-                                            border: 'none', borderRight: '1px solid', borderColor: 'grey.200',
-                                            fontSize: 12, fontWeight: 700, textTransform: 'none', color: '#64748b', py: 1,
-                                            '&:last-of-type': { borderRight: 'none' },
-                                            '&.Mui-selected': {
-                                                bgcolor: positionColor,
-                                                color: '#fff',
-                                                '&:hover': { bgcolor: positionColor, filter: 'brightness(0.92)' },
-                                            },
-                                        },
-                                    }}
-                                >
-                                    <ToggleButton value="buy">Buy / Long</ToggleButton>
-                                    <ToggleButton value="sell">Sell / Short</ToggleButton>
-                                </ToggleButtonGroup>
-                            </Box>
-
-                            <AnimatePresence>
-                                {isOptions && (
-                                    <motion.div
-                                        key="opttype"
-                                        initial={{ opacity: 0, x: 12 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: 12 }}
-                                        transition={{ duration: 0.18 }}
-                                        style={{ flex: 1 }}
-                                    >
-                                        <Typography sx={sectionLabel}>Option Type</Typography>
-                                        <ToggleButtonGroup
-                                            exclusive fullWidth size="small"
-                                            value={inputs.optionType}
-                                            onChange={(_, v) => v && set('optionType', v as OptionType)}
-                                            sx={{
-                                                border: '1px solid', borderColor: 'grey.200', borderRadius: 2, overflow: 'hidden',
-                                                '& .MuiToggleButton-root': {
-                                                    border: 'none', borderRight: '1px solid', borderColor: 'grey.200',
-                                                    fontSize: 12, fontWeight: 700, textTransform: 'none', color: '#64748b', py: 1,
-                                                    '&:last-of-type': { borderRight: 'none' },
-                                                    '&.Mui-selected': { bgcolor: '#6366f1', color: '#fff', '&:hover': { bgcolor: '#4f46e5' } },
-                                                },
-                                            }}
-                                        >
-                                            <ToggleButton value="CE">Call (CE)</ToggleButton>
-                                            <ToggleButton value="PE">Put (PE)</ToggleButton>
-                                        </ToggleButtonGroup>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </Stack>
-
-                        {/* Symbols */}
-                        <Box>
-                            <Typography sx={sectionLabel}>Symbol</Typography>
-                            <Stack direction="row" sx={{ flexWrap: 'wrap', gap: 1 }}>
-                                <AnimatePresence mode="popLayout">
-                                    {POPULAR_SYMBOLS[inputs.instrument].map(s => (
-                                        <motion.div
-                                            key={`${inputs.instrument}-${s.symbol}`}
-                                            initial={{ opacity: 0, scale: 0.88 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            exit={{ opacity: 0, scale: 0.88 }}
-                                            transition={{ duration: 0.14 }}
-                                        >
-                                            <Chip
-                                                label={s.symbol}
-                                                onClick={() => handleSymbol(s.symbol)}
-                                                size="small"
-                                                sx={{
-                                                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                                                    border: '1px solid',
-                                                    borderColor: inputs.symbol === s.symbol ? ORANGE : 'grey.200',
-                                                    bgcolor: inputs.symbol === s.symbol ? 'rgba(249,115,22,0.08)' : '#f8fafc',
-                                                    color: inputs.symbol === s.symbol ? ORANGE : '#64748b',
-                                                    '&:hover': { bgcolor: 'rgba(249,115,22,0.06)', borderColor: ORANGE },
-                                                    height: 30,
-                                                }}
-                                            />
-                                        </motion.div>
-                                    ))}
-                                </AnimatePresence>
-                            </Stack>
-                        </Box>
-
-                        {/* Lots + Lot size */}
-                        <Stack direction="row" spacing={2}>
-                            <Box sx={{ flex: 1 }}>
-                                <Typography sx={sectionLabel}>Number of Lots</Typography>
-                                <TextField
-                                    fullWidth size="small" type="number"
-                                    value={inputs.lots}
-                                    onChange={e => set('lots', Math.max(1, parseInt(e.target.value) || 1))}
-                                    slotProps={{ htmlInput: { min: 1 } }}
-                                    sx={tfSx}
-                                />
-                            </Box>
-                            <Box sx={{ flex: 1 }}>
-                                <Typography sx={sectionLabel}>Lot Size</Typography>
-                                <TextField
-                                    fullWidth size="small" type="number"
-                                    value={inputs.lotSize}
-                                    onChange={e => set('lotSize', Math.max(1, parseInt(e.target.value) || 1))}
-                                    slotProps={{ htmlInput: { min: 1 }, input: { endAdornment: <InputAdornment position="end"><Typography sx={{ fontSize: 12, color: '#94a3b8' }}>qty</Typography></InputAdornment> } }}
-                                    sx={tfSx}
-                                />
-                            </Box>
-                        </Stack>
-
-                        {/* Prices */}
-                        <Stack direction="row" spacing={2}>
-                            <Box sx={{ flex: 1 }}>
-                                <Typography sx={sectionLabel}>{isOptions ? 'Spot / Underlying' : 'Futures Price'}</Typography>
-                                <TextField
-                                    fullWidth size="small" type="number"
-                                    value={inputs.spotPrice}
-                                    onChange={e => set('spotPrice', parseFloat(e.target.value) || 0)}
-                                    slotProps={{ input: { startAdornment: <InputAdornment position="start"><Typography sx={{ fontSize: 13, color: '#94a3b8' }}>₹</Typography></InputAdornment> } }}
-                                    sx={tfSx}
-                                />
-                            </Box>
-                            {isOptions ? (
-                                <Box sx={{ flex: 1 }}>
-                                    <Typography sx={sectionLabel}>Strike Price</Typography>
-                                    <TextField
-                                        fullWidth size="small" type="number"
-                                        value={inputs.strikePrice}
-                                        onChange={e => set('strikePrice', parseFloat(e.target.value) || 0)}
-                                        slotProps={{ input: { startAdornment: <InputAdornment position="start"><Typography sx={{ fontSize: 13, color: '#94a3b8' }}>₹</Typography></InputAdornment> } }}
-                                        sx={tfSx}
+                                {/* Scrip */}
+                                <Box sx={{ mb: 2.5 }}>
+                                    <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#6b7fa3', mb: 0.75, ml: 0.5 }}>
+                                        Select Scrip
+                                    </Typography>
+                                    <ScripInput
+                                        options={scripOptions}
+                                        value={scrip ? `${scrip.symbol} ${scrip.expiry}` : ''}
+                                        onChange={s => { setScrip(s); setQuantity(s.lotSize); setErrors(e => ({ ...e, scrip: false })); }}
+                                        error={errors.scrip}
                                     />
                                 </Box>
-                            ) : (
-                                <Box sx={{ flex: 1 }}>
-                                    <Typography sx={sectionLabel}>Contract Value</Typography>
-                                    <Box sx={{ border: '1px solid', borderColor: 'rgba(249,115,22,0.25)', bgcolor: 'rgba(249,115,22,0.04)', borderRadius: 2, px: 1.5, py: '9px' }}>
-                                        <Typography sx={{ fontSize: 15, fontWeight: 800, color: ORANGE, lineHeight: 1 }}>{fmt(notionalValue)}</Typography>
-                                        <Typography sx={{ fontSize: 10, color: '#94a3b8', mt: 0.3 }}>{fmtFull(notionalValue)}</Typography>
-                                    </Box>
-                                </Box>
-                            )}
-                        </Stack>
 
-                        {/* Options extras */}
-                        <AnimatePresence>
-                            {isOptions && (
-                                <motion.div
-                                    key="opts-extras"
-                                    initial={{ opacity: 0, y: -8 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -8 }}
-                                    transition={{ duration: 0.18 }}
-                                >
-                                    <Stack direction="row" spacing={2}>
-                                        <Box sx={{ flex: 1 }}>
-                                            <Typography sx={sectionLabel}>Premium</Typography>
-                                            <TextField
-                                                fullWidth size="small" type="number"
-                                                value={inputs.premium}
-                                                onChange={e => set('premium', parseFloat(e.target.value) || 0)}
-                                                slotProps={{ input: { startAdornment: <InputAdornment position="start"><Typography sx={{ fontSize: 13, color: '#94a3b8' }}>₹</Typography></InputAdornment> } }}
-                                                sx={tfSx}
-                                            />
-                                        </Box>
-                                        <Box sx={{ flex: 1 }}>
-                                            <Typography sx={sectionLabel}>Days to Expiry</Typography>
-                                            <TextField
-                                                fullWidth size="small" type="number"
-                                                value={inputs.daysToExpiry}
-                                                onChange={e => set('daysToExpiry', Math.max(0, parseInt(e.target.value) || 0))}
-                                                slotProps={{ input: { endAdornment: <InputAdornment position="end"><Typography sx={{ fontSize: 12, color: '#94a3b8' }}>days</Typography></InputAdornment> } }}
-                                                sx={tfSx}
-                                            />
-                                        </Box>
-                                    </Stack>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-
-                        {/* Volatility */}
-                        <Box>
-                            <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                                <Typography sx={sectionLabel}>Implied Volatility</Typography>
-                                <Typography sx={{
-                                    fontSize: 13, fontWeight: 800,
-                                    color: inputs.volatility > 25 ? '#dc2626' : inputs.volatility > 18 ? '#d97706' : '#16a34a',
+                                {/* Action + Quantity */}
+                                <Box sx={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '1fr 1fr',
+                                    gap: 2,
+                                    alignItems: 'center',
                                 }}>
-                                    {inputs.volatility}%
-                                </Typography>
-                            </Stack>
-                            <Slider
-                                min={8} max={80} step={0.5}
-                                value={inputs.volatility}
-                                onChange={(_, v) => set('volatility', v as number)}
-                                sx={{
-                                    color: ORANGE, height: 4,
-                                    '& .MuiSlider-thumb': { width: 14, height: 14, '&:hover, &.Mui-focusVisible': { boxShadow: '0 0 0 6px rgba(249,115,22,0.15)' } },
-                                    '& .MuiSlider-rail': { bgcolor: '#e2e8f0' },
-                                }}
-                            />
-                            <Stack direction="row" sx={{ justifyContent: 'space-between', mt: 0.5 }}>
-                                {['Low 8%', 'Normal 15%', 'High 30%', 'Panic 80%'].map(t => (
-                                    <Typography key={t} sx={{ fontSize: 10, color: '#cbd5e1' }}>{t}</Typography>
-                                ))}
-                            </Stack>
-                        </Box>
-
-                        {/* Summary strip */}
-                        <Paper elevation={0} sx={{ ...cardSx, bgcolor: '#f8fafc', p: 2 }}>
-                            <Stack direction="row" divider={<Divider orientation="vertical" flexItem sx={{ borderColor: 'grey.200' }} />} spacing={0}>
-                                {[
-                                    { label: 'Total Qty',      value: (inputs.lotSize * inputs.lots).toLocaleString('en-IN') },
-                                    { label: 'Contract Value', value: fmt(notionalValue) },
-                                    { label: 'Leverage',       value: `${leverageRatio.toFixed(1)}×` },
-                                ].map(item => (
-                                    <Box key={item.label} sx={{ flex: 1, px: 2, '&:first-of-type': { pl: 0 }, '&:last-of-type': { pr: 0 } }}>
-                                        <Typography sx={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.07em', mb: 0.4 }}>
-                                            {item.label}
+                                    <Box>
+                                        <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#6b7fa3', mb: 0.5, ml: 0.5 }}>
+                                            Action
                                         </Typography>
-                                        <Typography sx={{ fontSize: 16, fontWeight: 800, color: DARK }}>
-                                            {item.value}
+                                        <RadioGroup
+                                            row
+                                            value={action}
+                                            onChange={e => setAction(e.target.value as Action)}
+                                            sx={{ gap: 1 }}
+                                        >
+                                            {[
+                                                { val: 'B', label: 'Buy' },
+                                                { val: 'S', label: 'Sell' },
+                                            ].map(({ val, label }) => (
+                                                <FormControlLabel
+                                                    key={val}
+                                                    value={val}
+                                                    label={label}
+                                                    control={
+                                                        <Radio
+                                                            size="small"
+                                                            sx={{
+                                                                color: '#c0c8d8',
+                                                                '&.Mui-checked': { color: '#16a34a' },
+                                                                p: '6px',
+                                                            }}
+                                                        />
+                                                    }
+                                                    sx={{
+                                                        mr: 0,
+                                                        '& .MuiFormControlLabel-label': {
+                                                            fontSize: 14, fontWeight: 700,
+                                                            color: action === val ? '#16a34a' : NAVY,
+                                                        },
+                                                    }}
+                                                />
+                                            ))}
+                                        </RadioGroup>
+                                    </Box>
+                                    <Box>
+                                        <Stack direction="row" sx={{ justifyContent: 'space-between', alignItems: 'center', mb: 0.5, mr: 0.5 }}>
+                                            <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#6b7fa3', ml: 0.5 }}>
+                                                Quantity
+                                            </Typography>
+                                            <Typography sx={{ fontSize: 11, color: '#6b7fa3' }}>
+                                                (Lot size {lotSize})
+                                            </Typography>
+                                        </Stack>
+                                        <Stack direction="row" sx={{
+                                            alignItems: 'center',
+                                            border: `1.5px solid ${BORDER}`, borderRadius: '50px',
+                                            bgcolor: '#fff', overflow: 'hidden', height: 40,
+                                        }}>
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => setQuantity(q => Math.max(0, q - lotSize))}
+                                                sx={{ borderRadius: 0, px: 1.5, color: NAVY, flexShrink: 0, '&:hover': { bgcolor: LBLUE } }}
+                                            >
+                                                <Typography sx={{ fontSize: 18, fontWeight: 700, lineHeight: 1 }}>−</Typography>
+                                            </IconButton>
+                                            <Box
+                                                component="input"
+                                                type="number"
+                                                value={quantity}
+                                                onChange={e => setQuantity(Math.max(0, parseInt(e.target.value) || 0))}
+                                                style={{
+                                                    flex: 1, border: 'none', outline: 'none',
+                                                    textAlign: 'center', fontSize: 14, fontWeight: 700,
+                                                    color: NAVY, background: 'transparent', fontFamily: 'inherit',
+                                                    minWidth: 0,
+                                                }}
+                                            />
+                                            <IconButton
+                                                size="small"
+                                                onClick={() => setQuantity(q => q + lotSize)}
+                                                sx={{ borderRadius: 0, px: 1.5, color: NAVY, flexShrink: 0, '&:hover': { bgcolor: LBLUE } }}
+                                            >
+                                                <Typography sx={{ fontSize: 18, fontWeight: 700, lineHeight: 1 }}>+</Typography>
+                                            </IconButton>
+                                        </Stack>
+                                    </Box>
+                                </Box>
+
+                                {/* Buttons */}
+                                <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
+                                    <Box
+                                        component="button"
+                                        onClick={handleAddToTable}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: 6,
+                                            background: NAVY, color: '#fff', border: 'none',
+                                            borderRadius: 50, padding: '10px 22px',
+                                            fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                                            fontFamily: 'inherit', letterSpacing: '0.01em',
+                                        }}
+                                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#1a2540'; }}
+                                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = NAVY; }}
+                                    >
+                                        <AddIcon sx={{ fontSize: 16 }} />
+                                        Add to Table
+                                    </Box>
+                                    <Box
+                                        component="button"
+                                        onClick={handleReset}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: 6,
+                                            background: 'transparent', color: '#6b7fa3',
+                                            border: `1.5px solid ${BORDER}`,
+                                            borderRadius: 50, padding: '10px 22px',
+                                            fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                                            fontFamily: 'inherit',
+                                        }}
+                                        onMouseEnter={e => { const b = e.currentTarget as HTMLButtonElement; b.style.borderColor = '#8dacd4'; b.style.color = NAVY; }}
+                                        onMouseLeave={e => { const b = e.currentTarget as HTMLButtonElement; b.style.borderColor = BORDER; b.style.color = '#6b7fa3'; }}
+                                    >
+                                        <RefreshIcon sx={{ fontSize: 15 }} />
+                                        Reset Table
+                                    </Box>
+                                </Stack>
+                            </Box>
+
+                            {/* Right: Combined margin requirements */}
+                            <Box sx={{ gridColumn: { xs: '1', md: '3 / 5' } }}>
+                                <Paper elevation={0} sx={{
+                                    borderRadius: 2.5, overflow: 'hidden',
+                                    border: `1px solid ${BORDER}`,
+                                }}>
+                                    <Box sx={{
+                                        bgcolor: NAVY, px: 2.5, py: 1.75, textAlign: 'center',
+                                    }}>
+                                        <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#fff', letterSpacing: '0.01em' }}>
+                                            Combined margin requirements
                                         </Typography>
                                     </Box>
-                                ))}
-                            </Stack>
-                        </Paper>
-
-                    </Stack>
-                </Box>
-
-                {/* ─── RIGHT: Results ─── */}
-                <Box sx={{ p: { xs: 2, md: 2.5 }, bgcolor: '#f8fafc', display: 'flex', flexDirection: 'column', gap: 1.75, overflowY: 'auto' }}>
-
-                    {/* Total margin hero */}
-                    <motion.div key={margin.totalMargin} layout>
-                        <Paper elevation={0} sx={{ borderRadius: 3, bgcolor: DARK, overflow: 'hidden', position: 'relative', p: '20px 20px 18px' }}>
-                            {/* subtle dot grid */}
-                            <Box sx={{
-                                position: 'absolute', inset: 0, opacity: 0.035,
-                                backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
-                                backgroundSize: '20px 20px',
-                            }} />
-                            <Box sx={{ position: 'relative' }}>
-                                <Typography sx={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#475569', mb: 1 }}>
-                                    Total Margin Required
-                                </Typography>
-
-                                <motion.div
-                                    key={fmt(margin.totalMargin)}
-                                    initial={{ opacity: 0, y: 6 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.22 }}
-                                >
-                                    <Typography sx={{ fontSize: 36, fontWeight: 800, color: ORANGE, lineHeight: 1, letterSpacing: '-0.03em' }}>
-                                        {fmt(margin.totalMargin)}
-                                    </Typography>
-                                    <Typography sx={{ fontSize: 11, color: '#334155', mt: 0.4, mb: 1.75 }}>
-                                        {fmtFull(margin.totalMargin)}
-                                    </Typography>
-                                </motion.div>
-
-                                <Stack direction="row" sx={{ justifyContent: 'space-between', mb: 0.75 }}>
-                                    <Typography sx={{ fontSize: 10, color: '#475569', fontWeight: 600, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                                        Margin / Contract
-                                    </Typography>
-                                    <Typography sx={{ fontSize: 10, fontWeight: 800, color: meterColor }}>
-                                        {marginPct.toFixed(1)}%
-                                    </Typography>
-                                </Stack>
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={meterFill}
-                                    sx={{
-                                        height: 5, borderRadius: 999, bgcolor: '#1e293b',
-                                        '& .MuiLinearProgress-bar': { bgcolor: meterColor, borderRadius: 999, transition: 'transform 0.4s ease' },
-                                    }}
-                                />
+                                    <Box sx={{ bgcolor: '#f4f7fc', p: 0 }}>
+                                        {[
+                                            { label: 'Span',           value: displayMargin.span,     highlight: false },
+                                            { label: 'Exposure Margin',value: displayMargin.exposure,  highlight: false },
+                                            { label: 'Total Margin',   value: displayMargin.total,    highlight: true  },
+                                            { label: 'Margin Benefit', value: 0,                      highlight: false },
+                                        ].map((item, i, arr) => (
+                                                <Stack
+                                                    key={item.label}
+                                                    direction="row"
+                                                    sx={{
+                                                        justifyContent: 'space-between',
+                                                        alignItems: 'center',
+                                                        px: 2.5,
+                                                        py: 1.5,
+                                                        borderBottom: i < arr.length - 1 ? `1px solid ${BORDER}` : 'none',
+                                                        bgcolor: item.highlight ? '#e8f0fe' : 'transparent',
+                                                    }}
+                                            >
+                                                <Typography sx={{ fontSize: 13, color: '#3d5275', fontWeight: 500 }}>
+                                                    {item.label}
+                                                </Typography>
+                                                <motion.div
+                                                    key={item.value}
+                                                    initial={{ opacity: 0.6 }}
+                                                    animate={{ opacity: 1 }}
+                                                    transition={{ duration: 0.25 }}
+                                                >
+                                                    <Typography sx={{
+                                                        fontSize: 14, fontWeight: 800,
+                                                        color: item.highlight ? BLUE : NAVY,
+                                                    }}>
+                                                        {item.value === 0 && item.label === 'Margin Benefit'
+                                                            ? '₹ 0'
+                                                            : `₹ ${fmtINR(item.value)}`}
+                                                    </Typography>
+                                                </motion.div>
+                                            </Stack>
+                                        ))}
+                                    </Box>
+                                </Paper>
                             </Box>
-                        </Paper>
-                    </motion.div>
-
-                    {/* Breakdown */}
-                    <Paper elevation={0} sx={{ ...cardSx, p: 0, overflow: 'hidden' }}>
-                        <Box sx={{ px: 2, py: 1.25, borderBottom: '1px solid', borderColor: 'grey.100' }}>
-                            <Typography sx={{ ...sectionLabel, mb: 0 }}>Margin Breakdown</Typography>
                         </Box>
-                        <AnimatePresence>
-                            {breakdownItems.map((item, i) => (
-                                <motion.div
-                                    key={item.label}
-                                    initial={{ opacity: 0, x: -8 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -8 }}
-                                    transition={{ duration: 0.15, delay: i * 0.04 }}
-                                >
-                                    <Stack
-                                        direction="row"
-                                        sx={{ justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1.25, borderBottom: i < breakdownItems.length - 1 ? '1px solid' : 'none', borderColor: 'grey.50' }}
-                                    >
-                                        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                                            <Box sx={{ width: 7, height: 7, borderRadius: '50%', bgcolor: item.color, flexShrink: 0 }} />
-                                            <Typography sx={{ fontSize: 13, color: '#64748b' }}>{item.label}</Typography>
-                                        </Stack>
-                                        <Typography sx={{ fontSize: 13, fontWeight: 700, color: DARK }}>{fmt(item.value)}</Typography>
-                                    </Stack>
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
-                        <Stack
-                            direction="row"
-                            sx={{ justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1.25, bgcolor: '#f8fafc', borderTop: '1px solid', borderColor: 'grey.200' }}
-                        >
-                            <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#374151' }}>Initial Margin</Typography>
-                            <Typography sx={{ fontSize: 14, fontWeight: 800, color: DARK }}>{fmt(margin.totalInitialMargin)}</Typography>
-                        </Stack>
-                    </Paper>
-
-                    {/* Maintenance + MTM */}
-                    <Stack direction="row" spacing={1.5}>
-                        {[
-                            { label: 'Maintenance Margin', value: fmt(margin.maintenanceMargin),      sub: '75% of initial',     accent: '#d97706', bg: 'rgba(217,119,6,0.06)',  border: 'rgba(217,119,6,0.2)'  },
-                            { label: 'MTM Call Threshold', value: fmt(margin.maintenanceMargin * 0.9), sub: 'Margin call trigger', accent: '#dc2626', bg: 'rgba(220,38,38,0.06)', border: 'rgba(220,38,38,0.2)' },
-                        ].map(item => (
-                            <Box key={item.label} sx={{ flex: 1, bgcolor: item.bg, border: `1px solid ${item.border}`, borderRadius: 3, p: 1.75 }}>
-                                <Typography sx={{ fontSize: 11, fontWeight: 600, color: '#94a3b8', mb: 0.75, lineHeight: 1.4 }}>{item.label}</Typography>
-                                <Typography sx={{ fontSize: 16, fontWeight: 800, color: item.accent, letterSpacing: '-0.02em', mb: 0.25 }}>{item.value}</Typography>
-                                <Typography sx={{ fontSize: 10, color: '#94a3b8' }}>{item.sub}</Typography>
-                            </Box>
-                        ))}
-                    </Stack>
-
-                    {/* Per-lot */}
-                    <Paper elevation={0} sx={cardSx}>
-                        <Typography sx={{ ...sectionLabel, mb: 1.5 }}>Per Lot</Typography>
-                        <Stack direction="row" spacing={2}>
-                            {[
-                                { label: 'Margin / Lot',    value: fmt(margin.totalMargin / inputs.lots) },
-                                { label: 'Break-even Move', value: `${marginPct.toFixed(2)}%` },
-                            ].map(item => (
-                                <Box key={item.label} sx={{ flex: 1 }}>
-                                    <Typography sx={{ fontSize: 10, fontWeight: 600, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.07em', mb: 0.5 }}>{item.label}</Typography>
-                                    <Typography sx={{ fontSize: 16, fontWeight: 800, color: DARK }}>{item.value}</Typography>
-                                </Box>
-                            ))}
-                        </Stack>
-                    </Paper>
-
-                    {/* Disclaimer */}
-                    <Box sx={{ px: 1.5, py: 1.25, bgcolor: '#fff', border: '1px solid', borderColor: 'grey.200', borderRadius: 2 }}>
-                        <Typography sx={{ fontSize: 10, color: '#94a3b8', lineHeight: 1.7 }}>
-                            ⚠ Indicative only. Actual margins are set by the NSE/BSE SPAN+Exposure model and may vary with volatility, corporate actions, and exchange circulars. Verify with your broker before trading.
-                        </Typography>
                     </Box>
 
-                </Box>
+                    <Divider sx={{ borderColor: BORDER }} />
+
+                    {/* ── Table ── */}
+                    <Box sx={{ overflowX: 'auto' }}>
+                        {rows.length === 0 ? (
+                            <Box sx={{ py: 5, textAlign: 'center' }}>
+                                <Typography sx={{ fontSize: 13, color: '#a0aec0', fontWeight: 500 }}>
+                                    No positions added yet. Configure and click "Add to Table".
+                                </Typography>
+                            </Box>
+                        ) : (
+                            <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                                <Box component="thead">
+                                    <Box component="tr" sx={{ bgcolor: '#f8fafc' }}>
+                                        {['Exchange', 'Scrip', 'Segment', 'Strike', 'Qty', 'Span (₹)', 'Exposure (₹)', 'Total (₹)', ''].map(h => (
+                                            <Box
+                                                key={h}
+                                                component="th"
+                                                sx={{
+                                                    px: 2.5, py: 1.25, textAlign: 'left',
+                                                    fontSize: 11, fontWeight: 700, color: '#6b7fa3',
+                                                    textTransform: 'uppercase', letterSpacing: '0.05em',
+                                                    borderBottom: `1px solid ${BORDER}`,
+                                                    whiteSpace: 'nowrap',
+                                                }}
+                                            >
+                                                {h}
+                                            </Box>
+                                        ))}
+                                    </Box>
+                                </Box>
+                                <Box component="tbody">
+                                    <AnimatePresence>
+                                        {rows.map((row, i) => (
+                                            <motion.tr
+                                                key={row.id}
+                                                initial={{ opacity: 0, y: -8 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                transition={{ duration: 0.18 }}
+                                                style={{ borderBottom: `1px solid ${BG}` }}
+                                            >
+                                                <Box component="td" sx={{ px: 2.5, py: 2, fontWeight: 700, color: NAVY }}>
+                                                    {row.exchange}
+                                                </Box>
+                                                <Box component="td" sx={{ px: 2.5, py: 2 }}>
+                                                    <Typography sx={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
+                                                        {row.scrip.symbol} {row.scrip.expiry}
+                                                    </Typography>
+                                                </Box>
+                                                <Box component="td" sx={{ px: 2.5, py: 2, color: '#3d5275' }}>
+                                                    {row.segment}
+                                                </Box>
+                                                <Box component="td" sx={{ px: 2.5, py: 2, color: '#3d5275' }}>
+                                                    {row.strike}
+                                                </Box>
+                                                <Box component="td" sx={{ px: 2.5, py: 2 }}>
+                                                    <Stack direction="row" spacing={0.75} sx={{ alignItems: 'center' }}>
+                                                        <Typography sx={{ fontSize: 13, fontWeight: 700, color: NAVY }}>
+                                                            {row.quantity}
+                                                        </Typography>
+                                                        <Chip
+                                                            label={row.action}
+                                                            size="small"
+                                                            sx={{
+                                                                height: 20, fontSize: 11, fontWeight: 800,
+                                                                bgcolor: row.action === 'B' ? 'rgba(22,163,74,0.1)' : 'rgba(220,38,38,0.1)',
+                                                                color: row.action === 'B' ? '#16a34a' : '#dc2626',
+                                                                border: `1px solid ${row.action === 'B' ? 'rgba(22,163,74,0.3)' : 'rgba(220,38,38,0.3)'}`,
+                                                            }}
+                                                        />
+                                                    </Stack>
+                                                </Box>
+                                                <Box component="td" sx={{ px: 2.5, py: 2, color: '#3d5275', fontWeight: 600 }}>
+                                                    {row.spanMargin > 0 ? fmtINR(row.spanMargin) : '—'}
+                                                </Box>
+                                                <Box component="td" sx={{ px: 2.5, py: 2, color: '#3d5275', fontWeight: 600 }}>
+                                                    {row.exposure > 0 ? fmtINR(row.exposure) : '—'}
+                                                </Box>
+                                                <Box component="td" sx={{ px: 2.5, py: 2, fontWeight: 800, color: NAVY }}>
+                                                    {fmtINR(row.total)}
+                                                </Box>
+                                                <Box component="td" sx={{ px: 2, py: 2 }}>
+                                                    <Tooltip title="Remove">
+                                                        <IconButton
+                                                            size="small"
+                                                            onClick={() => handleDelete(row.id)}
+                                                            sx={{ color: '#ef4444', '&:hover': { bgcolor: 'rgba(239,68,68,0.08)' } }}
+                                                        >
+                                                            <DeleteOutlinedIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </Box>
+                                            </motion.tr>
+                                        ))}
+                                    </AnimatePresence>
+                                </Box>
+                            </Box>
+                        )}
+                    </Box>
+
+                    {/* Grand Total footer */}
+                    <AnimatePresence>
+                        {rows.length > 0 && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 8 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <Box sx={{ p: 2.5, display: 'flex', justifyContent: 'flex-end', borderTop: `1px solid ${BORDER}` }}>
+                                    <Box sx={{
+                                        display: 'flex', alignItems: 'center', gap: 2,
+                                        bgcolor: LBLUE, border: `1.5px solid rgba(21,101,192,0.25)`,
+                                        borderRadius: '50px', px: 3, py: 1.25,
+                                    }}>
+                                        <Typography sx={{ fontSize: 13, fontWeight: 600, color: '#3d5275' }}>
+                                            Grand Total
+                                        </Typography>
+                                        <motion.div key={grandTotal} initial={{ scale: 0.95 }} animate={{ scale: 1 }}>
+                                            <Typography sx={{ fontSize: 16, fontWeight: 900, color: BLUE, letterSpacing: '-0.02em' }}>
+                                                ₹ {fmtINR(grandTotal)}
+                                            </Typography>
+                                        </motion.div>
+                                    </Box>
+                                </Box>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </Paper>
+
+                {/* Disclaimer */}
+                <Typography sx={{ fontSize: 11, color: '#94a3b8', mt: 2, textAlign: 'center', lineHeight: 1.8 }}>
+                    ⚠ Indicative only. Actual margins are determined by NSE/BSE SPAN + Exposure model and may vary with
+                    volatility, corporate actions, and exchange circulars. Verify with your broker before placing orders.
+                </Typography>
             </Box>
         </Box>
     );

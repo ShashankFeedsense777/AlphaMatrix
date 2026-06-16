@@ -1,32 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AlertCircle, ArrowLeft, CheckCircle2, KeyRound, Lock, Phone, ShieldCheck, User } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2, KeyRound, Mail, Phone, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Logo, Nature1, Nature2, Nature3 } from '../assets/index';
-import { loginAPI } from '../api/apiCalls';
+import { requestLoginOtpAPI, validateLoginOtpAPI } from '../api/apiCalls';
 import ShapeGrid from './ui/ShapeGrid';
 
-type LoginMode = 'password' | 'phone';
-type LoginResponse = { status: number; message?: string };
+type LoginMode = 'email' | 'phone';
+
 type ToastState = {
   id: number;
   type: 'success' | 'error';
   title: string;
   message: string;
 } | null;
-
-const loginWithUsernamePassword = async (_username: string, _password: string) => {
-  const response = await loginAPI(_username, _password);
-  return response as LoginResponse | undefined;
-};
-
-const requestLoginOtp = async (_mobile: string) => {
-  return { status: 200, message: 'OTP sent successfully.' };
-};
-
-const validateMobileOtp = async (_mobile: string, _otp: string) => {
-  return { status: 200, message: 'OTP validated successfully.' };
-};
 
 const slideVariants = {
   initial: { opacity: 0, x: 10 },
@@ -76,33 +63,54 @@ const SLIDE_DATA = [
 
 const EmployeeLoginPage: React.FC = () => {
   const navigate = useNavigate();
-  const [mode, setMode] = useState<LoginMode>('password');
+  const [mode, setMode] = useState<LoginMode>('email');
   const [otpSent, setOtpSent] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
-  const [formValues, setFormValues] = useState({
-    username: '',
-    password: '',
-    mobile: '',
-    otp: '',
-  });
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
 
   // Auto-slide logic
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % SLIDE_DATA.length);
-    }, 5000); // Change slide every 5 seconds
+    }, 5000);
     return () => clearInterval(timer);
   }, []);
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const validateEmail = (value: string) => {
+    if (!value.trim()) return '';
+    if (!emailRegex.test(value)) return 'Enter a valid email address.';
+    return '';
+  };
+
+  const validatePhone = (value: string) => {
+    if (!value) return '';
+    if (value.length < 10) return '';
+    if (!/^[6-9]/.test(value)) return 'Number must start with 6, 7, 8 or 9.';
+    return '';
+  };
+
+  const emailError = !otpSent ? validateEmail(email) : '';
+  const phoneError = !otpSent ? validatePhone(phone) : '';
+  const canSubmit = otpSent
+    ? otp.trim().length >= 4
+    : mode === 'email'
+      ? !emailError && email.trim().length > 0
+      : !phoneError && phone.length === 10;
+
+  const getIdentifier = () => (mode === 'email' ? email.trim() : `+91${phone}`);
 
   const switchMode = (nextMode: LoginMode) => {
     setMode(nextMode);
     setOtpSent(false);
-  };
-
-  const updateField = (field: keyof typeof formValues, value: string) => {
-    setFormValues((current) => ({ ...current, [field]: value }));
+    setOtp('');
+    setOtpError('');
   };
 
   const goToDashboard = () => {
@@ -125,34 +133,23 @@ const EmployeeLoginPage: React.FC = () => {
     event.preventDefault();
     setIsSubmitting(true);
 
-    try {
-      if (mode === 'password') {
-        const response = await loginWithUsernamePassword(formValues.username, formValues.password);
-        if (response?.status === 200) {
-          showToast({
-            type: 'success',
-            title: 'Login successful',
-            message: 'Redirecting to employee dashboard.',
-          });
-          goToDashboard();
-        } else {
-          showToast({
-            type: 'error',
-            title: 'Login failed',
-            message: response?.message || 'Invalid username or password.',
-          });
-        }
-        return;
-      }
+    const identifier = getIdentifier();
 
+    try {
       if (!otpSent) {
-        const response = await requestLoginOtp(formValues.mobile);
+        const error = mode === 'email' ? validateEmail(email) : validatePhone(phone);
+        if (error || (mode === 'email' && !email.trim()) || (mode === 'phone' && phone.length !== 10)) {
+          showToast({ type: 'error', title: 'Validation failed', message: error || 'Please check your input.' });
+          setIsSubmitting(false);
+          return;
+        }
+        const response = await requestLoginOtpAPI(identifier, mode);
         if (response?.status === 200) {
           setOtpSent(true);
           showToast({
             type: 'success',
             title: 'OTP sent',
-            message: 'Enter the OTP sent to your registered mobile number.',
+            message: `Enter the OTP sent to your registered ${mode === 'email' ? 'email' : 'phone'}.`,
           });
         } else {
           showToast({
@@ -164,7 +161,7 @@ const EmployeeLoginPage: React.FC = () => {
         return;
       }
 
-      const response = await validateMobileOtp(formValues.mobile, formValues.otp);
+      const response = await validateLoginOtpAPI(identifier, otp, mode);
       if (response?.status === 200) {
         showToast({
           type: 'success',
@@ -173,11 +170,7 @@ const EmployeeLoginPage: React.FC = () => {
         });
         goToDashboard();
       } else {
-        showToast({
-          type: 'error',
-          title: 'OTP verification failed',
-          message: response?.message || 'Please check the OTP and try again.',
-        });
+        setOtpError(response?.message || 'Incorrect OTP. Please try again.');
       }
     } finally {
       setIsSubmitting(false);
@@ -225,10 +218,6 @@ const EmployeeLoginPage: React.FC = () => {
           )}
         </AnimatePresence>
       </div>
-
-      {/* Background Decor (Grid & Radials) */}
-      {/* <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.055) 1px,transparent 1px)', backgroundSize: 'clamp(32px, 6vw, 44px) clamp(32px, 6vw, 44px)' }} />
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 0%,rgba(249,115,22,0.12) 0%,transparent 65%)' }} /> */}
 
       <div className="relative  flex min-h-svh flex-col px-3 py-3 min-[380px]:px-4 sm:px-6 lg:px-10">
         {/* Nav */}
@@ -327,7 +316,7 @@ const EmployeeLoginPage: React.FC = () => {
 
               {/* Toggle */}
               <div className="mb-6 grid grid-cols-2 gap-1 rounded-full border border-white/7 bg-black/40 p-1">
-                {[{ id: 'password' as const, label: 'Password', icon: User }, { id: 'phone' as const, label: 'Phone', icon: Phone }].map(({ id, label, icon: Icon }) => (
+                {[{ id: 'email' as const, label: 'Email', icon: Mail }, { id: 'phone' as const, label: 'Phone', icon: Phone }].map(({ id, label, icon: Icon }) => (
                   <button key={id} type="button" onClick={() => switchMode(id)} className={`relative flex min-h-10 items-center justify-center gap-1.5 sm:gap-2 rounded-full px-2 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase transition-colors ${mode === id ? 'text-white' : 'text-white/45'}`}>
                     {mode === id && <motion.span layoutId="pill" className="absolute inset-0 rounded-full bg-brand-saffron shadow-[0_0_20px_rgba(249,115,22,0.3)]" />}
                     <Icon size={13} className="relative z-10" /><span className="relative z-10">{label}</span>
@@ -338,56 +327,59 @@ const EmployeeLoginPage: React.FC = () => {
               {/* Form Content */}
               <AnimatePresence mode="wait">
                 <motion.form key={mode} onSubmit={handleLoginSubmit} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex flex-col gap-4">
-                  {mode === 'password' ? (
-                    <>
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">User ID</span>
-                        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all">
-                          <User size={14} className="shrink-0 text-white/30" />
-                          {/* Added placeholder:text-white/30 below */}
-                          <input type="text" autoComplete="username" placeholder="username" value={formValues.username} onChange={(event) => updateField('username', event.target.value)} className="login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
-                        </div>
+                  {mode === 'email' ? (
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Email</span>
+                      <div className={`flex min-w-0 items-center gap-3 rounded-xl border bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all ${emailError ? 'border-red-400/50' : 'border-white/10'}`}>
+                        <Mail size={14} className="shrink-0 text-white/30" />
+                        <input type="email" autoComplete="email" placeholder="email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
                       </div>
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Password</span>
-                        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all">
-                          <Lock size={14} className="shrink-0 text-white/30" />
-                          {/* Added placeholder:text-white/30 below */}
-                          <input type="password" autoComplete="current-password" placeholder="password" value={formValues.password} onChange={(event) => updateField('password', event.target.value)} className="login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
-                        </div>
-                      </div>
-                    </>
+                      {emailError && (
+                        <p className="text-[11px] text-red-400/80 mt-0.5">{emailError}</p>
+                      )}
+                    </div>
                   ) : (
-                    <>
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Mobile</span>
-                        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all">
-                          <Phone size={14} className="shrink-0 text-white/30" />
-                          {/* Added placeholder:text-white/30 below */}
-                          <input type="tel" autoComplete="tel" placeholder="+91 00000 00000" value={formValues.mobile} onChange={(event) => updateField('mobile', event.target.value)} className="login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
-                        </div>
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Phone</span>
+                      <div className={`flex min-w-0 items-center gap-3 rounded-xl border bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all ${phoneError ? 'border-red-400/50' : 'border-white/10'}`}>
+                        <Phone size={14} className="shrink-0 text-white/30" />
+                        <span className="text-sm text-white/50 font-mono shrink-0">+91</span>
+                        <input type="text" inputMode="numeric" maxLength={10} placeholder="0000000000" value={phone} onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          setPhone(digits);
+                        }} className="login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35 font-mono tracking-wider" />
                       </div>
-                      <AnimatePresence>
-                        {otpSent && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0, y: -8 }}
-                            animate={{ opacity: 1, height: 'auto', y: 0 }}
-                            exit={{ opacity: 0, height: 0, y: -8 }}
-                            transition={{ duration: 0.28 }}
-                            className="flex flex-col gap-1.5 overflow-hidden"
-                          >
-                            <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">OTP</span>
-                            <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all">
-                              <KeyRound size={14} className="shrink-0 text-white/30" />
-                              <input type="text" inputMode="numeric" maxLength={6} placeholder="6 digit code" value={formValues.otp} onChange={(event) => updateField('otp', event.target.value)} className="login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </>
+                      {phoneError && (
+                        <p className="text-[11px] text-red-400/80 mt-0.5">{phoneError}</p>
+                      )}
+                    </div>
                   )}
-                  <button type="submit" disabled={isSubmitting} className="mt-2 rounded-xl bg-brand-saffron py-3.5 px-4 text-[11px] font-bold uppercase tracking-widest hover:bg-orange-500 transition-colors shadow-lg shadow-brand-saffron/20 disabled:cursor-wait disabled:opacity-70">
-                    {isSubmitting ? 'Please Wait...' : mode === 'password' || otpSent ? 'Access Platform →' : 'Send OTP →'}
+                  <AnimatePresence>
+                    {otpSent && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0, y: -8 }}
+                        animate={{ opacity: 1, height: 'auto', y: 0 }}
+                        exit={{ opacity: 0, height: 0, y: -8 }}
+                        transition={{ duration: 0.28 }}
+                        className="flex flex-col gap-1.5 overflow-hidden"
+                      >
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">OTP</span>
+                        <div className={`flex min-w-0 items-center gap-3 rounded-xl border bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all ${otpError ? 'border-red-400/50' : 'border-white/10'}`}>
+                          <KeyRound size={14} className="shrink-0 text-white/30" />
+                          <input type="text" inputMode="numeric" maxLength={6} placeholder="6 digit code" value={otp} onChange={(e) => {
+                            const digits = e.target.value.replace(/\D/g, '').slice(0, 6);
+                            setOtp(digits);
+                            setOtpError('');
+                          }} className="login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
+                        </div>
+                        {otpError && (
+                          <p className="text-[11px] text-red-400/80 mt-0.5">{otpError}</p>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <button type="submit" disabled={isSubmitting || !canSubmit} className="mt-2 rounded-xl bg-brand-saffron py-3.5 px-4 text-[11px] font-bold uppercase tracking-widest hover:bg-orange-500 transition-colors shadow-lg shadow-brand-saffron/20 disabled:cursor-not-allowed disabled:opacity-40">
+                    {isSubmitting ? 'Please Wait...' : otpSent ? 'Access Platform →' : 'Get OTP →'}
                   </button>
                 </motion.form>
               </AnimatePresence>
