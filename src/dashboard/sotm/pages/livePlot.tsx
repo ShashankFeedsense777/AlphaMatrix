@@ -43,10 +43,15 @@ const STATUS_DOT: Record<SocketStatus, string> = {
 };
 
 export default function LivePlot() {
-  const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  const todayRaw = useMemo(() => {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }, []);
+  const today = useMemo(() => {
+    const d = new Date();
+    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  }, []);
 
-  const [selectedDate, setSelectedDate] = useState(todayStr);
   const [expiry, setExpiry]             = useState('');
   const [metric, setMetric]             = useState('n_delta');
   const [data, setData]                 = useState<StrikeData[]>([]);
@@ -101,8 +106,8 @@ export default function LivePlot() {
   }, []);
 
   useEffect(() => {
-    if (selectedDate) validateAndFetchExpiry(selectedDate);
-  }, [selectedDate, validateAndFetchExpiry]);
+    if (todayRaw) validateAndFetchExpiry(todayRaw);
+  }, [todayRaw, validateAndFetchExpiry]);
 
   useEffect(() => {
     const unsub = socketClient.onStatus(setSocketStatus);
@@ -110,7 +115,7 @@ export default function LivePlot() {
   }, []);
 
   useEffect(() => {
-    if (!selectedDate || !expiry) return;
+    if (!todayRaw || !expiry) return;
     setLoading(true);
     setError('');
     setData([]);
@@ -123,13 +128,13 @@ export default function LivePlot() {
     const unsubs = LIVE_GREEKS_EVENTS.map(ev =>
       socketClient.subscribe<LiveGreeksPayload>(ev, handler)
     );
-    socketClient.send('subscribe:greeks:live', { date: selectedDate, expiry, metric });
+    socketClient.send('subscribe:greeks:live', { date: todayRaw, expiry, metric });
 
     return () => {
-      socketClient.send('unsubscribe:greeks:live', { date: selectedDate, expiry, metric });
+      socketClient.send('unsubscribe:greeks:live', { date: todayRaw, expiry, metric });
       unsubs.forEach(u => u());
     };
-  }, [expiry, mergeStrikeData, metric, normalizeLivePayload, selectedDate]);
+  }, [expiry, mergeStrikeData, metric, normalizeLivePayload, todayRaw]);
 
   const getTimestamp = useCallback((time: string, dateStr: string) => {
   const [year, month, day] = dateStr.split('-').map(Number);
@@ -151,10 +156,10 @@ export default function LivePlot() {
 
   const buildOptions = useCallback((sd: StrikeData): Highcharts.Options => {
     const ceData = sd.ce
-      .map(p => [getTimestamp(p.time, selectedDate), p[metric as keyof GreekPoint]] as [number, number | null])
+      .map(p => [getTimestamp(p.time, todayRaw), p[metric as keyof GreekPoint]] as [number, number | null])
       .filter(([, v]) => v !== null) as [number, number][];
     const peData = sd.pe
-      .map(p => [getTimestamp(p.time, selectedDate), p[metric as keyof GreekPoint]] as [number, number | null])
+      .map(p => [getTimestamp(p.time, todayRaw), p[metric as keyof GreekPoint]] as [number, number | null])
       .filter(([, v]) => v !== null) as [number, number][];
 
     return {
@@ -176,7 +181,7 @@ export default function LivePlot() {
         rules: [{ condition: { maxWidth: 600 }, chartOptions: { legend: { enabled: false } } }],
       },
     };
-  }, [getTimestamp, metricLabel, metric, selectedDate]);
+  }, [getTimestamp, metricLabel, metric, todayRaw]);
 
   return (
     <div className="space-y-5">
@@ -193,18 +198,7 @@ export default function LivePlot() {
           <h3 className="mt-1 text-lg font-semibold text-slate-950">Live curve controls</h3>
         </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[160px_160px_160px_1fr] lg:items-end">
-
-        {/* Date */}
-        <div className="flex flex-col gap-1">
-          <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-500">Date</label>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={e => setSelectedDate(e.target.value)}
-            className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition-colors focus:border-orange-400 focus:bg-white"
-          />
-        </div>
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[160px_160px_1fr] lg:items-end">
 
         {/* Expiry */}
         <div className="flex flex-col gap-1">
@@ -214,7 +208,7 @@ export default function LivePlot() {
             value={expiry}
             onChange={e => setExpiry(e.target.value.toUpperCase())}
             placeholder="e.g. 07AUG25"
-            className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-300 focus:border-orange-400 focus:bg-white"
+            className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-orange-400 focus:bg-white"
           />
         </div>
 
@@ -234,7 +228,7 @@ export default function LivePlot() {
         <div className="flex h-10 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 lg:justify-self-end">
           <span className={`w-2 h-2 rounded-full shrink-0 ${STATUS_DOT[socketStatus]}`} />
           <span className="text-[11px] text-slate-500 capitalize">{socketStatus}</span>
-          {expiry && <span className="text-[11px] text-slate-400">· {expiry}</span>}
+          {expiry && <span className="text-[11px] text-slate-600">· {today}</span>}
         </div>
       </div>
       </motion.div>
@@ -257,7 +251,7 @@ export default function LivePlot() {
       {/* Empty */}
       {!loading && data.length === 0 && !error && (
         <div className="rounded-3xl border border-dashed border-slate-300 bg-white py-20 text-center text-sm text-slate-400">
-          Select a valid trading date and expiry to start streaming.
+          Select a valid expiry to start streaming.
         </div>
       )}
 

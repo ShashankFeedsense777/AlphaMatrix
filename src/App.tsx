@@ -16,6 +16,9 @@ import ConnectWithUs from './components/ConnectWithUs';
 import RealTimeMarket from './components/RealTimeMarket';
 import CompanyFooter from './components/CompanyFooter';
 import PrivateRoute from './routes/PrivateRoute';
+import LiveGreeks from './dashboard/sotm/GreeksLive';
+import HistoricalGreeks from './dashboard/sotm/GreeksHistorical';
+import MarginCalculator from './dashboard/marginCalculator/MarginCalculator';
 import './index.css';
 
 gsap.registerPlugin(ScrollToPlugin);
@@ -218,7 +221,12 @@ function App() {
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<EmployeeLoginPage />} />
       <Route element={<PrivateRoute />}>
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/dashboard" element={<DashboardPage />}>
+          <Route index element={<Navigate to="live-greeks" replace />} />
+          <Route path="live-greeks" element={<LiveGreeks />} />
+          <Route path="historical-greeks" element={<HistoricalGreeks />} />
+          <Route path="margin-calculator" element={<MarginCalculator />} />
+        </Route>
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

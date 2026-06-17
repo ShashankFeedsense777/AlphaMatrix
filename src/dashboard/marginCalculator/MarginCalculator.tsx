@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Box, Typography, Stack, Paper, MenuItem, Select,
@@ -9,11 +9,14 @@ import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-
-// ─── Config ─────────────────────────────────────────────────────────────────
-// Point this at your FastAPI backend. Never call SmartAPI directly from the
-// browser — your backend holds the AngelOne auth token.
-const API_BASE = import.meta.env?.VITE_MARGIN_API_BASE ?? 'http://localhost:8000';
+import {
+    calculateMargin,
+    fetchExpiries,
+    fetchStrikes,
+    ExpiryOption,
+    MarginLegPayload,
+    MarginApiResponse,
+} from '../../api/apiCalls';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type Exchange    = 'NFO' | 'BFO';
@@ -26,10 +29,6 @@ interface UnderlyingMeta {
     lotSize: number;
 }
 
-// Static list of underlyings + lot sizes just to populate the "Select Scrip"
-// search box. Expiries and strikes are fetched live from the backend
-// (which reads them from AngelOne's instrument master), so they're never
-// hardcoded or stale.
 const UNDERLYINGS: Record<Exchange, UnderlyingMeta[]> = {
     NFO: [
         { symbol: 'NIFTY',      lotSize: 65 },
@@ -54,11 +53,11 @@ interface TableRow {
     action:       Action;
     spanMargin:   number;
     exposure:     number;
-    total:        number;
+    totalMargin:  number;   // raw total_margin from API (0 for option buys — that's correct)
     netPremium:   number;
+    cashRequired: number;   // what actually needs to be paid/blocked: totalMargin + premium owed (if buying)
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 const fmtINR = (n: number) =>
     n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -67,60 +66,16 @@ const makeId = () =>
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-// ─── Backend calls ──────────────────────────────────────────────────────────
-interface MarginLegPayload {
-    exchange: Exchange;
-    segment: Segment;
-    underlying: string;
-    expiry: string;
-    strike?: number;
-    option_type?: OptionType;
-    quantity: number;
-    action: Action;
-}
+// For a BUY leg the trader pays the premium out of pocket — that premium IS
+// the requirement, even though span/exposure margin are correctly 0 (max
+// loss on a long option = premium paid, so no SPAN/Exposure collateral is
+// needed). For a SELL leg the premium is received as credit, so the
+// requirement is purely the API's total_margin (span + exposure).
+const computeCashRequired = (action: Action, totalMargin: number, netPremium: number) => {
+    if (action === 'BUY') return totalMargin + Math.max(netPremium, 0);
+    return totalMargin;
+};
 
-interface MarginApiResponse {
-    net_premium: number;
-    span_margin: number;
-    exposure_margin: number;
-    total_margin: number;
-    margin_benefit: number;
-}
-
-async function fetchMarginForLegs(legs: MarginLegPayload[]): Promise<MarginApiResponse> {
-    const res = await fetch(`${API_BASE}/api/margin/calculate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ legs }),
-    });
-    if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.detail ?? `Margin API error (${res.status})`);
-    }
-    return res.json();
-}
-
-async function fetchExpiries(exchange: Exchange, underlying: string, segment: Segment): Promise<string[]> {
-    const params = new URLSearchParams({ exchange, underlying, segment });
-    const res = await fetch(`${API_BASE}/api/instruments/search?${params}`);
-    if (!res.ok) return [];
-    const data = await res.json();
-    if (segment === 'Options') {
-        // backend returns [expiry, strike] tuples for options; collapse to unique expiries
-        return Array.from(new Set((data as [string, number][]).map(d => d[0])));
-    }
-    return data as string[];
-}
-
-async function fetchStrikes(exchange: Exchange, underlying: string, expiry: string): Promise<number[]> {
-    const params = new URLSearchParams({ exchange, underlying, segment: 'Options' });
-    const res = await fetch(`${API_BASE}/api/instruments/search?${params}`);
-    if (!res.ok) return [];
-    const data: [string, number][] = await res.json();
-    return Array.from(new Set(data.filter(([exp]) => exp === expiry).map(([, strike]) => strike))).sort((a, b) => a - b);
-}
-
-// ─── Theme tokens (kept from existing app identity) ──────────────────────────
 const NAVY   = '#0a1628';
 const BLUE   = '#1565c0';
 const LBLUE  = '#e8f0fe';
@@ -225,10 +180,14 @@ const MarginCalculator: React.FC = () => {
     const [exchange, setExchange]     = useState<Exchange>('NFO');
     const [segment, setSegment]       = useState<Segment>('Options');
     const [underlying, setUnderlying] = useState<UnderlyingMeta | null>(null);
-    const [expiry, setExpiry]         = useState<string>('');
-    const [expiryOptions, setExpiryOptions] = useState<string[]>([]);
-    const [strike, setStrike]         = useState<number | null>(null);
+
+    const [expiryOptions, setExpiryOptions] = useState<ExpiryOption[]>([]);
     const [strikeOptions, setStrikeOptions] = useState<number[]>([]);
+    const [expiryLoading, setExpiryLoading] = useState(false);
+    const [strikeLoading, setStrikeLoading] = useState(false);
+
+    const [expiry, setExpiry]         = useState<string>('');
+    const [strike, setStrike]         = useState<number | null>(null);
     const [optionType, setOptionType] = useState<OptionType>('PE');
     const [action, setAction]         = useState<Action>('BUY');
     const [quantity, setQuantity]     = useState<number>(0);
@@ -242,18 +201,35 @@ const MarginCalculator: React.FC = () => {
     const [tableLoading, setTableLoading] = useState(false);
     const [tableError, setTableError] = useState<string | null>(null);
 
+    const [basketTotal, setBasketTotal] = useState<MarginApiResponse | null>(null);
+
     const lotSize = underlying?.lotSize ?? (UNDERLYINGS[exchange][0]?.lotSize ?? 1);
 
     // ── fetch expiries when underlying/segment changes ──
+    // (fetchExpiries internally caches by exchange|underlying|segment, so
+    // re-selecting the same underlying within a session won't refetch.)
     useEffect(() => {
         if (!underlying) { setExpiryOptions([]); return; }
-        fetchExpiries(exchange, underlying.symbol, segment).then(setExpiryOptions);
+        let cancelled = false;
+        setExpiryLoading(true);
+        fetchExpiries(exchange, underlying.symbol, segment)
+            .then(opts => { if (!cancelled) setExpiryOptions(opts); })
+            .finally(() => { if (!cancelled) setExpiryLoading(false); });
+        return () => { cancelled = true; };
     }, [exchange, underlying, segment]);
 
     // ── fetch strikes when expiry changes (Options only) ──
+    // (fetchStrikes reads from the same cache fetchExpiries already
+    // populated for this exchange+underlying, so this resolves from memory
+    // instead of firing a second network request.)
     useEffect(() => {
         if (!underlying || !expiry || segment !== 'Options') { setStrikeOptions([]); return; }
-        fetchStrikes(exchange, underlying.symbol, expiry).then(setStrikeOptions);
+        let cancelled = false;
+        setStrikeLoading(true);
+        fetchStrikes(exchange, underlying.symbol, expiry)
+            .then(strikes => { if (!cancelled) setStrikeOptions(strikes); })
+            .finally(() => { if (!cancelled) setStrikeLoading(false); });
+        return () => { cancelled = true; };
     }, [exchange, underlying, expiry, segment]);
 
     const buildCurrentLeg = useCallback((): MarginLegPayload | null => {
@@ -271,20 +247,30 @@ const MarginCalculator: React.FC = () => {
         };
     }, [underlying, expiry, segment, strike, optionType, quantity, lotSize, exchange, action]);
 
-    // ── live preview of current form, debounced ──
+    // ── live preview of current form, debounced AND deduped against the
+    //    last leg actually sent, so an unchanged leg doesn't refetch. ──
+    const lastSentLegRef = useRef<string | null>(null);
     useEffect(() => {
         const leg = buildCurrentLeg();
-        if (!leg) { setLivePreview(null); setPreviewError(null); return; }
+        if (!leg) {
+            setLivePreview(null);
+            setPreviewError(null);
+            lastSentLegRef.current = null;
+            return;
+        }
 
+        const legKey = JSON.stringify(leg);
         let cancelled = false;
-        setPreviewLoading(true);
-        setPreviewError(null);
         const handle = setTimeout(() => {
-            fetchMarginForLegs([leg])
+            if (legKey === lastSentLegRef.current) return; // identical leg already fetched
+            lastSentLegRef.current = legKey;
+            setPreviewLoading(true);
+            setPreviewError(null);
+            calculateMargin([leg])
                 .then(res => { if (!cancelled) setLivePreview(res); })
                 .catch(err => { if (!cancelled) { setPreviewError(err.message); setLivePreview(null); } })
                 .finally(() => { if (!cancelled) setPreviewLoading(false); });
-        }, 450); // debounce so we don't hammer SmartAPI (10 req/s limit) on every keystroke
+        }, 450); // debounce so we don't hammer the margin API on every keystroke
 
         return () => { cancelled = true; clearTimeout(handle); };
     }, [buildCurrentLeg]);
@@ -305,40 +291,9 @@ const MarginCalculator: React.FC = () => {
         setQuantity(0);
     };
 
-    const recalcTableTotals = async (legRows: TableRow[]): Promise<TableRow[]> => {
-        // Re-derive each row's margin via the API (basket call), then
-        // re-attach to rows in the same order.
-        if (legRows.length === 0) return legRows;
-        const legs: MarginLegPayload[] = legRows.map(r => ({
-            exchange: r.exchange,
-            segment: r.segment,
-            underlying: r.underlying,
-            expiry: r.expiry,
-            ...(r.segment === 'Options' ? { strike: r.strike!, option_type: r.optionType! } : {}),
-            quantity: r.quantity,
-            action: r.action,
-        }));
-        // NOTE: SmartAPI's batch endpoint returns BASKET-level totals, not
-        // per-leg breakdowns. For a per-row Span/Exposure display (as in the
-        // AngelOne UI table), call the endpoint once per leg individually,
-        // and separately once for the whole basket to get the true combined
-        // total (which differs from the sum of legs whenever cross-margining
-        // / hedge benefit applies).
-        const perLeg = await Promise.all(legs.map(leg => fetchMarginForLegs([leg])));
-        return legRows.map((r, i) => ({
-            ...r,
-            spanMargin: perLeg[i].span_margin,
-            exposure: perLeg[i].exposure_margin,
-            total: perLeg[i].total_margin,
-            netPremium: perLeg[i].net_premium,
-        }));
-    };
-
-    const [basketTotal, setBasketTotal] = useState<MarginApiResponse | null>(null);
-
     const refreshBasketTotal = async (legRows: TableRow[]) => {
         if (legRows.length === 0) { setBasketTotal(null); return; }
-        const legs: MarginLegPayload[] = legRows.map(r => ({
+        const legs = legRows.map(r => ({
             exchange: r.exchange,
             segment: r.segment,
             underlying: r.underlying,
@@ -348,10 +303,9 @@ const MarginCalculator: React.FC = () => {
             action: r.action,
         }));
         try {
-            const total = await fetchMarginForLegs(legs);
+            const total = await calculateMargin(legs);
             setBasketTotal(total);
-        } catch (e) {
-            // basket total is best-effort; per-row totals still display
+        } catch {
             setBasketTotal(null);
         }
     };
@@ -370,7 +324,16 @@ const MarginCalculator: React.FC = () => {
         setTableLoading(true);
         setTableError(null);
         try {
-            const result = await fetchMarginForLegs([leg]);
+            // Reuse the live-preview result if it's already for this exact
+            // leg — avoids firing a second, identical request to
+            // /api/margin/calculate right after the preview just got it.
+            const legKey = JSON.stringify(leg);
+            const result = (legKey === lastSentLegRef.current && livePreview)
+                ? livePreview
+                : await calculateMargin([leg]);
+
+            const cashRequired = computeCashRequired(action, result.total_margin, result.net_premium);
+
             const row: TableRow = {
                 id: makeId(),
                 exchange,
@@ -383,8 +346,9 @@ const MarginCalculator: React.FC = () => {
                 action,
                 spanMargin: result.span_margin,
                 exposure: result.exposure_margin,
-                total: result.total_margin,
+                totalMargin: result.total_margin,
                 netPremium: result.net_premium,
+                cashRequired,
             };
             const nextRows = [...rows, row];
             setRows(nextRows);
@@ -422,23 +386,34 @@ const MarginCalculator: React.FC = () => {
         await refreshBasketTotal(nextRows);
     };
 
-    const grandTotal = basketTotal?.total_margin ?? rows.reduce((a, r) => a + r.total, 0);
+    // Grand total: sum of each row's already-correct cashRequired. This is
+    // the robust source of truth — it doesn't depend on the basket endpoint
+    // reproducing the same buy/sell split, and updates instantly on
+    // add/delete without waiting on refreshBasketTotal's round trip.
+    const grandTotal = rows.reduce((a, r) => a + r.cashRequired, 0);
 
-    // Right panel shows: basket total if rows exist, else live preview of the form.
+    const previewCashRequired = livePreview
+        ? computeCashRequired(action, livePreview.total_margin, livePreview.net_premium)
+        : 0;
+
+    // Right panel shows: basket aggregate if rows exist, else live preview.
     const displayMargin = rows.length > 0
         ? {
-            net_premium: basketTotal?.net_premium ?? rows.reduce((a, r) => a + r.netPremium, 0),
-            span_margin: basketTotal?.span_margin ?? rows.reduce((a, r) => a + r.spanMargin, 0),
-            exposure_margin: basketTotal?.exposure_margin ?? rows.reduce((a, r) => a + r.exposure, 0),
-            total_margin: basketTotal?.total_margin ?? rows.reduce((a, r) => a + r.total, 0),
-            margin_benefit: basketTotal?.margin_benefit ?? 0,
+            net_premium:     rows.reduce((a, r) => a + r.netPremium, 0),
+            span_margin:     rows.reduce((a, r) => a + r.spanMargin, 0),
+            exposure_margin: rows.reduce((a, r) => a + r.exposure, 0),
+            cash_required:   grandTotal,
         }
-        : (livePreview ?? { net_premium: 0, span_margin: 0, exposure_margin: 0, total_margin: 0, margin_benefit: 0 });
+        : {
+            net_premium:     livePreview?.net_premium ?? 0,
+            span_margin:     livePreview?.span_margin ?? 0,
+            exposure_margin: livePreview?.exposure_margin ?? 0,
+            cash_required:   previewCashRequired,
+        };
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: BG, fontFamily: '"Inter", "Roboto", sans-serif' }}>
-            {/* Header */}
-            <Box sx={{ bgcolor: '#fff', borderBottom: `1px solid ${BORDER}`, px: 3, py: 2 }}>
+            <Box sx={{ bgcolor: '#fff', borderBottom: `1px solid ${BORDER}`, px: 3, py: 2}}>
                 <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
                     <Box sx={{
                         width: 34, height: 34, borderRadius: 2,
@@ -507,29 +482,51 @@ const MarginCalculator: React.FC = () => {
                                     />
                                 </Box>
 
-                                {/* Expiry + Option Type row (mirrors AngelOne layout) */}
+                                {/* Expiry + Option Type row */}
                                 <Box sx={{ display: 'grid', gridTemplateColumns: segment === 'Options' ? '1fr 1fr' : '1fr', gap: 2, mb: 2.5 }}>
-                                    <Box >
+                                    <Box sx={{ position: 'relative' }}>
                                         <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#6b7fa3', mb: 0.75, ml: 0.5 }}>
                                             Expiry
                                         </Typography>
-                                        <FormControl fullWidth size="small" >
+                                        <FormControl fullWidth size="small">
                                             <Select
                                                 value={expiry}
                                                 onChange={e => { setExpiry(e.target.value); setStrike(null); setErrors(er => ({ ...er, expiry: false })); }}
                                                 displayEmpty
                                                 sx={selectSx}
                                                 disabled={!underlying || expiryOptions.length === 0}
-                                                
+                                                renderValue={(v: string) => {
+                                                    if (!v) return <Typography sx={{ color: '#6b7fa3', fontSize: 14, whiteSpace: 'nowrap' }}>{underlying ? 'Select expiry' : 'Select scrip first'}</Typography>;
+                                                    const match = expiryOptions.find(e => e.value === v);
+                                                    return <Typography sx={{ fontSize: 14, fontWeight: 600, color: NAVY, whiteSpace: 'nowrap' }}>{match?.label ?? v}</Typography>;
+                                                }}
                                             >
-                                                <MenuItem value="" disabled >
-                                                    {underlying ? 'Select expiry' : 'Select scrip first'}
-                                                </MenuItem>
-                                                {expiryOptions.map(exp => (
-                                                    <MenuItem key={exp}  value={exp}>{exp}</MenuItem>
-                                                ))}
+                                                {expiryOptions.map(exp => {
+                                                    const parts = exp.label.split(' • ');
+                                                    return (
+                                                        <MenuItem key={exp.value} value={exp.value} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', py: 1.25 }}>
+                                                            <Typography sx={{ fontSize: 14, fontWeight: 600, color: NAVY, whiteSpace: 'nowrap' }}>
+                                                                {parts[0]}
+                                                            </Typography>
+                                                            {parts[1] && (
+                                                                <Chip
+                                                                    label={parts[1]}
+                                                                    size="small"
+                                                                    sx={{
+                                                                        height: 22, fontSize: 11, fontWeight: 700,
+                                                                        bgcolor: LBLUE, color: BLUE,
+                                                                        borderRadius: '8px', whiteSpace: 'nowrap', ml: 'auto',
+                                                                    }}
+                                                                />
+                                                            )}
+                                                        </MenuItem>
+                                                    );
+                                                })}
                                             </Select>
                                         </FormControl>
+                                        {expiryLoading && (
+                                            <CircularProgress size={16} sx={{ position: 'absolute', right: 12, top: 32, color: BLUE }} />
+                                        )}
                                         {errors.expiry && (
                                             <Typography sx={{ fontSize: 11, color: '#d32f2f', mt: 0.5, ml: 1.5 }}>
                                                 Please select expiry
@@ -553,7 +550,7 @@ const MarginCalculator: React.FC = () => {
 
                                 {/* Strike (Options only) */}
                                 {segment === 'Options' && (
-                                    <Box sx={{ mb: 2.5 }}>
+                                    <Box sx={{ mb: 2.5, position: 'relative' }}>
                                         <Typography sx={{ fontSize: 12, fontWeight: 600, color: '#6b7fa3', mb: 0.75, ml: 0.5 }}>
                                             Strike
                                         </Typography>
@@ -564,15 +561,23 @@ const MarginCalculator: React.FC = () => {
                                                 displayEmpty
                                                 sx={selectSx}
                                                 disabled={!expiry || strikeOptions.length === 0}
+                                                renderValue={(v: number | string) => {
+                                                    if (v === '' || v === null) return <Typography sx={{ color: '#6b7fa3', fontSize: 14, whiteSpace: 'nowrap' }}>{expiry ? 'Select strike' : 'Select expiry first'}</Typography>;
+                                                    return <Typography sx={{ fontSize: 14, fontWeight: 600, color: NAVY, whiteSpace: 'nowrap' }}>{Number(v).toLocaleString('en-IN')}</Typography>;
+                                                }}
                                             >
-                                                <MenuItem value="" disabled>
-                                                    {expiry ? 'Select strike' : 'Select expiry first'}
-                                                </MenuItem>
                                                 {strikeOptions.map(s => (
-                                                    <MenuItem key={s} value={s}>{s}</MenuItem>
+                                                    <MenuItem key={s} value={s} sx={{ py: 1.25 }}>
+                                                        <Typography sx={{ fontSize: 14, fontWeight: 600, color: NAVY }}>
+                                                            {s.toLocaleString('en-IN')}
+                                                        </Typography>
+                                                    </MenuItem>
                                                 ))}
                                             </Select>
                                         </FormControl>
+                                        {strikeLoading && (
+                                            <CircularProgress size={16} sx={{ position: 'absolute', right: 12, top: 32, color: BLUE }} />
+                                        )}
                                         {errors.strike && (
                                             <Typography sx={{ fontSize: 11, color: '#d32f2f', mt: 0.5, ml: 1.5 }}>
                                                 Please select strike
@@ -612,12 +617,15 @@ const MarginCalculator: React.FC = () => {
                                                 component="input"
                                                 type="number"
                                                 value={quantity}
-                                                onChange={e => {
+                                                onBlur={e => {
+                                                    // snap to nearest multiple of lot size on blur, not on
+                                                    // every keystroke — avoids spurious intermediate values
+                                                    // (and extra preview calls) while typing.
                                                     const raw = Math.max(0, parseInt(e.target.value) || 0);
-                                                    // snap to nearest multiple of lot size — NSE/BSE reject non-multiples
                                                     const snapped = Math.round(raw / lotSize) * lotSize;
                                                     setQuantity(snapped);
                                                 }}
+                                                onChange={e => setQuantity(Math.max(0, parseInt(e.target.value) || 0))}
                                                 style={{ flex: 1, border: 'none', outline: 'none', textAlign: 'center', fontSize: 14, fontWeight: 700, color: NAVY, background: 'transparent', fontFamily: 'inherit', minWidth: 0 }}
                                             />
                                             <IconButton size="small" onClick={() => setQuantity(q => q + lotSize)} sx={{ borderRadius: 0, px: 1.5, color: NAVY, flexShrink: 0, '&:hover': { bgcolor: LBLUE } }}>
@@ -680,10 +688,10 @@ const MarginCalculator: React.FC = () => {
                                             </Box>
                                         )}
                                         {[
-                                            { label: 'Net Premium',     value: displayMargin.net_premium,     highlight: false, signed: true },
-                                            { label: 'Span Margin',     value: displayMargin.span_margin,     highlight: false, signed: false },
-                                            { label: 'Exposure Margin', value: displayMargin.exposure_margin, highlight: false, signed: false },
-                                            { label: 'Total',           value: displayMargin.total_margin,    highlight: true,  signed: false },
+                                            { label: 'Net Premium',     value: displayMargin.net_premium,     highlight: false, note: action === 'BUY' ? 'paid' : 'received' },
+                                            { label: 'Span Margin',     value: displayMargin.span_margin,     highlight: false, note: null },
+                                            { label: 'Exposure Margin', value: displayMargin.exposure_margin, highlight: false, note: null },
+                                            { label: 'Cash Required',   value: displayMargin.cash_required,   highlight: true,  note: null },
                                         ].map((item, i, arr) => (
                                             <Stack
                                                 key={item.label}
@@ -695,10 +703,17 @@ const MarginCalculator: React.FC = () => {
                                                     bgcolor: item.highlight ? '#e8f0fe' : 'transparent',
                                                 }}
                                             >
-                                                <Typography sx={{ fontSize: 13, color: '#3d5275', fontWeight: 500 }}>{item.label}</Typography>
+                                                <Typography sx={{ fontSize: 13, color: '#3d5275', fontWeight: 500 }}>
+                                                    {item.label}
+                                                    {item.note && (
+                                                        <Typography component="span" sx={{ fontSize: 11, color: '#94a3b8', ml: 0.5 }}>
+                                                            ({item.note})
+                                                        </Typography>
+                                                    )}
+                                                </Typography>
                                                 <motion.div key={item.value} initial={{ opacity: 0.6 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
                                                     <Typography sx={{ fontSize: 14, fontWeight: 800, color: item.highlight ? BLUE : NAVY }}>
-                                                        {item.signed && item.value < 0 ? '-' : ''}₹{fmtINR(Math.abs(item.value))}
+                                                        ₹{fmtINR(item.value)}
                                                     </Typography>
                                                 </motion.div>
                                             </Stack>
@@ -726,7 +741,7 @@ const MarginCalculator: React.FC = () => {
                             <Box component="table" sx={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                                 <Box component="thead">
                                     <Box component="tr" sx={{ bgcolor: '#f8fafc' }}>
-                                        {['Exchange', 'Scrip', 'Segment', 'Strike', 'Type', 'Qty', 'Span (₹)', 'Exposure (₹)', 'Total (₹)', ''].map(h => (
+                                        {['Exchange', 'Scrip', 'Segment', 'Strike', 'Type', 'Qty', 'Span (₹)', 'Exposure (₹)', 'Cash Req. (₹)', ''].map(h => (
                                             <Box key={h} component="th" sx={{ px: 2.5, py: 1.25, textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#6b7fa3', textTransform: 'uppercase', letterSpacing: '0.05em', borderBottom: `1px solid ${BORDER}`, whiteSpace: 'nowrap' }}>
                                                 {h}
                                             </Box>
@@ -777,7 +792,7 @@ const MarginCalculator: React.FC = () => {
                                                     {row.exposure > 0 ? fmtINR(row.exposure) : '—'}
                                                 </Box>
                                                 <Box component="td" sx={{ px: 2.5, py: 2, fontWeight: 800, color: NAVY }}>
-                                                    {fmtINR(row.total)}
+                                                    {fmtINR(row.cashRequired)}
                                                 </Box>
                                                 <Box component="td" sx={{ px: 2, py: 2 }}>
                                                     <Tooltip title="Remove">
@@ -814,8 +829,10 @@ const MarginCalculator: React.FC = () => {
 
                 <Typography sx={{ fontSize: 11, color: '#94a3b8', mt: 2, textAlign: 'center', lineHeight: 1.8 }}>
                     Margins are fetched live from AngelOne's Margin Calculator API and reflect actual SPAN + Exposure
-                    requirements at time of request. They may still change with volatility, corporate actions, and
-                    exchange circulars before order placement.
+                    requirements at time of request. For option buys, Span/Exposure are correctly ₹0 since the
+                    premium paid is the maximum loss — "Cash Required" reflects what you'd actually need to pay or
+                    block. Figures may still change with volatility, corporate actions, and exchange circulars
+                    before order placement.
                 </Typography>
             </Box>
         </Box>
