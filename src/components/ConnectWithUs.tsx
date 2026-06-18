@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SectionReveal, { fadeUp } from './SectionReveal';
+import { getCachedVideoUrl } from '../utils/videoCache';
 
 type CardId = 'trader' | 'research' | 'technology';
 
@@ -58,6 +59,14 @@ const ConnectWithUs: React.FC = () => {
   const [hovered, setHovered] = useState<CardId | null>(null);
   const [formData, setFormData] = useState({ whoAmI: '', fullName: '', email: '', phone: '', doc: null as File | null });
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
+  const cachedSrcRef = useRef<Record<string, string>>({});
+
+  useEffect(() => {
+    const urls = [VIDEO_RES_SRC, VIDEO_TRD_SRC, VIDEO_TEC_SRC];
+    Promise.all(urls.map(getCachedVideoUrl)).then(([res, trd, tec]) => {
+      cachedSrcRef.current = { research: res, trader: trd, technology: tec };
+    });
+  }, []);
 
   useEffect(() => {
     CARDS.forEach((c) => {
@@ -127,9 +136,10 @@ const ConnectWithUs: React.FC = () => {
                   <video
                     ref={(el) => { videoRefs.current[card.id] = el; }}
                     src={
-                      card.id === 'research' ? VIDEO_RES_SRC :
+                      cachedSrcRef.current[card.id] ||
+                      (card.id === 'research' ? VIDEO_RES_SRC :
                         card.id === 'trader' ? VIDEO_TRD_SRC :
-                          VIDEO_TEC_SRC
+                          VIDEO_TEC_SRC)
                     }
                     muted
                     loop

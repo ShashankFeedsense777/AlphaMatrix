@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import SectionReveal, { fadeLeft, scaleIn, staggerContainer, fadeUp } from './SectionReveal';
 import { Person1, Person2, Person3 } from '../assets/index';
 import { AnimatePresence, motion } from 'framer-motion';
+import { getCachedVideoUrl } from '../utils/videoCache';
 
 const teamMembers = [
   
@@ -67,9 +68,16 @@ const teamMembers = [
   },
 ];
 
+const ABOUT_VIDEOS = [
+  'https://res.cloudinary.com/drverjcjf/video/upload/v1780914017/Circle_Frame1_ddntd8.mp4',
+  'https://res.cloudinary.com/drverjcjf/video/upload/v1780914015/Footer_rrbhuu.mp4',
+];
+
 const AboutUs: React.FC = () => {
 const [activeIndex, setActiveIndex] = React.useState(0);
 const [isPaused, setIsPaused] = React.useState(false);
+const cachedAboutRef = useRef<string[]>([]);
+const videoRef = useRef<HTMLVideoElement>(null);
 
 React.useEffect(() => {
   if (isPaused) return;
@@ -78,6 +86,24 @@ React.useEffect(() => {
   }, 5000);
   return () => clearInterval(interval);
 }, [isPaused]);
+
+useEffect(() => {
+  Promise.all(ABOUT_VIDEOS.map(getCachedVideoUrl)).then((blobUrls) => {
+    cachedAboutRef.current = blobUrls;
+    if (videoRef.current) {
+      videoRef.current.src = blobUrls[0];
+    }
+  });
+}, []);
+
+const handleVideoEnded = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+  const video = e.currentTarget;
+  const i = Number(video.dataset.currentIndex || 0);
+  const next = (i + 1) % ABOUT_VIDEOS.length;
+  video.dataset.currentIndex = String(next);
+  video.src = cachedAboutRef.current[next] || ABOUT_VIDEOS[next];
+  video.play();
+};
 
   return (
     <>
@@ -114,26 +140,14 @@ React.useEffect(() => {
               />
               <div className="aspect-square bg-linear-to-tr from-[#1a0505] via-brand-saffron/10 to-brand-saffron/25 rounded-full flex items-center justify-center p-6 sm:p-8 overflow-hidden relative">
                 <video
+                  ref={videoRef}
                   autoPlay
                   muted
                   playsInline
                   className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-60"
                   onLoadedMetadata={(e) => { e.currentTarget.playbackRate = 0.75; }}
-                  onEnded={(e) => {
-                    const urls = [
-                      'https://res.cloudinary.com/drverjcjf/video/upload/v1780914017/Circle_Frame1_ddntd8.mp4',
-                      'https://res.cloudinary.com/drverjcjf/video/upload/v1780914015/Footer_rrbhuu.mp4',
-                    ];
-                    const video = e.currentTarget;
-                    const i = Number(video.dataset.currentIndex || 0);
-                    const next = (i + 1) % urls.length;
-                    video.dataset.currentIndex = String(next);
-                    video.src = urls[next];
-                    video.play();
-                  }}
-                >
-                  <source src="https://res.cloudinary.com/drverjcjf/video/upload/v1780914017/Circle_Frame1_ddntd8.mp4" type="video/mp4" />
-                </video>
+                  onEnded={handleVideoEnded}
+                />
                 <div className="text-center relative z-10 select-none">
                   <h3 className="text-[clamp(2rem,8vw,4.5rem)] font-bold text-white tracking-tight mb-1">Alpha</h3>
                   <h3 className="text-[clamp(1.5rem,6vw,3rem)] font-bold text-brand-saffron tracking-widest">Matrix</h3>
