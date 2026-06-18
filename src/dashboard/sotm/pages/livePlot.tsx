@@ -4,6 +4,10 @@ import { HighchartsReact } from 'highcharts-react-official';
 import Highcharts from 'highcharts';
 import { socketClient, SocketStatus } from '../../../utils/socketClient';
 
+Highcharts.setOptions({
+  time: { timezone: 'Asia/Kolkata' },
+});
+
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const LIVE_GREEKS_EVENTS = ['greeks:live'];
 
@@ -43,13 +47,11 @@ const STATUS_DOT: Record<SocketStatus, string> = {
 };
 
 export default function LivePlot() {
-  const todayRaw = useMemo(() => {
+  const { todayRaw, today } = useMemo(() => {
     const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  }, []);
-  const today = useMemo(() => {
-    const d = new Date();
-    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    const raw = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const fmt = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+    return { todayRaw: raw, today: fmt };
   }, []);
 
   const [expiry, setExpiry]             = useState('');
@@ -59,27 +61,23 @@ export default function LivePlot() {
   const [error, setError]               = useState('');
   const [socketStatus, setSocketStatus] = useState<SocketStatus>('idle');
 
-  Highcharts.setOptions({
-    time: {
-      timezone: 'Asia/Kolkata',
-    },
-  });
-
   const validateAndFetchExpiry = useCallback(async (date: string) => {
     try {
-      const valRes = await fetch(`${API_BASE}/api/validate-date`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date }),
-      });
+      const [valRes, expRes] = await Promise.all([
+        fetch(`${API_BASE}/api/validate-date`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date }),
+        }),
+        fetch(`${API_BASE}/api/expiry-from-date`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date }),
+        }),
+      ]);
       const val = await valRes.json();
       if (!val.valid) { setError(val.reason); setExpiry(''); return; }
       setError('');
-      const expRes = await fetch(`${API_BASE}/api/expiry-from-date`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date }),
-      });
       const exp = await expRes.json();
       setExpiry(exp.expiry_display);
     } catch {
@@ -105,9 +103,7 @@ export default function LivePlot() {
     return Array.from(map.values()).sort((a, b) => a.strike - b.strike);
   }, []);
 
-  useEffect(() => {
-    if (todayRaw) validateAndFetchExpiry(todayRaw);
-  }, [todayRaw, validateAndFetchExpiry]);
+  useEffect(() => { validateAndFetchExpiry(todayRaw); }, []);
 
   useEffect(() => {
     const unsub = socketClient.onStatus(setSocketStatus);
@@ -115,7 +111,7 @@ export default function LivePlot() {
   }, []);
 
   useEffect(() => {
-    if (!todayRaw || !expiry) return;
+    if (!expiry) return;
     setLoading(true);
     setError('');
     setData([]);
@@ -134,7 +130,7 @@ export default function LivePlot() {
       socketClient.send('unsubscribe:greeks:live', { date: todayRaw, expiry, metric });
       unsubs.forEach(u => u());
     };
-  }, [expiry, mergeStrikeData, metric, normalizeLivePayload, todayRaw]);
+  }, [expiry, metric]);
 
   const getTimestamp = useCallback((time: string, dateStr: string) => {
   const [year, month, day] = dateStr.split('-').map(Number);

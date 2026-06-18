@@ -18,6 +18,7 @@ import CompanyFooter from './components/CompanyFooter';
 import PrivateRoute from './routes/PrivateRoute';
 import LiveGreeks from './dashboard/sotm/GreeksLive';
 import HistoricalGreeks from './dashboard/sotm/GreeksHistorical';
+import VWAP from './dashboard/vwap/VWAP';
 import MarginCalculator from './dashboard/marginCalculator/MarginCalculator';
 import './index.css';
 
@@ -225,6 +226,7 @@ function App() {
           <Route index element={<Navigate to="live-greeks" replace />} />
           <Route path="live-greeks" element={<LiveGreeks />} />
           <Route path="historical-greeks" element={<HistoricalGreeks />} />
+          <Route path="vwap" element={<VWAP />} />
           <Route path="margin-calculator" element={<MarginCalculator />} />
         </Route>
       </Route>

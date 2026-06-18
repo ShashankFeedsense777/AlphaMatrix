@@ -9,7 +9,13 @@ const companyDetails = [
   { label: 'NSE Membership', value: '90415' },
   { label: 'BSE Membership', value: '6879' },
   { label: 'SEBI Registration', value: 'INZ000318637' },
+];
 
+const regulatoryLinks = [
+  { label: 'SEBI', href: 'https://www.sebi.gov.in' },
+  { label: 'NSE', href: 'https://www.nseindia.com' },
+  { label: 'BSE', href: 'https://www.bseindia.com' },
+  { label: 'SEBI SCORES', href: 'https://scores.sebi.gov.in' },
 ];
 
 const CompanyFooter: React.FC = () => {
@@ -90,6 +96,32 @@ const CompanyFooter: React.FC = () => {
                 </p>
               </div>
             </div>
+
+            {/* Regulatory quick links */}
+            <div className="mt-6 flex flex-wrap gap-2">
+              {regulatoryLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="
+                    rounded-full
+                    border border-white/10
+                    bg-white/5
+                    px-3.5 py-1.5
+                    text-[11px] uppercase tracking-[0.18em]
+                    text-white/50
+                    transition-all duration-300
+                    hover:text-brand-saffron
+                    hover:border-brand-saffron/40
+                    hover:bg-white/[0.07]
+                  "
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
           </SectionReveal>
 
           <motion.div
@@ -126,10 +158,102 @@ const CompanyFooter: React.FC = () => {
             ))}
           </motion.div>
         </div>
-        
 
-        <div className="mt-10 sm:mt-12 pt-6 border-t border-white/8 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
-          <p className="text-xs sm:text-sm text-white/30">
+        {/* Compliance & Disclosures */}
+        <SectionReveal variants={fadeUp}>
+          <div className="mt-10 sm:mt-12 pt-8 border-t border-white/8">
+            <p className="text-xs uppercase tracking-[0.24em] text-white/35 mb-4">
+              Compliance &amp; Disclosures
+            </p>
+            <div className="space-y-4 text-[11px] sm:text-xs text-white/60 leading-relaxed max-w-5xl">
+              <p>
+  AlphaMatrix (CIN: U67120MH2008PTC185004, GSTIN: 27AAFCM6712K1Z9) is a
+  member of NSE &amp; BSE with SEBI Registration No: INZ000318637.
+  Registered Office: Flat No. 17, 1st Floor, Mahavir Majesty, M.G Road,
+  Near BMC Swimming Pool, Kandivali West, Mumbai, Mumbai Suburban,
+  Maharashtra 400067. For any grievances related to stock broking, please
+  write to{' '}
+  <a
+    href="mailto:grievances@alphamatrix.in"
+    className="text-brand-saffron/90 hover:text-brand-saffron underline-offset-2 hover:underline transition-colors"
+  >
+    grievances@alphamatrix.in
+  </a>
+  . Please ensure you carefully read the Risk Disclosure Document as
+  prescribed by SEBI before investing.
+</p>
+
+              <p>
+                Procedure to file a complaint on SEBI SCORES: Register on the{' '}
+                <a
+                  href="https://scores.sebi.gov.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-saffron/90 hover:text-brand-saffron underline-offset-2 hover:underline transition-colors"
+                >
+                  SCORES
+                </a>{' '}
+                portal. Mandatory details for filing complaints on SCORES:
+                Name, PAN, Address, Mobile Number, E-mail ID. Benefits:
+                Effective communication, speedy redressal of grievances. You
+                may also escalate disputes through the SEBI{' '}
+                <a
+                  href="https://smartodr.in"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-saffron/90 hover:text-brand-saffron underline-offset-2 hover:underline transition-colors"
+                >
+                  Online Dispute Resolution (ODR)
+                </a>{' '}
+                portal.
+              </p>
+
+              <p>
+                AlphaMatrix makes no warranties or representations, express or
+                implied, on products or strategies offered through the
+                platform, and accepts no liability for any damages or losses,
+                however caused, arising from the use of or reliance on its
+                products or related services. Unless otherwise specified, all
+                returns, performance data and back-tested results are
+                historical and for illustrative purposes only; future
+                performance will vary and depends on personal and market
+                circumstances. Information provided is educational only and
+                does not constitute investment advice.
+              </p>
+
+              <p className="text-white/50">
+                Investment in securities market are subject to market risks,
+                read all the related documents carefully before investing.
+              </p>
+
+              <p>
+                For exchange-validated membership details, refer to{' '}
+                <a
+                  href="https://www.nseindia.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-saffron/90 hover:text-brand-saffron underline-offset-2 hover:underline transition-colors"
+                >
+                  nseindia.com
+                </a>{' '}
+                and{' '}
+                <a
+                  href="https://www.bseindia.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-saffron/90 hover:text-brand-saffron underline-offset-2 hover:underline transition-colors"
+                >
+                  bseindia.com
+                </a>
+                . Terms and conditions of the website/app are applicable.
+                Privacy policy of the website is applicable.
+              </p>
+            </div>
+          </div>
+        </SectionReveal>
+
+        <div className="mt-8 sm:mt-10 pt-6 border-t border-white/8 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
+          <p className="text-xs sm:text-sm text-white/50">
             &copy; 2026 AlphaMatrix. All rights reserved.
           </p>
           <p className="text-xs uppercase tracking-[0.22em] text-white/25">

@@ -29,7 +29,7 @@ const NAV_ITEMS: NavItem[] = [
         label: 'VWAP',
         description: 'Volume weighted\naverage price',
         children: [
-            { label: 'VWAP Analysis', view: 'vwap', available: false },
+            { label: 'VWAP Analysis', view: 'vwap', available: true },
         ],
     },
     {

@@ -1,6 +1,10 @@
 import { useRef, useEffect } from 'react';
 import './ShapeGrid.css';
 
+function hashCell(x: number, y: number): number {
+  return ((x * 73856093) ^ (y * 19349663)) >>> 0;
+}
+
 interface ShapeGridProps {
   direction?: 'right' | 'left' | 'up' | 'down' | 'diagonal';
   speed?: number;
@@ -30,6 +34,34 @@ const ShapeGrid = ({
   const hoveredSquare = useRef<{ x: number; y: number } | null>(null);
   const trailCells = useRef<{ x: number; y: number }[]>([]);
   const cellOpacities = useRef(new Map<string, number>());
+  const stockImages = useRef<HTMLImageElement[]>([]);
+
+  useEffect(() => {
+    const svgModules = import.meta.glob('../../assests/stocksSVG/*.svg', {
+      eager: true,
+      query: '?url',
+      import: 'default',
+    }) as Record<string, string>;
+
+    const urls = Object.values(svgModules);
+    const images: HTMLImageElement[] = [];
+    let loadedCount = 0;
+
+    const onLoad = () => {
+      loadedCount++;
+      if (loadedCount === urls.length) {
+        stockImages.current = images;
+      }
+    };
+
+    urls.forEach((url) => {
+      const img = new Image();
+      img.onload = onLoad;
+      img.onerror = onLoad;
+      img.src = url;
+      images.push(img);
+    });
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -101,10 +133,20 @@ const ShapeGrid = ({
             const cellKey = `${col},${row}`;
             const alpha = cellOpacities.current.get(cellKey);
             if (alpha) {
+              ctx.save();
               ctx.globalAlpha = alpha;
               drawHex(cx, cy, squareSize);
-              ctx.fillStyle = hoverFillColor;
-              ctx.fill();
+              ctx.clip();
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(cx - squareSize, cy - squareSize, squareSize * 2, squareSize * 2);
+              if (stockImages.current.length > 0) {
+                const img = stockImages.current[hashCell(col, row) % stockImages.current.length];
+                if (img) {
+                  const s = squareSize * 1.8;
+                  ctx.drawImage(img, cx - s / 2, cy - s / 2, s, s);
+                }
+              }
+              ctx.restore();
               ctx.globalAlpha = 1;
             }
             drawHex(cx, cy, squareSize);
@@ -129,10 +171,19 @@ const ShapeGrid = ({
             const cellKey = `${col},${row}`;
             const alpha = cellOpacities.current.get(cellKey);
             if (alpha) {
+              ctx.save();
               ctx.globalAlpha = alpha;
               drawTriangle(cx, cy, squareSize, flip);
-              ctx.fillStyle = hoverFillColor;
-              ctx.fill();
+              ctx.clip();
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(cx - squareSize, cy - squareSize, squareSize * 2, squareSize * 2);
+              if (stockImages.current.length > 0) {
+                const img = stockImages.current[hashCell(col, row) % stockImages.current.length];
+                if (img) {
+                  ctx.drawImage(img, cx - squareSize / 2, cy - squareSize / 2, squareSize, squareSize);
+                }
+              }
+              ctx.restore();
               ctx.globalAlpha = 1;
             }
             drawTriangle(cx, cy, squareSize, flip);
@@ -153,10 +204,19 @@ const ShapeGrid = ({
             const cellKey = `${col},${row}`;
             const alpha = cellOpacities.current.get(cellKey);
             if (alpha) {
+              ctx.save();
               ctx.globalAlpha = alpha;
               drawCircle(cx, cy, squareSize);
-              ctx.fillStyle = hoverFillColor;
-              ctx.fill();
+              ctx.clip();
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(cx - squareSize, cy - squareSize, squareSize * 2, squareSize * 2);
+              if (stockImages.current.length > 0) {
+                const img = stockImages.current[hashCell(col, row) % stockImages.current.length];
+                if (img) {
+                  ctx.drawImage(img, cx - squareSize / 2, cy - squareSize / 2, squareSize, squareSize);
+                }
+              }
+              ctx.restore();
               ctx.globalAlpha = 1;
             }
             drawCircle(cx, cy, squareSize);
@@ -177,9 +237,20 @@ const ShapeGrid = ({
             const cellKey = `${col},${row}`;
             const alpha = cellOpacities.current.get(cellKey);
             if (alpha) {
+              ctx.save();
               ctx.globalAlpha = alpha;
-              ctx.fillStyle = hoverFillColor;
+              ctx.beginPath();
+              ctx.rect(sx, sy, squareSize, squareSize);
+              ctx.clip();
+              ctx.fillStyle = '#ffffff';
               ctx.fillRect(sx, sy, squareSize, squareSize);
+              if (stockImages.current.length > 0) {
+                const img = stockImages.current[hashCell(col, row) % stockImages.current.length];
+                if (img) {
+                  ctx.drawImage(img, sx, sy, squareSize, squareSize);
+                }
+              }
+              ctx.restore();
               ctx.globalAlpha = 1;
             }
             ctx.strokeStyle = borderColor;

@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { LogOut } from 'lucide-react';
 import LiveGreeks from '../sotm/GreeksLive';
 import HistoricalGreeks from '../sotm/GreeksHistorical';
+import VWAP from '../vwap/VWAP';
 import MarginCalculator from '../marginCalculator/MarginCalculator';
 import { Logo } from '../../assets';
 import { useNavigate } from 'react-router-dom';
@@ -33,7 +34,7 @@ const NAV_ITEMS: NavItem[] = [
         label: 'VWAP',
         description: 'Volume weighted\naverage price',
         children: [
-            { label: 'VWAP Analysis', view: 'vwap', available: false },
+            { label: 'VWAP Analysis', view: 'vwap', available: true },
         ],
     },
     {
@@ -49,6 +50,7 @@ const ViewRenderer: React.FC<{ view: ActiveView }> = ({ view }) => {
     switch (view) {
         case 'live-greeks': return <LiveGreeks />;
         case 'historical-greeks': return <HistoricalGreeks />;
+        case 'vwap': return <VWAP />;
         case 'margin-calculator': return <MarginCalculator />;
         default: return null;
     }

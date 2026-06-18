@@ -413,7 +413,12 @@ const MarginCalculator: React.FC = () => {
 
     return (
         <Box sx={{ minHeight: '100vh', bgcolor: BG, fontFamily: '"Inter", "Roboto", sans-serif' }}>
-            <Box sx={{ bgcolor: '#fff', borderBottom: `1px solid ${BORDER}`, px: 3, py: 2}}>
+            
+
+            <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1200, mx: 'auto' }}>
+                
+                <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${BORDER}`, overflow: 'hidden', bgcolor: '#fff' }}>
+                    <Box sx={{ bgcolor: '#fff', borderBottom: `1px solid ${BORDER}`, px: 3, py: 2}}>
                 <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center' }}>
                     <Box sx={{
                         width: 34, height: 34, borderRadius: 2,
@@ -427,9 +432,6 @@ const MarginCalculator: React.FC = () => {
                     </Typography>
                 </Stack>
             </Box>
-
-            <Box sx={{ p: { xs: 2, md: 3 }, maxWidth: 1200, mx: 'auto' }}>
-                <Paper elevation={0} sx={{ borderRadius: 3, border: `1px solid ${BORDER}`, overflow: 'hidden', bgcolor: '#fff' }}>
                     <Box sx={{ p: { xs: 2.5, md: 3 } }}>
                         <Box sx={{
                             display: 'grid',
@@ -598,8 +600,8 @@ const MarginCalculator: React.FC = () => {
                                                     key={val}
                                                     value={val}
                                                     label={label}
-                                                    control={<Radio size="small" sx={{ color: '#c0c8d8', '&.Mui-checked': { color: '#16a34a' }, p: '6px' }} />}
-                                                    sx={{ mr: 0, '& .MuiFormControlLabel-label': { fontSize: 14, fontWeight: 700, color: action === val ? '#16a34a' : NAVY } }}
+                                                    control={<Radio size="small" sx={{ color: '#c0c8d8', '&.Mui-checked': { color: val === 'BUY' ? '#16a34a' : '#dc2626' }, p: '6px' }} />}
+                                                    sx={{ mr: 0, '& .MuiFormControlLabel-label': { fontSize: 14, fontWeight: 700, color: action === val ? (val === 'BUY' ? '#16a34a' : '#dc2626') : NAVY } }}
                                                 />
                                             ))}
                                         </RadioGroup>

@@ -1,13 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Activity, BarChart2, Radio, Table2 } from 'lucide-react';
 import LivePlot from './pages/livePlot';
 import LiveTable from './pages/liveTable';
+import { socketClient } from '../../utils/socketClient';
 
 type View = 'plot' | 'table';
 
 const LiveGreeks: React.FC = () => {
   const [view, setView] = useState<View>('plot');
+
+  const handleTabChange = useCallback((id: View) => {
+    if (id === view) return;
+    socketClient.send('unsubscribe:greeks:live');
+    socketClient.send('unsubscribe:greeks:table');
+    setView(id);
+  }, [view]);
 
   return (
     <div className="min-h-screen bg-[#f7f8fb] text-slate-950">
@@ -72,7 +80,7 @@ const LiveGreeks: React.FC = () => {
             <button
               key={id}
               type="button"
-              onClick={() => setView(id)}
+              onClick={() => handleTabChange(id)}
               className={`relative flex items-center justify-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold transition-colors ${
                 view === id
                   ? 'text-slate-950'

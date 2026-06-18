@@ -111,7 +111,7 @@ export default function LiveTable() {
     socketClient.send('subscribe:greeks:table', { n_position: nPosition });
 
     return () => {
-      socketClient.send('unsubscribe:greeks:table');
+      socketClient.send('unsubscribe:greeks:table', { n_position: nPosition });
       unsubs.forEach(u => u());
     };
   }, [nPosition]);

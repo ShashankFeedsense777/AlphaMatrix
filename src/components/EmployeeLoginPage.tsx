@@ -182,10 +182,10 @@ const EmployeeLoginPage: React.FC = () => {
       <div className="absolute inset-0 z-100">
         <ShapeGrid
           speed={0.4}
-          squareSize={55}
+          squareSize={60}
           direction="diagonal"
           borderColor="rgba(255,255,255,0.06)"
-          hoverFillColor="#F97316"
+          hoverFillColor="transparent"
           shape="square"
           hoverTrailAmount={3}
         />
@@ -225,8 +225,8 @@ const EmployeeLoginPage: React.FC = () => {
           <button type="button" onClick={() => { navigate('/'); }} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-3 py-2 text-[11px] font-semibold uppercase tracking-widest text-white/60 backdrop-blur-md transition-colors hover:border-brand-saffron/40 hover:text-white z-101">
             <ArrowLeft size={14} /> Home
           </button>
-          <div className="flex min-w-0 items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand-saffron/20 bg-brand-saffron/10">
+          <div className="flex min-w-0 items-center gap-2.5 z-101">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand-saffron/20 bg-brand-saffron/10  backdrop-blur-md">
               <img src={Logo} alt="AlphaMatrix" className="h-5 w-5 object-contain" />
             </div>
             <span className="truncate text-[11px] sm:text-xs font-bold uppercase tracking-[0.14em] sm:tracking-[0.22em]">AlphaMatrix</span>
@@ -307,7 +307,7 @@ const EmployeeLoginPage: React.FC = () => {
             </div>
 
             {/* ── Right panel (Login Form) ── */}
-            <div className="flex min-w-0 flex-col bg-[#07070b]/95 p-5 min-[380px]:p-6 sm:p-8 lg:p-9 backdrop-blur-xl z-101">
+            <div className="flex min-w-0 flex-col bg-transparent p-5 min-[380px]:p-6 sm:p-8 lg:p-9 backdrop-blur-xl z-101">
               <div className="mb-5 flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] border border-brand-saffron/20 bg-brand-saffron/10 text-brand-saffron">
                 <ShieldCheck size={22} />
               </div>
@@ -378,7 +378,7 @@ const EmployeeLoginPage: React.FC = () => {
                       </motion.div>
                     )}
                   </AnimatePresence>
-                  <button type="submit" disabled={isSubmitting || !canSubmit} className="mt-2 rounded-xl bg-brand-saffron py-3.5 px-4 text-[11px] font-bold uppercase tracking-widest hover:bg-orange-500 transition-colors shadow-lg shadow-brand-saffron/20 disabled:cursor-not-allowed disabled:opacity-40">
+                  <button type="submit" disabled={isSubmitting || !canSubmit} className="mt-2 rounded-xl bg-brand-saffron py-3.5 px-4 text-[11px] font-bold uppercase tracking-widest hover:bg-orange-500 transition-colors shadow-lg shadow-brand-saffron/20 disabled:opacity-40" style={{ cursor: isSubmitting || !canSubmit ? 'not-allowed' : 'pointer' }}>
                     {isSubmitting ? 'Please Wait...' : otpSent ? 'Access Platform →' : 'Get OTP →'}
                   </button>
                 </motion.form>

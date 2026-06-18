@@ -11,6 +11,11 @@ interface SocketMessage<T = unknown> {
 }
 const DEFAULT_SOCKET_URL = `ws://localhost:8000/ws`;
 
+interface ActiveSubscription {
+  event: string;
+  payload: unknown;
+}
+
 class SocketClient {
   private socket: WebSocket | null = null;
   private reconnectTimer: number | null = null;
@@ -19,6 +24,7 @@ class SocketClient {
   private readonly handlers = new Map<string, Set<SocketHandler>>();
   private readonly statusHandlers = new Set<StatusHandler>();
   private status: SocketStatus = 'idle';
+  private readonly subscriptions = new Map<string, ActiveSubscription>();
   private readonly url =
     import.meta.env.VITE_SOCKET_URL ||
     import.meta.env.VITE_WS_URL ||
@@ -36,6 +42,7 @@ class SocketClient {
     this.socket.addEventListener('open', () => {
       this.reconnectAttempts = 0;
       this.setStatus('open');
+      this.resubscribeAll();
     });
 
     this.socket.addEventListener('message', (event) => {
@@ -66,6 +73,7 @@ class SocketClient {
 
     this.socket?.close();
     this.socket = null;
+    this.subscriptions.clear();
     this.setStatus('closed');
   }
 
@@ -73,6 +81,15 @@ class SocketClient {
     this.connect();
 
     const message = JSON.stringify({ event, payload });
+
+    if (event.startsWith('subscribe:')) {
+      this.subscriptions.set(event, { event, payload });
+    } else if (event.startsWith('unsubscribe:')) {
+      const subEvent = event.replace('unsubscribe:', 'subscribe:');
+      if (this.subscriptions.has(subEvent)) {
+        this.subscriptions.delete(subEvent);
+      }
+    }
 
     if (this.socket?.readyState === WebSocket.OPEN) {
       this.socket.send(message);
@@ -111,6 +128,13 @@ class SocketClient {
     return () => {
       this.statusHandlers.delete(handler);
     };
+  }
+
+  private resubscribeAll() {
+    for (const sub of this.subscriptions.values()) {
+      const message = JSON.stringify({ event: sub.event, payload: sub.payload });
+      this.socket?.send(message);
+    }
   }
 
   private handleMessage(rawMessage: string) {

@@ -36,7 +36,7 @@ const VisionMission: React.FC = () => {
           squareSize={55}
           direction="diagonal"
           borderColor="rgba(255,255,255,0.06)"
-          hoverFillColor="#F97316"
+          hoverFillColor="transparent"
           shape="square"
           hoverTrailAmount={3}
         />
