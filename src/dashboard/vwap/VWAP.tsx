@@ -1,5 +1,5 @@
 // VWAP.tsx
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import {
   Box,
   Paper,
@@ -342,11 +342,11 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 // ============================================================
 // KPI strip
 // ============================================================
-const KpiStrip: React.FC<{ merged: MergedRow[] }> = ({ merged }) => {
+const KpiStrip: React.FC<{ merged: MergedRow[]; removeDuplicates: boolean }> = ({ merged, removeDuplicates }) => {
   if (!merged.length) return null;
 
-  const buys = merged.filter((r) => r.plot_buy_signal).length;
-  const sells = merged.filter((r) => r.plot_sell_signal).length;
+  const buys = merged.filter((r) => removeDuplicates ? r.plot_buy_signal : r.buy_signal).length;
+  const sells = merged.filter((r) => removeDuplicates ? r.plot_sell_signal : r.sell_signal).length;
   const last = merged[merged.length - 1];
   const first = merged[0];
   const change = last.n_close - first.n_open;
@@ -531,9 +531,11 @@ const ChartPanel: React.FC<{ merged: MergedRow[]; asset: string; showSignals: bo
       dragmode: 'pan',
       hovermode: 'x unified',
       hoverlabel: {
-        font: { color: '#fff' },
-        bgcolor: '#1e293b',
-        bordercolor: '#334155',
+        font: { color: '#f1f5f9', size: 12, family: '"Inter", "Roboto", sans-serif' },
+        bgcolor: 'rgba(0,0,0,0.82)',
+        bordercolor: 'rgba(255,255,255,0.08)',
+        borderradius: 8,
+        align: 'left',
       },
       xaxis: {
         rangeslider: { visible: false },
@@ -543,6 +545,8 @@ const ChartPanel: React.FC<{ merged: MergedRow[]; asset: string; showSignals: bo
         spikemode: 'across',
         tickfont: { color: '#475569', size: 11, weight: 600 },
         title: { text: 'Time', font: { color: '#64748b', size: 12, weight: 600 } },
+        dtick: 1800000,
+        tickformat: '%I:%M %p',
       },
       yaxis: {
         side: 'right',
@@ -680,11 +684,21 @@ const VWAP: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<VWAPApiResponse | null>(null);
+  const initialMounted = useRef(false);
 
   useEffect(() => {
     handleGenerate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!initialMounted.current) {
+      initialMounted.current = true;
+      return;
+    }
+    handleGenerate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params.remove_duplicates]);
 
   const handleParamChange = useCallback(
     (patch: Partial<VWAPRequestPayload>) => setParams((p) => ({ ...p, ...patch })),
@@ -877,7 +891,7 @@ const VWAP: React.FC = () => {
       {/* Results */}
       {result ? (
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-          <KpiStrip merged={result.merged_data} />
+          <KpiStrip merged={result.merged_data} removeDuplicates={params.remove_duplicates} />
 
           <Paper
             elevation={0}

@@ -123,7 +123,7 @@ export default function LiveTable() {
   const ceMax   = data ? getMaxMap(data.ce) : {};
   const peMax   = data ? getMaxMap(data.pe) : {};
   const ceCols  = buildColumns(ceMax, '#445a7e');
-  const peCols  = buildColumns(peMax, '#834f7c');
+  const peCols  = buildColumns(peMax, '#ff2056');
 
   const gridSx = useCallback((highlightBg: string, hoverBg: string) => ({
     border: 'none',
@@ -224,21 +224,23 @@ export default function LiveTable() {
           <div className="flex flex-wrap items-center gap-4 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-[11px] text-slate-500 shadow-sm">
             <span className="font-semibold text-slate-700">Max highlights:</span>
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#445a7e' }} />
+              <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#0077bc' }} />
               CE — OI, IV, Delta, Theta
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#834f7c' }} />
+              <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#a73232' }} />
               PE — OI, IV, Delta, Theta
             </span>
           </div>
 
+          <div className='grid grid-cols-2 gap-3'>
+            <div>
           {/* CE Table */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: '#445a7e' }} />
-              <h3 className="text-sm font-semibold text-slate-800">Call Options (CE)</h3>
-            </div>
+
+            <div className="mb-3 flex items-center gap-2.5">
+                <div className="h-4 w-1 rounded-full bg-emerald-500" />
+                <p className="text-sm font-bold uppercase tracking-[0.08em] text-slate-800">Call Options (CE)</p>
+              </div>
             <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm" style={{ height: 400 }}>
               <DataGrid
                 rows={ceRows}
@@ -246,17 +248,16 @@ export default function LiveTable() {
                 pageSizeOptions={[10]}
                 density="compact"
                 disableRowSelectionOnClick
-                sx={gridSx('#445a7e', '#f0f4ff')}
+                sx={gridSx('#0077bc', '#f0f4ff')}
               />
             </div>
-          </div>
-
-          {/* PE Table */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: '#834f7c' }} />
-              <h3 className="text-sm font-semibold text-slate-800">Put Options (PE)</h3>
             </div>
+            <div>
+            {/* PE Table */}
+            <div className="mb-3 flex items-center gap-2.5">
+                <div className="h-4 w-1 rounded-full bg-rose-500" />
+                <p className="text-sm font-bold uppercase tracking-[0.08em] text-slate-800">Put Options (PE)</p>
+              </div>
             <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm" style={{ height: 400 }}>
               <DataGrid
                 rows={peRows}
@@ -264,10 +265,13 @@ export default function LiveTable() {
                 pageSizeOptions={[10]}
                 density="compact"
                 disableRowSelectionOnClick
-                sx={gridSx('#834f7c', '#fdf0fc')}
+                sx={gridSx('#a73232', '#fdf0fc')}
               />
             </div>
+            </div>
           </div>
+
+         
         </>
       )}
     </div>

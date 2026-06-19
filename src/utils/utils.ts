@@ -44,3 +44,11 @@ export const escalationLevels = [
     href: 'https://scores.sebi.gov.in',
   },
 ];
+
+
+export const attentionInvestorPoints: string[] = [
+  'Stock Brokers can accept securities as margin from clients only by way of pledge in the depository system w.e.f. September 01, 2020.',
+  'Update your email id and mobile number with your stock broker / depository participant and receive OTP directly from depository on your email id and/or mobile number to create pledge.',
+  'Check your securities / bonds in the consolidated account statement issued by NSDL/CDSL every month.',
+  'Third party products are not Exchange traded products, and the broker is just acting as distributor and all disputes with respect to the distribution activity, would not have access to SCORES/ODR, Exchange investor redressal forum or Arbitration mechanism.',
+];

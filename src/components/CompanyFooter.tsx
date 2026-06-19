@@ -3,7 +3,7 @@ import SectionReveal, { fadeUp, staggerContainer } from './SectionReveal';
 import { Logo } from '../assets/index';
 import { motion } from 'framer-motion';
 import { getCachedVideoUrl } from '../utils/videoCache';
-import { companyDetails, escalationLevels, regulatoryLinks } from '../utils/utils';
+import { attentionInvestorPoints, companyDetails, escalationLevels, regulatoryLinks } from '../utils/utils';
 
 
 
@@ -96,7 +96,7 @@ const CompanyFooter: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-5 text-sm sm:text-base text-white/60 leading-relaxed">
+            <div className="space-y-5 text-sm sm:text-base text-white/65 leading-relaxed">
               <div>
                 <p className="text-xs uppercase tracking-[0.24em] text-white mb-2">
                   Registered Office Address
@@ -147,9 +147,9 @@ const CompanyFooter: React.FC = () => {
                 <p className="text-[10px] uppercase tracking-[0.18em] text-brand-saffron mb-1.5">
                   Compliance Officer
                 </p>
-                <p className="text-[11px] sm:text-xs text-white font-medium mb-1">
+                {/* <p className="text-[11px] sm:text-xs text-white font-medium mb-1">
                   Mr. Rajesh Sharma
-                </p>
+                </p> */}
                 <div className="flex items-center gap-1.5 text-white/70 text-[11px] sm:text-xs">
                   <PhoneIcon />
                   <span>+91 22 4000 0001</span>
@@ -222,7 +222,7 @@ const CompanyFooter: React.FC = () => {
           </motion.div>
         </div>
 
-        {/* NEW: Grievance Redressal Escalation Matrix */}
+        {/* Grievance Redressal Escalation Matrix */}
         <SectionReveal variants={fadeUp}>
           <div className="mt-8 pt-6 border-t border-white/8">
             <p className="text-[11px] uppercase tracking-[0.24em] text-white mb-3">
@@ -246,7 +246,7 @@ const CompanyFooter: React.FC = () => {
                         </span>
                         <span className="text-[11px] font-semibold text-white/80">{step.title}</span>
                       </div>
-                      <p className="text-[11px] sm:text-xs text-white/60 leading-relaxed mb-2">
+                      <p className="text-[11px] sm:text-xs text-white/65 leading-relaxed mb-2">
                         {step.description}
                       </p>
                       <a
@@ -259,21 +259,69 @@ const CompanyFooter: React.FC = () => {
                       </a>
                     </div>
                   </div>
-
-
                 </React.Fragment>
               ))}
             </div>
           </div>
         </SectionReveal>
 
+        {/* NEW: Attention Investors — mandatory verbatim message per NSE/BSE circulars */}
+        <SectionReveal variants={fadeUp}>
+          <div className="mt-4 pt-6 border-t border-white/8">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-brand-saffron" />
+              <p className="text-[11px] uppercase tracking-[0.24em] text-white">
+                Attention Investors
+              </p>
+            </div>
+            <p className="text-[10px] text-white/35 mb-4 max-w-2xl">
+              Mandatory advisory as prescribed by NSE/BSE circulars on investor protection.
+            </p>
+
+            <motion.div
+              variants={staggerContainer(0.08)}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-40px' }}
+              className="grid grid-rows-1 sm:grid-rows-2 "
+            >
+              {attentionInvestorPoints.map((point, idx) => (
+                <motion.div
+                  key={idx}
+                  variants={fadeUp}
+                  className="
+                    flex gap-3
+                    py-1
+                  "
+                >
+                  <span
+                    className="
+                      shrink-0
+                      flex items-center justify-center
+                      h-5 w-5 mt-0.5
+                      rounded-full
+                      bg-brand-saffron/10
+                      text-[10px] font-bold text-brand-saffron
+                    "
+                  >
+                    {idx + 1}
+                  </span>
+                  <p className="text-[11px] sm:text-xs text-white/65 leading-relaxed">
+                    {point}
+                  </p>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </SectionReveal>
+
         {/* Compliance & Disclosures */}
         <SectionReveal variants={fadeUp}>
-          <div className="mt-10 sm:mt-12 pt-8 border-t border-white/8 ">
+          <div className="mt-4 sm:mt-4 pt-8 border-t border-white/8 ">
             <p className="text-xs uppercase tracking-[0.24em] text-white mb-4">
               Compliance &amp; Disclosures
             </p>
-            <div className="space-y-4 text-[11px] sm:text-xs text-white/60 leading-relaxed">
+            <div className="space-y-4 text-[11px] sm:text-xs text-white/65 leading-relaxed">
               <p>
                 AlphaMatrix (CIN: U67120MH2008PTC185004, GSTIN: 27AAFCM6712K1Z9) is a
                 member of NSE &amp; BSE with SEBI Registration No: INZ000318637.
@@ -364,7 +412,7 @@ const CompanyFooter: React.FC = () => {
           <p className="text-xs sm:text-sm text-white/50">
             &copy; 2026 AlphaMatrix. All rights reserved.
           </p>
-          <p className="text-xs uppercase tracking-[0.22em] text-white/25">
+          <p className="text-xs uppercase tracking-[0.22em] text-white/65">
             NSE: 90415&nbsp;&nbsp;•&nbsp;&nbsp;BSE: 6879
           </p>
         </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   Box,
@@ -12,11 +12,42 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+
 import { HighchartsReact } from "highcharts-react-official";
 import Highcharts from "highcharts";
+
+const textFieldSx = {
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '12px',
+    bgcolor: '#f8fafc',
+    transition: 'box-shadow 0.2s, border-color 0.2s',
+    '& fieldset': { borderColor: '#e2e8f0' },
+    '&:hover fieldset': { borderColor: '#cbd5e1' },
+    '&.Mui-focused fieldset': { borderColor: '#2563eb', borderWidth: '1.5px' },
+    '&.Mui-focused': { boxShadow: '0 0 0 3px rgba(37,99,235,0.1)' },
+  },
+  '& .MuiInputLabel-root': { fontSize: '0.82rem', color: '#64748b' },
+  '& .MuiInputLabel-root.Mui-focused': { color: '#2563eb' },
+  '& .MuiOutlinedInput-input': { fontSize: '0.85rem', color: '#1e293b' },
+};
+
+const selectSx = {
+  ...textFieldSx,
+  '& .MuiSelect-select': { fontSize: '0.85rem', color: '#1e293b' },
+};
+
+const buttonSx = {
+  height: 40,
+  borderRadius: '12px',
+  px: 3,
+  width: 'max-content',
+  bgcolor: '#f97316',
+  textTransform: 'none',
+  fontWeight: 600,
+  fontSize: '0.82rem',
+  boxShadow: '0 1px 3px rgba(249,115,22,0.25)',
+  '&:hover': { bgcolor: '#ea580c', boxShadow: '0 2px 6px rgba(249,115,22,0.35)' },
+};
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -60,7 +91,7 @@ export default function HistoricalPlot() {
   const [data, setData] = useState<StrikeData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+  const hasAutoFetched = useRef(false);
   const validateAndFetchExpiry = useCallback(async (date: Date) => {
     const sDate = formatDate(date);
     try {
@@ -125,6 +156,13 @@ export default function HistoricalPlot() {
     }
   };
 
+  useEffect(() => {
+    if (expiry && selectedDate && !hasAutoFetched.current) {
+      hasAutoFetched.current = true;
+      fetchData();
+    }
+  }, [expiry, selectedDate]);
+
   const getTimestamp = (time: string) => {
     if (!selectedDate) return 0;
     const [h, m, s] = time.split(":").map(Number);
@@ -135,38 +173,44 @@ export default function HistoricalPlot() {
 
   const buildOptions = (strikeData: StrikeData): Highcharts.Options => {
     const metricLabel = metric.slice(2).toUpperCase();
-    const ceData = strikeData.ce.map((p) => [getTimestamp(p.time), p[metric as keyof GreekPoint]] as [number, number | null]).filter(([, v]) => v !== null);
-    const peData = strikeData.pe.map((p) => [getTimestamp(p.time), p[metric as keyof GreekPoint]] as [number, number | null]).filter(([, v]) => v !== null);
+    const ceData = strikeData.ce.map((p) => [getTimestamp(p.time), p[metric as keyof GreekPoint]] as [number, number | null]).filter(([, v]) => v !== null) as [number, number][];
+    const peData = strikeData.pe.map((p) => [getTimestamp(p.time), p[metric as keyof GreekPoint]] as [number, number | null]).filter(([, v]) => v !== null) as [number, number][];
     const vLineTime = getTimestamp(timeStr);
 
     return {
+      chart: { animation: false, style: { fontFamily: 'inherit' } },
       title: {
-        text: `${metricLabel} — CE vs PE | ${expiry} | Strike ${strikeData.strike} | ${selectedDate ? formatDate(selectedDate) : ""}`,
+        text: `${metricLabel} — Strike ${strikeData.strike}`,
+        style: { fontSize: '13px', fontWeight: '600', color: '#111' },
       },
       xAxis: {
         type: "datetime",
         title: { text: "Time" },
+        labels: { style: { fontSize: '11px' } },
         plotLines: [{
-          color: "green",
+          color: "#22c55e",
           width: 2,
           dashStyle: "Dash",
           value: vLineTime,
-          label: { text: timeStr, align: "left" },
+          label: { text: timeStr, align: "left", style: { fontSize: '10px', color: '#22c55e' } },
           zIndex: 5,
         }],
       },
-      yAxis: { title: { text: metricLabel } },
+      yAxis: { title: { text: metricLabel }, labels: { style: { fontSize: '11px' } } },
       legend: { align: "center", verticalAlign: "top" },
-      plotOptions: { series: { marker: { enabled: false } } },
+      plotOptions: { series: { marker: { enabled: false }, animation: false } },
       series: [
-        { name: "CE", type: "line", color: "royalblue", data: ceData },
-        { name: "PE", type: "line", color: "crimson", data: peData },
+        { name: "CE", type: "line", color: "#3b82f6", data: ceData },
+        { name: "PE", type: "line", color: "#ef4444", data: peData },
       ],
+      credits: { enabled: false },
+      responsive: {
+        rules: [{ condition: { maxWidth: 600 }, chartOptions: { legend: { enabled: false } } }],
+      },
     };
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDateFns}>
       <Box className="space-y-5">
         <motion.div
           initial={{ opacity: 0, y: 14 }}
@@ -180,11 +224,18 @@ export default function HistoricalPlot() {
           </div>
 
         <Box className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[180px_160px_150px_160px_auto] xl:items-end">
-          <DatePicker
+          <TextField
+            type="date"
             label="Select Date"
-            value={selectedDate}
-            onChange={(d) => setSelectedDate(d)}
-            slotProps={{ textField: { size: "small", fullWidth: true } }}
+            value={selectedDate ? formatDate(selectedDate) : ''}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSelectedDate(val ? new Date(val + 'T00:00:00') : null);
+            }}
+            size="small"
+            fullWidth
+            sx={textFieldSx}
+            slotProps={{ inputLabel: { shrink: true } }}
           />
 
           <TextField
@@ -194,6 +245,7 @@ export default function HistoricalPlot() {
             onChange={(e) => setExpiry(e.target.value.toUpperCase())}
             placeholder="e.g. 07AUG25"
             fullWidth
+            sx={textFieldSx}
           />
 
           <TextField
@@ -203,9 +255,10 @@ export default function HistoricalPlot() {
             onChange={(e) => setTimeStr(e.target.value)}
             placeholder="10:16:00"
             fullWidth
+            sx={textFieldSx}
           />
 
-          <FormControl size="small" fullWidth>
+          <FormControl size="small" fullWidth sx={selectSx}>
             <InputLabel>Greek Metric</InputLabel>
             <Select value={metric} label="Greek Metric" onChange={(e) => setMetric(e.target.value)}>
               {METRICS.map((m) => (
@@ -214,7 +267,7 @@ export default function HistoricalPlot() {
             </Select>
           </FormControl>
 
-          <Button variant="contained" onClick={fetchData} disabled={loading} sx={{ width:"15%", height: 40, borderRadius: 2, px: 3, bgcolor: "#f97316", "&:hover": { bgcolor: "#ea580c" } }}>
+          <Button variant="contained" onClick={fetchData} disabled={loading} sx={buttonSx}>
             {loading ? "Loading..." : "Fetch"}
           </Button>
         </Box>
@@ -246,6 +299,5 @@ export default function HistoricalPlot() {
         ))}
         </div>
       </Box>
-    </LocalizationProvider>
   );
 }

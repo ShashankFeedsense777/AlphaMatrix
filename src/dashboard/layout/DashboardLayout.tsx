@@ -78,7 +78,7 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
 
     return (
         <div className="min-h-screen flex flex-col bg-white">
-            <header className="relative z-50 bg-[#111111]">
+            <header className="fixed top-0 w-full z-50 bg-[#111111]">
                 <div className="flex items-center h-[70px] px-4 sm:px-6 gap-4">
                     <div className="flex items-center gap-2.5 mr-2 shrink-0">
                         <div className="w-10 h-10 flex items-center justify-center">
@@ -103,8 +103,8 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
                                     <button
                                         type="button"
                                         className={`relative px-3 py-1.5 text-[13px] transition-colors duration-150 rounded-sm ${isMenuOpen || isActive
-                                                ? 'text-white'
-                                                : 'text-white/55 hover:text-white'
+                                            ? 'text-white'
+                                            : 'text-white/55 hover:text-white'
                                             }`}
                                     >
                                         {item.label}
@@ -160,10 +160,10 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
                                             disabled={!child.available}
                                             onClick={() => child.available && handleSelect(child.view)}
                                             className={`text-left text-[13px] transition-colors duration-150 w-fit ${child.available
-                                                    ? activeView === child.view
-                                                        ? 'text-white font-semibold'
-                                                        : 'text-white/65 hover:text-white'
-                                                    : 'text-white/25 cursor-not-allowed'
+                                                ? activeView === child.view
+                                                    ? 'text-white font-semibold'
+                                                    : 'text-white/65 hover:text-white'
+                                                : 'text-white/25 cursor-not-allowed'
                                                 }`}
                                         >
                                             {child.label}
@@ -181,7 +181,7 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
                 </AnimatePresence>
             </header>
 
-            <div className="relative flex-1">
+            <div className="relative flex-1 pt-[70px]">
                 <AnimatePresence>
                     {isOpen && (
                         <motion.div
@@ -196,7 +196,7 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
                     )}
                 </AnimatePresence>
 
-                <main className="min-h-[calc(100vh-52px)] bg-white">
+                <main className="min-h-[calc(100vh-70px)] bg-white">
                     {children}
                 </main>
             </div>
