@@ -19,7 +19,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
     {
         label: 'State Of The Market',
-        description: 'State of the market\nlittle overview',
+        description: 'Live and historical options Greeks —\nDelta, Gamma, Theta, Vega — across strikes,\nexpires and instruments in real time',
         children: [
             { label: 'Live Greeks', view: 'live-greeks', available: true },
             { label: 'Historical Greeks', view: 'historical-greeks', available: true },
@@ -27,14 +27,14 @@ const NAV_ITEMS: NavItem[] = [
     },
     {
         label: 'VWAP',
-        description: 'Volume weighted\naverage price',
+        description: 'Rolling volume-weighted average price\nwith upper/lower volatility bands and\nauto-generated buy/sell entry signals',
         children: [
             { label: 'VWAP Analysis', view: 'vwap', available: true },
         ],
     },
     {
         label: 'Margin Calculator',
-        description: 'Margin & exposure\ncalculator',
+        description: 'SPAN-based margin and exposure across\nF&O buy and sell legs, with live backend\nsync for accurate real-time requirements',
         children: [
             { label: 'F&O Margin Calculator', view: 'margin-calculator', available: true },
         ],
@@ -143,9 +143,12 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
                             onMouseEnter={() => handleMouseEnter(openMenu!)}
                             onMouseLeave={handleMouseLeave}
                         >
-                            <div className="flex gap-12 px-6 sm:px-8 py-5 sm:py-6">
-                                <div className="shrink-0 w-44 hidden sm:block">
-                                    <p className="text-[13px] font-bold text-white leading-snug whitespace-pre-line">
+                            <div className="flex gap-14 px-8 sm:px-10 py-6 sm:py-7">
+                                <div className="shrink-0 w-48 hidden sm:flex flex-col gap-1.5">
+                                    <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/30">
+                                        About
+                                    </span>
+                                    <p className="text-[12.5px] font-normal text-white/70 leading-relaxed whitespace-pre-line">
                                         {openItem.description}
                                     </p>
                                 </div>

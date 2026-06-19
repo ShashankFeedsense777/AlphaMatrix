@@ -94,6 +94,32 @@ export interface MarginApiResponse {
 // }
 
 
+// ─── VWAP Dashboard API ───────────────────────────────────────────────────────
+
+export interface VWAPRequestPayload {
+    dt_date: string;
+    asset?: string;
+    start_time?: string;
+    end_time?: string;
+    freq?: number;
+    show_signals?: boolean;
+    remove_duplicates?: boolean;
+}
+
+export interface VWAPDataRow {
+    [key: string]: string | number | boolean | null;
+}
+
+export interface VWAPApiResponse {
+    futures_data: VWAPDataRow[];
+    merged_data: VWAPDataRow[];
+}
+
+export async function fetchVwapData(payload: VWAPRequestPayload): Promise<VWAPApiResponse> {
+    const response = await apiClient.post(endpoint.vwapData, payload);
+    return response.data;
+}
+
 // ─── Margin Calculator API ────────────────────────────────────────────────────
 
 const MARGIN_API_BASE = import.meta.env?.VITE_MARGIN_API_BASE ?? 'http://localhost:8000';

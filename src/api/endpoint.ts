@@ -3,5 +3,5 @@ export const endpoint = {
     register:"/auth/register",
     requestOtp:"/api/request-otp",
     validateOtp:"/api/validate-otp",
-    
+    vwapData: "/api/vwap/data",
 }
