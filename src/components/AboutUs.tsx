@@ -149,8 +149,7 @@ const handleVideoEnded = (e: React.SyntheticEvent<HTMLVideoElement>) => {
                   onEnded={handleVideoEnded}
                 />
                 <div className="text-center relative z-10 select-none">
-                  <h3 className="text-[clamp(2rem,8vw,4.5rem)] font-bold text-white tracking-tight mb-1">Alpha</h3>
-                  <h3 className="text-[clamp(1.5rem,6vw,3rem)] font-bold text-brand-saffron tracking-widest">Matrix</h3>
+                  <h3 className="text-[clamp(2rem,8vw,4.5rem)] font-bold text-white tracking-tight mb-1">AlphaMatrix</h3>
                 </div>
               </div>
             </SectionReveal>

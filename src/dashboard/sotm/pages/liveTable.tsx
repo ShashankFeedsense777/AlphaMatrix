@@ -233,43 +233,61 @@ export default function LiveTable() {
             </span>
           </div>
 
-          <div className='grid grid-cols-2 gap-3'>
-            <div>
-          {/* CE Table */}
+         <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+  {/* CE Table */}
+  <div>
+    <div className="mb-3 flex items-center gap-2.5">
+      <div className="h-4 w-1 rounded-full bg-emerald-500" />
+      <p className="text-sm font-bold uppercase tracking-[0.08em] text-slate-800">
+        Call Options (CE)
+      </p>
+    </div>
 
-            <div className="mb-3 flex items-center gap-2.5">
-                <div className="h-4 w-1 rounded-full bg-emerald-500" />
-                <p className="text-sm font-bold uppercase tracking-[0.08em] text-slate-800">Call Options (CE)</p>
-              </div>
-            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm" style={{ height: 400 }}>
-              <DataGrid
-                rows={ceRows}
-                columns={ceCols}
-                pageSizeOptions={[10]}
-                density="compact"
-                disableRowSelectionOnClick
-                sx={gridSx('#0077bc', '#f0f4ff')}
-              />
-            </div>
-            </div>
-            <div>
-            {/* PE Table */}
-            <div className="mb-3 flex items-center gap-2.5">
-                <div className="h-4 w-1 rounded-full bg-rose-500" />
-                <p className="text-sm font-bold uppercase tracking-[0.08em] text-slate-800">Put Options (PE)</p>
-              </div>
-            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm" style={{ height: 400 }}>
-              <DataGrid
-                rows={peRows}
-                columns={peCols}
-                pageSizeOptions={[10]}
-                density="compact"
-                disableRowSelectionOnClick
-                sx={gridSx('#a73232', '#fdf0fc')}
-              />
-            </div>
-            </div>
-          </div>
+    <div
+      className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm"
+      style={{ height: "min(400px, 70vh)" }}
+    >
+      <DataGrid
+        rows={ceRows}
+        columns={ceCols}
+        pageSizeOptions={[10]}
+        density="compact"
+        disableRowSelectionOnClick
+        sx={{
+          ...gridSx("#0077bc", "#f0f4ff"),
+          minWidth: 700,
+        }}
+      />
+    </div>
+  </div>
+
+  {/* PE Table */}
+  <div>
+    <div className="mb-3 flex items-center gap-2.5">
+      <div className="h-4 w-1 rounded-full bg-rose-500" />
+      <p className="text-sm font-bold uppercase tracking-[0.08em] text-slate-800">
+        Put Options (PE)
+      </p>
+    </div>
+
+    <div
+      className="overflow-x-auto rounded-3xl border border-slate-200 bg-white shadow-sm"
+      style={{ height: "min(400px, 70vh)" }}
+    >
+      <DataGrid
+        rows={peRows}
+        columns={peCols}
+        pageSizeOptions={[10]}
+        density="compact"
+        disableRowSelectionOnClick
+        sx={{
+          ...gridSx("#a73232", "#fdf0fc"),
+          minWidth: 700,
+        }}
+      />
+    </div>
+  </div>
+</div>
 
          
         </>

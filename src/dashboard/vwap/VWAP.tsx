@@ -523,7 +523,7 @@ const ChartPanel: React.FC<{ merged: MergedRow[]; asset: string; showSignals: bo
     }
 
     const layout: any = {
-      title: { text: `${asset} · VWAP Dashboard`, font: { size: 14, color: '#1e293b', weight: 700 } },
+      title: { text: `${asset}`, font: { size: 14, color: '#1e293b', weight: 700 } },
       paper_bgcolor: '#ffffff',
       plot_bgcolor: '#ffffff',
       font: { color: '#334155', family: '"Inter", "Roboto", sans-serif' },

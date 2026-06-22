@@ -37,7 +37,7 @@ const ShapeGrid = ({
   const stockImages = useRef<HTMLImageElement[]>([]);
 
   useEffect(() => {
-    const svgModules = import.meta.glob('../../assests/stocksSVG/*.svg', {
+    const svgModules = import.meta.glob('../../assets/stocksSVG/*.svg', {
       eager: true,
       query: '?url',
       import: 'default',

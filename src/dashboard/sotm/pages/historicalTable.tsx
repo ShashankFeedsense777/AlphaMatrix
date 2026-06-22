@@ -298,27 +298,55 @@ export default function HistoricalTable() {
               ))}
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-            <div>
-              <div className="mb-3 flex items-center gap-2.5">
-                <div className="h-4 w-1 rounded-full bg-emerald-500" />
-                <p className="text-sm font-bold uppercase tracking-[0.08em] text-slate-800">Call Options (CE)</p>
-              </div>
-              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" style={{ height: 420 }}>
-                <DataGrid rows={enrich(data.ce, "CE")} columns={COLUMNS} sx={dataGridSx} pageSizeOptions={[10]} density="compact" disableRowSelectionOnClick hideFooterSelectedRowCount />
-              </div>
-            </div>
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+  <div>
+    <div className="mb-3 flex items-center gap-2.5">
+      <div className="h-4 w-1 rounded-full bg-emerald-500" />
+      <p className="text-sm font-bold uppercase tracking-[0.08em] text-slate-800">
+        Call Options (CE)
+      </p>
+    </div>
 
-            <div>
-              <div className="mb-3 flex items-center gap-2.5">
-                <div className="h-4 w-1 rounded-full bg-rose-500" />
-                <p className="text-sm font-bold uppercase tracking-[0.08em] text-slate-800">Put Options (PE)</p>
-              </div>
-              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" style={{ height: 420 }}>
-                <DataGrid rows={enrich(data.pe, "PE")} columns={COLUMNS} sx={dataGridSx} pageSizeOptions={[10]} density="compact" disableRowSelectionOnClick hideFooterSelectedRowCount />
-              </div>
-            </div>
-            </div>
+    <div
+      className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+      style={{ height: "min(420px, 70vh)" }}
+    >
+      <DataGrid
+        rows={enrich(data.ce, "CE")}
+        columns={COLUMNS}
+        sx={dataGridSx}
+        pageSizeOptions={[10]}
+        density="compact"
+        disableRowSelectionOnClick
+        hideFooterSelectedRowCount
+      />
+    </div>
+  </div>
+
+  <div>
+    <div className="mb-3 flex items-center gap-2.5">
+      <div className="h-4 w-1 rounded-full bg-rose-500" />
+      <p className="text-sm font-bold uppercase tracking-[0.08em] text-slate-800">
+        Put Options (PE)
+      </p>
+    </div>
+
+    <div
+      className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+      style={{ height: "min(420px, 70vh)" }}
+    >
+      <DataGrid
+        rows={enrich(data.pe, "PE")}
+        columns={COLUMNS}
+        sx={dataGridSx}
+        pageSizeOptions={[10]}
+        density="compact"
+        disableRowSelectionOnClick
+        hideFooterSelectedRowCount
+      />
+    </div>
+  </div>
+</div>
           </>
         )}
       </Box>

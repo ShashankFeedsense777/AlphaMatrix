@@ -411,7 +411,11 @@ const CompanyFooter: React.FC = () => {
         <div className="mt-8 sm:mt-10 pt-6 border-t border-white/8 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
           <p className="text-xs sm:text-sm text-white/50">
             &copy; 2026 AlphaMatrix. All rights reserved.
+           
           </p>
+           <p className="text-xs sm:text-sm text-white/50">
+             Design, development & deployment by Feedsense AI
+           </p>
           <p className="text-xs uppercase tracking-[0.22em] text-white/65">
             NSE: 90415&nbsp;&nbsp;•&nbsp;&nbsp;BSE: 6879
           </p>
