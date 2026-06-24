@@ -109,19 +109,21 @@ const HeroSection: React.FC = () => {
           variants={fadeUp}
           className="mt-5 sm:mt-8 text-[clamp(1.5rem,6vw,4rem)] text-gray-300 font-light leading-tight"
         >
+          <span className="text-white font-semibold">AlphaMatrix</span>
+          <br/>
           We are building the{' '}
           <br/>
           <span className="text-white font-semibold">best-in-class</span>
         </motion.h1>
-        
 
         <motion.p
           variants={fadeUp}
-          className="text-[clamp(2.25rem,8vw,4.5rem)] font-extrabold text-white leading-[1.05] "
+          className="text-[clamp(2.25rem,8vw,4.5rem)] font-extrabold text-white leading-[1.05]"
         >
-          Quintessential AI ready 
+          Quintessential{' '}
+          <span className="text-brand-saffron">AlphaMatrix</span>{' '}AI ready
           <br/>
-          <strong className=" text-brand-saffron block mt-2">  Humanoid{' '} Quant Firm</strong>
+          <strong className="text-brand-saffron block mt-2">Humanoid Quant Firm</strong>
         </motion.p>
 
        

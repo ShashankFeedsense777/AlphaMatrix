@@ -3,6 +3,8 @@ import { motion, Variants } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import SEO from './components/SEO';
+import StructuredData from './components/StructuredData';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import SplashScreen from './components/SplashScreen';
@@ -218,20 +220,89 @@ function LandingPage() {
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/login" element={<EmployeeLoginPage />} />
-      <Route element={<PrivateRoute />}>
-        <Route path="/dashboard" element={<DashboardPage />}>
-          <Route index element={<Navigate to="live-greeks" replace />} />
-          <Route path="live-greeks" element={<LiveGreeks />} />
-          <Route path="historical-greeks" element={<HistoricalGreeks />} />
-          <Route path="vwap" element={<VWAP />} />
-          <Route path="margin-calculator" element={<MarginCalculator />} />
+    <>
+      <SEO />
+      <StructuredData />
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route
+          path="/login"
+          element={
+            <>
+              <SEO
+                title="Employee Login"
+                description="Secure employee login portal for AlphaMatrix quantitative trading platform."
+                canonical="https://alphamatrixsecurities.com/login"
+                noIndex
+              />
+              <EmployeeLoginPage />
+            </>
+          }
+        />
+        <Route element={<PrivateRoute />}>
+          <Route path="/dashboard" element={<DashboardPage />}>
+            <Route index element={<Navigate to="live-greeks" replace />} />
+            <Route
+              path="live-greeks"
+              element={
+                <>
+                  <SEO
+                    title="Live Greeks"
+                    description="Real-time options Greeks dashboard — Delta, Gamma, Theta, Vega, Rho with live market data."
+                    canonical="https://alphamatrixsecurities.com/dashboard/live-greeks"
+                    noIndex
+                  />
+                  <LiveGreeks />
+                </>
+              }
+            />
+            <Route
+              path="historical-greeks"
+              element={
+                <>
+                  <SEO
+                    title="Historical Greeks"
+                    description="Historical options Greeks analysis and backtesting data for quantitative trading strategies."
+                    canonical="https://alphamatrixsecurities.com/dashboard/historical-greeks"
+                    noIndex
+                  />
+                  <HistoricalGreeks />
+                </>
+              }
+            />
+            <Route
+              path="vwap"
+              element={
+                <>
+                  <SEO
+                    title="VWAP Calculator"
+                    description="Volume-Weighted Average Price (VWAP) calculator and charting tool for algorithmic trading."
+                    canonical="https://alphamatrixsecurities.com/dashboard/vwap"
+                    noIndex
+                  />
+                  <VWAP />
+                </>
+              }
+            />
+            <Route
+              path="margin-calculator"
+              element={
+                <>
+                  <SEO
+                    title="Margin Calculator"
+                    description="Trading margin calculator for derivatives and equities — calculate required margin and leverage."
+                    canonical="https://alphamatrixsecurities.com/dashboard/margin-calculator"
+                    noIndex
+                  />
+                  <MarginCalculator />
+                </>
+              }
+            />
+          </Route>
         </Route>
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
 

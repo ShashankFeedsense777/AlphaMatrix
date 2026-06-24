@@ -9,7 +9,7 @@ interface SocketMessage<T = unknown> {
   payload?: T;
   data?: T;
 }
-const DEFAULT_SOCKET_URL = `ws://localhost:8000/ws`;
+const DEFAULT_SOCKET_URL = `ws://192.168.29.70:8000/ws`;
 
 interface ActiveSubscription {
   event: string;
