@@ -4,6 +4,7 @@ export const companyDetails = [
   { label: 'NSE Membership', value: '90415' },
   { label: 'BSE Membership', value: '6879' },
   { label: 'SEBI Registration', value: 'INZ000318637' },
+  { label: 'NSCCL', value: 'M70105' },
 ];
 
 export const regulatoryLinks = [
@@ -73,7 +74,6 @@ export const attentionInvestorQuotes: string[] = [
 export const legalityLinks = [
   { label: 'Investor Charter', href: '/investor-charter' },
   { label: 'Investor Grievance', href: '/investor-grievance' },
-  { label: 'Risk Disclosure', href: '/risk-disclosure' },
   { label: 'How to File a Complaint', href: '/how-to-file-a-complaint' },
   { label: 'Investor Complaints Details', href: '/investor-complaints-details' },
 ];

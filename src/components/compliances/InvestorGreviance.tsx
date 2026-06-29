@@ -79,7 +79,7 @@ const escalationMatrix: EscalationRow[] = [
 
 // Pending field placeholder
 const Pending: React.FC = () => (
-  <span className="inline-flex items-center gap-1 text-amber-400/70 text-[11px] italic">
+  <span className="inline-flex items-center gap-1 text-amber-600/70 text-[11px] italic">
     <AlertCircle size={11} /> Pending
   </span>
 );
@@ -99,18 +99,18 @@ const SectionShell: React.FC<{
     initial="hidden"
     whileInView="visible"
     viewport={{ once: true, margin: '-60px' }}
-    className="py-8 sm:py-10 border-b border-white/8 last:border-b-0"
+    className="py-8 sm:py-10 border-b border-gray-200 last:border-b-0"
   >
     <div className="flex items-start gap-3 sm:gap-4 mb-5 sm:mb-6">
       <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl border border-brand-saffron/20 bg-brand-saffron/10 text-brand-saffron">
         {icon}
       </div>
       <div className="min-w-0 pt-1">
-        <h2 className="text-base sm:text-lg font-semibold text-white leading-snug">
+        <h2 className="text-base sm:text-lg font-semibold text-gray-900 leading-snug">
           {title}
         </h2>
         {subtitle && (
-          <p className="text-[11px] sm:text-xs text-white/40 mt-1 leading-relaxed">
+          <p className="text-[11px] sm:text-xs text-gray-500 font-bold mt-1 leading-relaxed">
             {subtitle}
           </p>
         )}
@@ -128,8 +128,8 @@ const InfoLine: React.FC<{
   <div className="flex items-start gap-2.5">
     <span className="mt-0.5 text-brand-saffron/60 shrink-0">{icon}</span>
     <div className="min-w-0">
-      <p className="text-[9px] uppercase tracking-wider text-white/35 mb-0.5">{label}</p>
-      <p className="text-[12px] sm:text-[12.5px] text-white/75 leading-relaxed break-words">
+      <p className="text-[9px] uppercase tracking-wider text-gray-700 font-bold mb-0.5">{label}</p>
+      <p className="text-[12px] sm:text-[12.5px] text-gray-600 leading-relaxed break-words">
         {value}
       </p>
     </div>
@@ -139,13 +139,13 @@ const InfoLine: React.FC<{
 const EscalationCard: React.FC<{ row: EscalationRow; index: number }> = ({ row, index }) => (
   <motion.div
     variants={fadeUp}
-    className="rounded-xl border border-white/8 bg-white/[0.03] p-4 sm:p-5 transition-colors hover:border-brand-saffron/25"
+    className="rounded-xl border border-gray-200 bg-white shadow-sm p-4 sm:p-5 transition-colors hover:border-brand-saffron/25"
   >
     <div className="flex items-center gap-2.5 mb-4">
       <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-saffron/10 text-[10px] font-bold text-brand-saffron">
         {index + 1}
       </span>
-      <p className="text-[13px] font-semibold text-white">{row.role}</p>
+      <p className="text-[13px] font-semibold text-black">{row.role}</p>
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
       <InfoLine
@@ -210,7 +210,7 @@ const InvestorGrievance: React.FC = () => {
               Grievance Redressal &amp; Escalation Mechanism
             </span>
           </div>
-          <h1 className="text-[clamp(1.75rem,5vw,2.5rem)] font-light text-white leading-tight mb-3">
+          <h1 className="text-[clamp(1.75rem,5vw,2.5rem)] font-light text-gray-900 leading-tight mb-3">
             Investor <span className="font-bold">Grievance</span>
           </h1>
           <p className="text-xs sm:text-sm text-gray-500 leading-relaxed max-w-xl mx-auto">
@@ -246,7 +246,7 @@ const InvestorGrievance: React.FC = () => {
           title="Write to Us Directly"
           icon={<Mail size={18} />}
         >
-          <p className="text-[12.5px] sm:text-sm text-white/65 leading-relaxed mb-1">
+          <p className="text-[12.5px] sm:text-sm text-gray-700 leading-relaxed mb-1">
             We are extremely sorry that you&rsquo;ve had a reason to complain. For any kind of
             grievance, you may write to us at:
           </p>
@@ -256,7 +256,7 @@ const InvestorGrievance: React.FC = () => {
           >
             grievances@alphamatrix.in
           </a>
-          <p className="text-[12.5px] sm:text-sm text-white/65 leading-relaxed mb-5">
+          <p className="text-[12.5px] sm:text-sm text-gray-700 leading-relaxed mb-5">
             We shall have your complaint properly investigated and dealt with efficiently.
           </p>
 
@@ -267,19 +267,19 @@ const InvestorGrievance: React.FC = () => {
             ].map(({ segment }) => (
               <div
                 key={segment}
-                className="rounded-xl border border-white/8 bg-white/[0.03] p-4"
+                className="rounded-xl border border-gray-200 bg-white shadow-sm p-4"
               >
                 <p className="text-[10px] font-bold uppercase tracking-widest text-brand-saffron/80 mb-3">
                   {segment}
                 </p>
-                <p className="text-[12.5px] text-white/80 font-medium mb-1.5">
+                <p className="text-[12.5px] text-gray-800 font-medium mb-1.5">
                   Compliance Officer: Mr. Sadanand Mishra
                 </p>
-                <div className="flex items-center gap-1.5 text-[12px] text-white/60 mb-1">
+                <div className="flex items-center gap-1.5 text-[12px] text-gray-600 mb-1">
                   <Phone size={12} className="text-brand-saffron/60" />
                   <span>022-4000 0001</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-[12px] text-white/60">
+                <div className="flex items-center gap-1.5 text-[12px] text-gray-600">
                   <Mail size={12} className="text-brand-saffron/60" />
                   <a
                     href="mailto:compliance@alphamatrix.in"
@@ -299,7 +299,7 @@ const InvestorGrievance: React.FC = () => {
           subtitle="Filing of complaints on SCORES — easy & quick"
           icon={<AlertCircle size={18} />}
         >
-          <p className="text-[12.5px] sm:text-sm text-white/65 leading-relaxed mb-4">
+          <p className="text-[12.5px] sm:text-sm text-gray-700 leading-relaxed mb-4">
             Visit the SCORES website:{' '}
             <a
               href="https://scores.sebi.gov.in"
@@ -313,18 +313,18 @@ const InvestorGrievance: React.FC = () => {
 
           <div className="space-y-4">
             <div>
-              <p className="text-[12px] font-semibold text-white/75 mb-2">
+              <p className="text-[12px] font-semibold text-gray-800 mb-2">
                 Register on the SCORES portal
               </p>
             </div>
 
             <div>
-              <p className="text-[12px] font-semibold text-white/75 mb-2">
+              <p className="text-[12px] font-semibold text-gray-800 mb-2">
                 Mandatory details for filing complaints on SCORES
               </p>
               <ul className="grid grid-cols-2 gap-1.5">
                 {['Name', 'PAN', 'Address', 'Mobile Number & Email ID'].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-[12px] text-white/60">
+                  <li key={item} className="flex items-center gap-2 text-[12px] text-gray-600">
                     <span className="h-1 w-1 rounded-full bg-brand-saffron/60 shrink-0" />
                     {item}
                   </li>
@@ -333,10 +333,10 @@ const InvestorGrievance: React.FC = () => {
             </div>
 
             <div>
-              <p className="text-[12px] font-semibold text-white/75 mb-2">Benefits</p>
+              <p className="text-[12px] font-semibold text-gray-800 mb-2">Benefits</p>
               <ul className="space-y-1">
                 {['Effective communication', 'Speedy redressal of grievances'].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-[12px] text-white/60">
+                  <li key={item} className="flex items-center gap-2 text-[12px] text-gray-600">
                     <span className="h-1 w-1 rounded-full bg-brand-saffron/60 shrink-0" />
                     {item}
                   </li>
@@ -348,7 +348,7 @@ const InvestorGrievance: React.FC = () => {
 
         {/* Footer note */}
         <div className="py-8 sm:py-10">
-          <p className="text-[11px] text-white/30 leading-relaxed">
+          <p className="text-[11px] text-gray-500 font-bold leading-relaxed">
             All escalation timelines follow SEBI/Exchange-prescribed norms. If your grievance
             remains unresolved after escalation through the above channels, you may approach
             SEBI SCORES or the SEBI Online Dispute Resolution (ODR) portal at{' '}
