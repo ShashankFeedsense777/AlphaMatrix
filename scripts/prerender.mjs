@@ -6,16 +6,21 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST = path.resolve(__dirname, '..', 'dist');
+const INDEX = path.join(DIST, 'index.html');
+const SHELL_INDEX = path.join(DIST, 'index.shell.html');
 
 const ROUTES = ['/'];
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const cleanHtml = (html) =>
+  html.replace(/\s(src|href)="blob:http:\/\/localhost:5199\/[^"]*"/g, '');
 
 async function startServer() {
   return new Promise((resolve, reject) => {
     const proc = spawn('npx', ['vite', 'preview', '--port', '5199', '--strictPort'], {
       cwd: path.resolve(__dirname, '..'),
       stdio: ['ignore', 'pipe', 'pipe'],
+      detached: true,
     });
 
     let resolved = false;
@@ -76,10 +81,20 @@ async function prerender() {
       // Small extra settle time for lazy-loaded components
       await sleep(1000);
 
-      const html = await page.content();
+      const html = cleanHtml(await page.content());
 
-      // Save prerendered version separately — real users get the empty shell,
-      // crawlers get this full-content version (routed via .htaccess)
+      if (route === '/' && fs.existsSync(INDEX) && !fs.existsSync(SHELL_INDEX)) {
+        fs.copyFileSync(INDEX, SHELL_INDEX);
+        console.log(`  Backed up original app shell to ${SHELL_INDEX}`);
+      }
+
+      // Make the canonical URL serve full HTML. Some static hosts ignore
+      // .htaccess, so crawler-only rewrites are not reliable.
+      if (route === '/') {
+        fs.writeFileSync(INDEX, html, 'utf-8');
+        console.log(`  Replaced ${INDEX} with prerendered HTML (${html.length} bytes)`);
+      }
+
       const prerenderedPath = path.join(DIST, 'index.prerendered.html');
       fs.writeFileSync(prerenderedPath, html, 'utf-8');
       console.log(`  Saved to ${prerenderedPath} (${html.length} bytes)`);
@@ -88,7 +103,11 @@ async function prerender() {
     }
   } finally {
     await browser.close();
-    server.kill();
+    try {
+      process.kill(-server.pid, 'SIGTERM');
+    } catch {
+      server.kill('SIGTERM');
+    }
     console.log('\nDone.');
   }
 }

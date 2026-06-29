@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Logo, Nature1, Nature2, Nature3 } from '../assets/index';
 import { requestLoginOtpAPI, validateLoginOtpAPI } from '../api/apiCalls';
 import ShapeGrid from './ui/ShapeGrid';
+import RiskDisclosureModal from './modal/RiskDisclosureModal';
 
 type LoginMode = 'email' | 'phone';
 
@@ -72,6 +73,15 @@ const EmployeeLoginPage: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
   const [otpError, setOtpError] = useState('');
+
+  const [showDisclosure, setShowDisclosure] = useState(() => {
+  return sessionStorage.getItem('fnoDisclosureAck') !== 'true';
+});
+
+const handleAcknowledgeDisclosure = () => {
+  sessionStorage.setItem('fnoDisclosureAck', 'true');
+  setShowDisclosure(false);
+};
 
   // Auto-slide logic
   useEffect(() => {
@@ -178,6 +188,10 @@ const EmployeeLoginPage: React.FC = () => {
   };
 
   return (
+    <>
+    <AnimatePresence>
+      {showDisclosure && <RiskDisclosureModal onAcknowledge={handleAcknowledgeDisclosure} />}
+    </AnimatePresence>
     <main className="relative min-h-svh overflow-x-hidden bg-[#060608] text-white selection:bg-brand-saffron selection:text-white">
       <div className="absolute inset-0 z-100">
         <ShapeGrid
@@ -391,6 +405,7 @@ const EmployeeLoginPage: React.FC = () => {
       </div>
 
     </main>
+    </>
   );
 };
 
