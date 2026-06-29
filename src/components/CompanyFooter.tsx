@@ -3,7 +3,7 @@ import SectionReveal, { fadeUp, staggerContainer } from './SectionReveal';
 import { Logo } from '../assets/index';
 import { motion } from 'framer-motion';
 import { getCachedVideoUrl } from '../utils/videoCache';
-import { attentionInvestorPoints, attentionInvestorQuotes, companyDetails, escalationLevels, IMPORTANT_LINKS, regulatoryLinks } from '../utils/utils';
+import { attentionInvestorPoints, attentionInvestorQuotes, companyDetails, escalationLevels, IMPORTANT_LINKS, legalityLinks, regulatoryLinks } from '../utils/utils';
 import { ArrowUpRight } from 'lucide-react';
 
 
@@ -86,7 +86,7 @@ const CompanyFooter: React.FC = () => {
       />
 
       <div className="relative max-w-7xl mx-auto">
-        <div className="grid gap-10 lg:grid-cols-[1.1fr_1.4fr] lg:items-start">
+        <div className="grid gap-10 lg:grid-cols-[1.1fr_1.2fr_0.7fr] lg:items-start">
           <SectionReveal variants={fadeUp}>
             <div className="flex items-center gap-3 mb-6">
               <img src={Logo} alt="AlphaMatrix" className="h-12 w-12 sm:h-14 sm:w-14" />
@@ -162,54 +162,30 @@ const CompanyFooter: React.FC = () => {
               </div>
             </div>
 
-            {/* Regulatory quick links */}
-            <div className="mt-6 flex flex-wrap gap-2">
-              {regulatoryLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="
-                rounded-full
-                border border-white/10
-                bg-white/10
-                px-3.5 py-1.5
-                text-[11px] font-semibold uppercase tracking-[0.18em]
-                text-white/50
-                transition-all duration-300
-                hover:text-brand-saffron
-                hover:border-brand-saffron/40
-                hover:bg-white/[0.07]
-              "
-                >
-                  {link.label}
-                </a>
-              ))}
-            </div>
-          </SectionReveal>
 
+          </SectionReveal>
+          {/* Company details and account info */}
           <motion.div
             variants={staggerContainer(0.08)}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: '-40px' }}
-            className="grid grid-cols-2 sm:grid-cols-3 gap-2"
+            className="grid grid-cols-2 gap-2"
           >
             {companyDetails.map((detail) => (
               <motion.div
                 key={detail.label}
                 variants={fadeUp}
                 className="
-                rounded-xl
-                border border-white/10
-                bg-white/5
-                backdrop-blur-xl
-                px-3 py-2
-                transition-all
-                duration-300
-                hover:border-brand-saffron/40
-                hover:bg-white/[0.07]
+                  rounded-xl
+                  border border-white/10
+                  bg-white/5
+                  backdrop-blur-xl
+                  px-3 py-2
+                  transition-all
+                  duration-300
+                  hover:border-brand-saffron/40
+                  hover:bg-white/[0.07]
                 "
               >
                 <p className="text-[10px] uppercase tracking-[0.18em] text-brand-saffron mb-1">
@@ -221,11 +197,10 @@ const CompanyFooter: React.FC = () => {
               </motion.div>
             ))}
 
-            {/* USCNBA Bank Details integrated as a wide card */}
             <motion.div
-                variants={fadeUp}
-                className="
-                col-span-2 sm:col-span-3
+              variants={fadeUp}
+              className="
+                col-span-2
                 rounded-xl
                 border border-white/10
                 bg-white/5
@@ -237,151 +212,178 @@ const CompanyFooter: React.FC = () => {
                 hover:bg-white/[0.07]
                 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3
                 mt-1
-                "
+              "
             >
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-brand-saffron mb-0.5">
+                  Active USCNBA (Nodal Bank A/c)
+                </p>
+                <p className="text-[9px] text-white/50">As reported to Exchange</p>
+              </div>
+              <div className="flex gap-x-6 gap-y-2">
                 <div>
-                   <p className="text-[10px] uppercase tracking-[0.18em] text-brand-saffron mb-0.5">
-                     Active USCNBA (Nodal Bank A/c)
-                   </p>
-                   <p className="text-[9px] text-white/50">As reported to Exchange</p>
+                  <p className="text-[9px] uppercase tracking-wider text-white/40 mb-0.5">Bank</p>
+                  <p className="font-mono text-xs text-white">ICICI</p>
                 </div>
-                <div className="flex gap-x-6 gap-y-2">
-                   <div>
-                      <p className="text-[9px] uppercase tracking-wider text-white/40 mb-0.5">Bank</p>
-                      <p className="font-mono text-xs text-white">ICICI</p>
-                   </div>
-                   <div>
-                      <p className="text-[9px] uppercase tracking-wider text-white/40 mb-0.5">A/C No.</p>
-                      <p className="font-mono text-xs text-white">405158611</p>
-                   </div>
-                   <div>
-                      <p className="text-[9px] uppercase tracking-wider text-white/40 mb-0.5">IFSC</p>
-                      <p className="font-mono text-xs text-white">ICIC0000004</p>
-                   </div>
+                <div>
+                  <p className="text-[9px] uppercase tracking-wider text-white/40 mb-0.5">A/C No.</p>
+                  <p className="font-mono text-xs text-white">405158611</p>
                 </div>
+                <div>
+                  <p className="text-[9px] uppercase tracking-wider text-white/40 mb-0.5">IFSC</p>
+                  <p className="font-mono text-xs text-white">ICIC0000004</p>
+                </div>
+              </div>
             </motion.div>
           </motion.div>
-        </div>
 
-        {/* Grievance Redressal Escalation Matrix */}
-        <SectionReveal variants={fadeUp}>
-          <div className="mt-8 pt-6 border-t border-white/8">
-            <p className="text-[11px] uppercase tracking-[0.24em] text-white mb-3">
-              Grievance Redressal Mechanism
-            </p>
+          {/* Legality — narrow vertical column, pinned right */}
+          <SectionReveal variants={fadeUp}>
+            <div className="flex flex-col">
+              <p className="text-xs uppercase tracking-[0.24em] text-white mb-4">
+                Legality
+              </p>
+              <ul className="space-y-3">
+                {legalityLinks.map((link) => (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group inline-flex items-center gap-1.5 text-[12.5px] sm:text-[13px] text-white/65 hover:text-brand-saffron transition-colors"
+                    >
+                      {link.label}
+                      <ArrowUpRight
+                        size={12}
+                        className="opacity-0 -translate-x-0.5 transition-all duration-200 group-hover:opacity-60 group-hover:translate-x-0"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </SectionReveal>
+      </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-start gap-0">
-              {escalationLevels.map((step, idx) => (
-                <React.Fragment key={step.level}>
-                  <div className="group relative flex-1">
-                    <div className="
+      {/* Grievance Redressal Escalation Matrix */}
+      <SectionReveal variants={fadeUp}>
+        <div className="mt-8 pt-6 border-t border-white/8">
+          <p className="text-[11px] uppercase tracking-[0.24em] text-white mb-3">
+            Grievance Redressal Mechanism
+          </p>
+
+          <div className="flex flex-col sm:flex-row sm:items-start gap-0">
+            {escalationLevels.map((step, idx) => (
+              <React.Fragment key={step.level}>
+                <div className="group relative flex-1">
+                  <div className="
                       relative z-10
                       rounded-xl  backdrop-blur-xl
                       px-3.5 py-3
                       transition-all duration-300
                       hover:border-brand-saffron/30 hover:bg-white/8
                     ">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="flex items-center justify-center h-5 w-5 rounded-full bg-brand-saffron/10 text-[8px] font-bold text-brand-saffron">
-                          {step.level}
-                        </span>
-                        <span className="text-[11px] font-semibold text-white/80">{step.title}</span>
-                      </div>
-                      <p className="text-[11px] sm:text-xs text-white/65 leading-relaxed mb-2">
-                        {step.description}
-                      </p>
-                      <a
-                        href={step.href}
-                        target={step.href.startsWith('http') ? '_blank' : undefined}
-                        rel={step.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-                        className="inline-flex items-center gap-1 text-[11px] font-medium text-brand-saffron/70 hover:text-brand-saffron transition-colors"
-                      >
-                        {step.linkLabel}
-                      </a>
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="flex items-center justify-center h-5 w-5 rounded-full bg-brand-saffron/10 text-[8px] font-bold text-brand-saffron">
+                        {step.level}
+                      </span>
+                      <span className="text-[11px] font-semibold text-white/80">{step.title}</span>
                     </div>
+                    <p className="text-[11px] sm:text-xs text-white/65 leading-relaxed mb-2">
+                      {step.description}
+                    </p>
+                    <a
+                      href={step.href}
+                      target={step.href.startsWith('http') ? '_blank' : undefined}
+                      rel={step.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                      className="inline-flex items-center gap-1 text-[11px] font-medium text-brand-saffron/70 hover:text-brand-saffron transition-colors"
+                    >
+                      {step.linkLabel}
+                    </a>
                   </div>
-                </React.Fragment>
-              ))}
-            </div>
+                </div>
+              </React.Fragment>
+            ))}
           </div>
-        </SectionReveal>
+        </div>
+      </SectionReveal>
 
-        {/* NEW: Attention Investors — mandatory verbatim message per NSE/BSE circulars */}
-<SectionReveal variants={fadeUp}>
-  <div className="mt-4 pt-6 border-t border-white/8">
-    <div className="flex items-center gap-2 mb-1">
-      <span className="h-1.5 w-1.5 rounded-full bg-brand-saffron" />
-      <p className="text-[11px] uppercase tracking-[0.24em] text-white">
-        Attention Investors
-      </p>
-    </div>
-    <p className="text-[11px] text-white/55 mb-4 max-w-2xl">
-      Mandatory advisory as prescribed by NSE/BSE circulars on investor protection.
-    </p>
-
-    {/* Numbered points */}
-    <motion.div
-      variants={staggerContainer(0.08)}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-40px' }}
-      className="grid grid-cols-1 sm:grid-cols-2 gap-x-6"
-    >
-      {attentionInvestorPoints.map((point, idx) => (
-        <motion.div key={idx} variants={fadeUp} className="flex gap-3 py-1">
-          <span className="shrink-0 flex items-center justify-center h-5 w-5 mt-0.5 rounded-full bg-brand-saffron/10 text-[10px] font-bold text-brand-saffron">
-            {idx + 1}
-          </span>
-          <p className="text-[11px] sm:text-xs text-white/65 leading-relaxed">
-            {point}
+      {/* NEW: Attention Investors — mandatory verbatim message per NSE/BSE circulars */}
+      <SectionReveal variants={fadeUp}>
+        <div className="mt-4 pt-6 border-t border-white/8">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand-saffron" />
+            <p className="text-[11px] uppercase tracking-[0.24em] text-white">
+              Attention Investors
+            </p>
+          </div>
+          <p className="text-[11px] text-white/55 mb-4 max-w-2xl">
+            Mandatory advisory as prescribed by NSE/BSE circulars on investor protection.
           </p>
-        </motion.div>
-      ))}
-    </motion.div>
 
-    {/* Quoted advisory lines */}
-    <motion.div
-      variants={staggerContainer(0.08)}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-40px' }}
-      className="mt-5 space-y-3 border-t border-white/8 pt-5"
-    >
-      {attentionInvestorQuotes.map((quote, idx) => (
-        <motion.p
-          key={idx}
-          variants={fadeUp}
-          className="text-[11px] sm:text-xs text-white/60 italic leading-relaxed border-l-2 border-brand-saffron/25 pl-3"
-        >
-          “{quote}”
-        </motion.p>
-      ))}
-    </motion.div>
+          {/* Numbered points */}
+          <motion.div
+            variants={staggerContainer(0.08)}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-40px' }}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-x-6"
+          >
+            {attentionInvestorPoints.map((point, idx) => (
+              <motion.div key={idx} variants={fadeUp} className="flex gap-3 py-1">
+                <span className="shrink-0 flex items-center justify-center h-5 w-5 mt-0.5 rounded-full bg-brand-saffron/10 text-[10px] font-bold text-brand-saffron">
+                  {idx + 1}
+                </span>
+                <p className="text-[11px] sm:text-xs text-white/65 leading-relaxed">
+                  {point}
+                </p>
+              </motion.div>
+            ))}
+          </motion.div>
 
-    {/* PSPL / AlphaMatrix compliance paragraph */}
-    <motion.p
-      variants={fadeUp}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: '-40px' }}
-      className="mt-5 border-t border-white/8 pt-5 text-[11px] sm:text-xs text-white/60 leading-relaxed"
-    >
-      AlphaMatrix does not offer any product pertaining to “portfolio management” or
-      any “fixed return scheme” of any kind. AlphaMatrix does not accept cash for
-      opening or operating a trading account under any circumstances. All pay-in and
-      pay-out activities are through banking channels only. AlphaMatrix does not
-      provide “guaranteed,” “assured,” or “fixed” returns to any of its clients for
-      trading in the securities market. AlphaMatrix, and its directors, employees,
-      and authorised persons, do not promote or allow any of the aforesaid activities
-      or any other activity in contravention of the rules, regulations, or bye-laws
-      of the NSE/SEBI.
-    </motion.p>
-  </div>
-</SectionReveal>
+          {/* Quoted advisory lines */}
+          <motion.div
+            variants={staggerContainer(0.08)}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-40px' }}
+            className="mt-5 space-y-3 border-t border-white/8 pt-5"
+          >
+            {attentionInvestorQuotes.map((quote, idx) => (
+              <motion.p
+                key={idx}
+                variants={fadeUp}
+                className="text-[11px] sm:text-xs text-white/60 italic leading-relaxed border-l-2 border-brand-saffron/25 pl-3"
+              >
+                “{quote}”
+              </motion.p>
+            ))}
+          </motion.div>
 
-        {/* Compliance & Disclosures */}
-        <SectionReveal variants={fadeUp}>
-          {/* <div className="mt-4 sm:mt-4 pt-8 border-t border-white/8 ">
+          {/* PSPL / AlphaMatrix compliance paragraph */}
+          <motion.p
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-40px' }}
+            className="mt-5 border-t border-white/8 pt-5 text-[11px] sm:text-xs text-white/60 leading-relaxed"
+          >
+            AlphaMatrix does not offer any product pertaining to “portfolio management” or
+            any “fixed return scheme” of any kind. AlphaMatrix does not accept cash for
+            opening or operating a trading account under any circumstances. All pay-in and
+            pay-out activities are through banking channels only. AlphaMatrix does not
+            provide “guaranteed,” “assured,” or “fixed” returns to any of its clients for
+            trading in the securities market. AlphaMatrix, and its directors, employees,
+            and authorised persons, do not promote or allow any of the aforesaid activities
+            or any other activity in contravention of the rules, regulations, or bye-laws
+            of the NSE/SEBI.
+          </motion.p>
+        </div>
+      </SectionReveal>
+
+      {/* Compliance & Disclosures */}
+      <SectionReveal variants={fadeUp}>
+        {/* <div className="mt-4 sm:mt-4 pt-8 border-t border-white/8 ">
             <p className="text-xs uppercase tracking-[0.24em] text-white mb-4">
               Compliance &amp; Disclosures
             </p>
@@ -470,43 +472,43 @@ const CompanyFooter: React.FC = () => {
               </p>
             </div>
           </div> */}
-                        {/* Important Links */}
-            <div className="mt-6  border-t border-white/8 flex justify-center py-4">
-              <p className="text-[11px] sm:text-xs leading-relaxed">
-                <span className="font-semibold text-white">Important Links: </span>
-                {IMPORTANT_LINKS.map((link, idx) => (
-                  <React.Fragment key={link.label}>
-                    <a
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-brand-saffron/90 hover:text-brand-saffron underline-offset-2 hover:underline transition-colors"
-                    >
-                      {link.label}
-                    </a>
-                    {idx < IMPORTANT_LINKS.length - 1 && (
-                      <span className="text-white/25 mx-2">|</span>
-                    )}
-                  </React.Fragment>
-                ))}
-              </p>
-            </div>
-        </SectionReveal>
-
-        <div className="mt-1 sm:mt-1 pt-6 border-t border-white/8 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
-          <p className="text-xs sm:text-sm text-white/50">
-            &copy; 2026 AlphaMatrix. All rights reserved.
-
-          </p>
-          <p className="text-xs sm:text-sm text-white/50">
-            Design, development & deployment by Feedsense AI
-          </p>
-          <p className="text-xs uppercase tracking-[0.22em] text-white/65">
-            NSE: 90415&nbsp;&nbsp;•&nbsp;&nbsp;BSE: 6879
+        {/* Important Links */}
+        <div className="mt-6  border-t border-white/8 flex justify-center py-4">
+          <p className="text-[11px] sm:text-xs leading-relaxed">
+            <span className="font-semibold text-white">Important Links: </span>
+            {IMPORTANT_LINKS.map((link, idx) => (
+              <React.Fragment key={link.label}>
+                <a
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brand-saffron/90 hover:text-brand-saffron underline-offset-2 hover:underline transition-colors"
+                >
+                  {link.label}
+                </a>
+                {idx < IMPORTANT_LINKS.length - 1 && (
+                  <span className="text-white/25 mx-2">|</span>
+                )}
+              </React.Fragment>
+            ))}
           </p>
         </div>
+      </SectionReveal>
+
+      <div className="mt-1 sm:mt-1 pt-6 border-t border-white/8 flex flex-col md:flex-row items-center justify-between gap-3 text-center md:text-left">
+        <p className="text-xs sm:text-sm text-white/50">
+          &copy; 2026 AlphaMatrix. All rights reserved.
+
+        </p>
+        <p className="text-xs sm:text-sm text-white/50">
+          Design, development & deployment by Feedsense AI
+        </p>
+        <p className="text-xs uppercase tracking-[0.22em] text-white/65">
+          NSE: 90415&nbsp;&nbsp;•&nbsp;&nbsp;BSE: 6879
+        </p>
       </div>
-    </footer>
+    </div>
+    </footer >
   );
 };
 

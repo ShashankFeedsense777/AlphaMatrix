@@ -15,7 +15,7 @@ export const regulatoryLinks = [
 
 
 export const IMPORTANT_LINKS = [
-  { label: 'Advisory for Investors', href: 'https://www.sebi.gov.in/sebi_data/commondocs/aug-2021/InvestorAdvisory_p.pdf' },
+  // { label: 'Advisory for Investors', href: 'https://www.sebi.gov.in/sebi_data/commondocs/aug-2021/InvestorAdvisory_p.pdf' },
   { label: 'SCORES', href: 'https://scores.sebi.gov.in' },
   { label: 'NSE Circulars', href: 'https://www.nseindia.com/resources/exchange-communication-circulars' },
   { label: 'BSE Circulars', href: 'https://www.bseindia.com/static/about/circular.aspx' },
@@ -67,4 +67,13 @@ export const attentionInvestorQuotes: string[] = [
   'Prevent un-authorized transactions in your account. Update your mobile numbers/email ids with your stock brokers and depository participants. Receive information of your transactions directly from the exchange or depository on your mobile/email at the end of the day. Issued in the interest of investors.',
   'KYC is one-time exercise while dealing in securities markets \u2013 once KYC is done through a SEBI registered intermediary (broker, DP, mutual fund, etc.), you need not undergo the same process again when you approach another intermediary.',
   'No need to issue cheques by investors while subscribing to IPO. Just write the bank account number and sign in the application form to authorise your bank to make payment in case of allotment. No worries for refund as the money remains in the investor\u2019s account.',
+];
+
+// add to your utils/utils.ts alongside IMPORTANT_LINKS, escalationLevels, etc.
+export const legalityLinks = [
+  { label: 'Investor Charter', href: '/investor-charter' },
+  { label: 'Investor Grievance', href: '/investor-grievance' },
+  { label: 'Risk Disclosure', href: '/risk-disclosure' },
+  { label: 'How to File a Complaint', href: '/how-to-file-a-complaint' },
+  { label: 'Investor Complaints Details', href: '/investor-complaints-details' },
 ];

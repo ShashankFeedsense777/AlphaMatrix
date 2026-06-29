@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { gsap } from 'gsap';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import SEO from './components/SEO';
 import StructuredData from './components/StructuredData';
 import Navbar from './components/Navbar';
@@ -22,7 +22,10 @@ import LiveGreeks from './dashboard/sotm/GreeksLive';
 import HistoricalGreeks from './dashboard/sotm/GreeksHistorical';
 import VWAP from './dashboard/vwap/VWAP';
 import MarginCalculator from './dashboard/marginCalculator/MarginCalculator';
+import InfoLayout from './components/mainLayout/InfoLayout';
+import InvestorCharter from './components/compliances/InvestorCharter';
 import './index.css';
+import InvestorGreviance from './components/compliances/InvestorGreviance';
 
 gsap.registerPlugin(ScrollToPlugin);
 
@@ -55,12 +58,37 @@ const Section: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 const NAVBAR_OFFSET = 80;
 
 function LandingPage() {
-  const [showSplash, setShowSplash] = useState(() => !sessionStorage.getItem('alphaMatrixSplashSeen'));
+  const [showSplash, setShowSplash] = useState(() => {
+    const hasSeen = sessionStorage.getItem('alphaMatrixSplashSeen');
+    const hasScrollTo = window.location.search.includes('scrollTo=');
+    return !hasSeen && !hasScrollTo;
+  });
+
+  useEffect(() => {
+    if (!showSplash && !sessionStorage.getItem('alphaMatrixSplashSeen')) {
+      sessionStorage.setItem('alphaMatrixSplashSeen', 'true');
+    }
+  }, [showSplash]);
   const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(15);
   const tweenRef = useRef<gsap.core.Tween | null>(null);
   const pauseRef = useRef<number | null>(null);
   const nextSectionIndexRef = useRef(1);
+  const location = useLocation();
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const scrollToId = searchParams.get('scrollTo');
+    if (scrollToId) {
+      setTimeout(() => {
+        const element = document.getElementById(scrollToId);
+        if (element) {
+          const y = element.getBoundingClientRect().top + window.scrollY - 80;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [location]);
 
   useEffect(() => {
     let isActive = isAutoScrollEnabled;
@@ -300,6 +328,39 @@ function App() {
             />
           </Route>
         </Route>
+        
+        <Route element={<InfoLayout />}>
+          <Route
+            path="/investor-charter"
+            element={
+              <>
+                <SEO
+                  title="Investor Charter"
+                  description="Investor Charter for Stock Brokers"
+                  canonical="https://alphamatrixsecurities.com/investor-charter"
+                />
+                <InvestorCharter />
+              </>
+            }
+          />
+        </Route>
+
+    <Route element={<InfoLayout />}>
+          <Route
+            path="/investor-grievance"
+            element={
+              <>
+                <SEO
+                  title="Investor Grievance"
+                  description="Investor Grievance for Stock Brokers"
+                  canonical="https://alphamatrixsecurities.com/investor-grievance"
+                />
+                <InvestorGreviance />
+              </>
+            }
+          />
+        </Route>
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-scroll';
 import { Menu, Settings, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Logo } from '../assets/index'
 
 interface NavbarProps {
@@ -27,8 +27,10 @@ const Navbar: React.FC<NavbarProps> = ({
   setScrollSpeed = () => { },
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === '/';
   const [scrolled, setScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState<String>(navItems[0].to);
+  const [activeSection, setActiveSection] = useState<String | null>(isHome ? navItems[0].to : null);
   const [showSettings, setShowSettings] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
@@ -45,15 +47,19 @@ const Navbar: React.FC<NavbarProps> = ({
 
         setScrolled(scrollPosition > 50);
 
-        const currentSection = navItems.reduce((current: any, item) => {
-          const section = document.getElementById(item.to);
-          if (!section) return current;
+        if (!isHome) {
+          setActiveSection(null);
+        } else {
+          const currentSection = navItems.reduce((current: any, item) => {
+            const section = document.getElementById(item.to);
+            if (!section) return current;
 
-          const sectionTop = section.getBoundingClientRect().top + scrollPosition;
-          return sectionTop <= activationPoint ? item.to : current;
-        }, navItems[0].to);
+            const sectionTop = section.getBoundingClientRect().top + scrollPosition;
+            return sectionTop <= activationPoint ? item.to : current;
+          }, navItems[0].to);
 
-        setActiveSection(currentSection);
+          setActiveSection(currentSection);
+        }
         frameId = null;
       });
     };
@@ -69,7 +75,7 @@ const Navbar: React.FC<NavbarProps> = ({
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
     };
-  }, []);
+  }, [isHome]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -87,6 +93,9 @@ const Navbar: React.FC<NavbarProps> = ({
     setIsAutoScrollEnabled(false);
     setActiveSection(sectionId);
     setShowMobileMenu(false);
+    if (!isHome) {
+      navigate(`/?scrollTo=${sectionId}`);
+    }
   };
 
   const openEmployeeLogin = () => {
@@ -112,24 +121,37 @@ const Navbar: React.FC<NavbarProps> = ({
 
         {/* Nav Links */}
         <div className="hidden lg:flex items-center space-x-5 xl:space-x-8">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              to={item.to}
-              smooth={true}
-              spy={false}
-              duration={50}
-              delay={0}
-              offset={-80}
-              onClick={() => handleNavClick(item.to)}
-              className={`transition-colors cursor-pointer text-sm xl:text-sm tracking-wide uppercase whitespace-nowrap ${activeSection === item.to
+          {navItems.map((item) => {
+            const className = `transition-colors cursor-pointer text-sm xl:text-sm tracking-wide uppercase whitespace-nowrap ${
+              activeSection === item.to
                 ? 'text-brand-saffron font-bold'
                 : 'text-gray-300 hover:text-brand-saffron font-medium'
-                }`}
-            >
-              {item.name}
-            </Link>
-          ))}
+            }`;
+
+            return isHome ? (
+              <Link
+                key={item.name}
+                to={item.to}
+                smooth={true}
+                spy={false}
+                duration={50}
+                delay={0}
+                offset={-80}
+                onClick={() => handleNavClick(item.to)}
+                className={className}
+              >
+                {item.name}
+              </Link>
+            ) : (
+              <a
+                key={item.name}
+                onClick={() => handleNavClick(item.to)}
+                className={className}
+              >
+                {item.name}
+              </a>
+            );
+          })}
         </div>
 
         {/* Controls and Actions */}
@@ -214,24 +236,37 @@ const Navbar: React.FC<NavbarProps> = ({
       {showMobileMenu && (
         <div className="lg:hidden border-t border-white/10 bg-brand-black/95 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-4 py-4 grid gap-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.to}
-                smooth={true}
-                spy={false}
-                duration={120}
-                delay={0}
-                offset={-76}
-                onClick={() => handleNavClick(item.to)}
-                className={`px-3 py-3 rounded-md text-sm uppercase tracking-wide cursor-pointer ${activeSection === item.to
+            {navItems.map((item) => {
+              const className = `px-3 py-3 rounded-md text-sm uppercase tracking-wide cursor-pointer ${
+                activeSection === item.to
                   ? 'bg-brand-saffron/10 text-brand-saffron font-bold'
                   : 'text-gray-300 hover:bg-white/5'
-                  }`}
-              >
-                {item.name}
-              </Link>
-            ))}
+              }`;
+
+              return isHome ? (
+                <Link
+                  key={item.name}
+                  to={item.to}
+                  smooth={true}
+                  spy={false}
+                  duration={120}
+                  delay={0}
+                  offset={-76}
+                  onClick={() => handleNavClick(item.to)}
+                  className={className}
+                >
+                  {item.name}
+                </Link>
+              ) : (
+                <a
+                  key={item.name}
+                  onClick={() => handleNavClick(item.to)}
+                  className={className}
+                >
+                  {item.name}
+                </a>
+              );
+            })}
             <button
               type="button"
               onClick={openEmployeeLogin}
