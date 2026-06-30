@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-scroll';
 import { Menu, Settings, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Logo } from '../assets/index'
@@ -19,6 +18,8 @@ const navItems = [
   { name: 'About Us', to: 'aboutus' },
   { name: 'Connect With Us', to: 'contact' },
 ] as const;
+
+const getNavHref = (sectionId: string) => (sectionId === 'hero' ? '/' : `/#${sectionId}`);
 
 const Navbar: React.FC<NavbarProps> = ({
   isAutoScrollEnabled = false,
@@ -89,12 +90,32 @@ const Navbar: React.FC<NavbarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showSettings]);
 
-  const handleNavClick = (sectionId: string) => {
+  const scrollToSection = (sectionId: string) => {
+    const section = document.getElementById(sectionId);
+    if (!section) return false;
+
+    const sectionTop = section.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({
+      top: sectionTop,
+      behavior: 'smooth',
+    });
+
+    return true;
+  };
+
+  const handleNavClick = (event: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     setIsAutoScrollEnabled(false);
     setActiveSection(sectionId);
     setShowMobileMenu(false);
+
+    if (isHome && scrollToSection(sectionId)) {
+      event.preventDefault();
+      return;
+    }
+
     if (!isHome) {
-      navigate(`/?scrollTo=${sectionId}`);
+      event.preventDefault();
+      navigate(sectionId === 'hero' ? '/' : `/?scrollTo=${sectionId}`);
     }
   };
 
@@ -128,24 +149,11 @@ const Navbar: React.FC<NavbarProps> = ({
                 : 'text-gray-300 hover:text-brand-saffron font-medium'
             }`;
 
-            return isHome ? (
-              <Link
-                key={item.name}
-                to={item.to}
-                smooth={true}
-                spy={false}
-                duration={50}
-                delay={0}
-                offset={-80}
-                onClick={() => handleNavClick(item.to)}
-                className={className}
-              >
-                {item.name}
-              </Link>
-            ) : (
+            return (
               <a
                 key={item.name}
-                onClick={() => handleNavClick(item.to)}
+                href={getNavHref(item.to)}
+                onClick={(event) => handleNavClick(event, item.to)}
                 className={className}
               >
                 {item.name}
@@ -243,24 +251,11 @@ const Navbar: React.FC<NavbarProps> = ({
                   : 'text-gray-300 hover:bg-white/5'
               }`;
 
-              return isHome ? (
-                <Link
-                  key={item.name}
-                  to={item.to}
-                  smooth={true}
-                  spy={false}
-                  duration={120}
-                  delay={0}
-                  offset={-76}
-                  onClick={() => handleNavClick(item.to)}
-                  className={className}
-                >
-                  {item.name}
-                </Link>
-              ) : (
+              return (
                 <a
                   key={item.name}
-                  onClick={() => handleNavClick(item.to)}
+                  href={getNavHref(item.to)}
+                  onClick={(event) => handleNavClick(event, item.to)}
                   className={className}
                 >
                   {item.name}

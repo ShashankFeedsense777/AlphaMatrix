@@ -248,6 +248,14 @@ function LandingPage() {
 }
 
 function App() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.pathname !== '/' || location.search.includes('scrollTo=')) {
+      sessionStorage.setItem('alphaMatrixSplashSeen', 'true');
+    }
+  }, [location.pathname, location.search]);
+
   return (
     <>
       <SEO />

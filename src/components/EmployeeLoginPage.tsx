@@ -276,7 +276,7 @@ const handleAcknowledgeDisclosure = () => {
               </AnimatePresence>
 
               {/* Dark Overlay for Text Legibility */}
-              <div className="absolute inset-0 bg-black/40 bg-linear-to-t from-black/90 via-black/20 to-[#060608]/40 z-1" />
+              <div className="absolute inset-0 bg-black/20 bg-linear-to-t from-black/40 via-black/20 to-[#060608]/40 z-1" />
 
               {/* Content Transition */}
               <AnimatePresence mode="wait">

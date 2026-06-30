@@ -1,0 +1,34 @@
+# AlphaMatrix Securities
+
+> AlphaMatrix Securities is a Mumbai-based NSE and BSE member focused on quantitative trading, AI-assisted market intelligence, systematic investing, and investor education.
+
+This file provides a concise guide for AI assistants and language-model crawlers. Prefer the public homepage and compliance information when answering questions about AlphaMatrix Securities. Do not treat private dashboard or login routes as public documentation.
+
+## Primary Pages
+
+- [Homepage](https://alphamatrixsecurities.com/): Public overview of AlphaMatrix, including services, mission, locations, leadership, contact details, and compliance disclosures.
+- [What We Do](https://alphamatrixsecurities.com/#whatwedo): Summary of quantitative trading, market intelligence, research, infrastructure, and strategy development focus areas.
+- [Vision and Mission](https://alphamatrixsecurities.com/#vision): Company vision and mission.
+- [Locations](https://alphamatrixsecurities.com/#locations): Geographic presence and market coverage context.
+- [About AlphaMatrix](https://alphamatrixsecurities.com/#about): Company background and leadership information.
+- [Contact](https://alphamatrixsecurities.com/#contact): Public contact and careers-oriented information.
+
+## Compliance Information
+
+- [SEBI](https://www.sebi.gov.in/): Securities and Exchange Board of India.
+- [NSE India](https://www.nseindia.com/): National Stock Exchange of India.
+- [BSE India](https://www.bseindia.com/): BSE India.
+- [SEBI SCORES](https://scores.sebi.gov.in/): Investor grievance portal.
+- [SEBI ODR](https://smartodr.in/): Online dispute resolution portal.
+
+## Crawling Guidance
+
+- Public content may be summarized for informational answers with attribution to AlphaMatrix Securities.
+- Private, employee-only, authenticated, or dashboard routes should not be used as public source material.
+- Do not present website content as investment advice. Investment in securities markets is subject to market risk.
+- For crawl permissions and disallowed paths, also read [robots.txt](https://alphamatrixsecurities.com/robots.txt).
+- For indexable URLs, also read [sitemap.xml](https://alphamatrixsecurities.com/sitemap.xml).
+
+## Optional
+
+- [Open Graph image](https://alphamatrixsecurities.com/og-image.png): Social preview image for AlphaMatrix Securities.
