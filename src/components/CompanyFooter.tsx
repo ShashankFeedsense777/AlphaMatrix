@@ -383,7 +383,7 @@ const CompanyFooter: React.FC = () => {
 
       {/* Compliance & Disclosures */}
       <SectionReveal variants={fadeUp}>
-        {/* <div className="mt-4 sm:mt-4 pt-8 border-t border-white/8 ">
+        <div className="mt-4 sm:mt-4 pt-8 border-t border-white/8 ">
             <p className="text-xs uppercase tracking-[0.24em] text-white mb-4">
               Compliance &amp; Disclosures
             </p>
@@ -471,7 +471,7 @@ const CompanyFooter: React.FC = () => {
                 Privacy policy of the website is applicable.
               </p>
             </div>
-          </div> */}
+          </div>
         {/* Important Links */}
         <div className="mt-6  border-t border-white/8 flex justify-center py-4">
           <p className="text-[11px] sm:text-xs leading-relaxed">
@@ -487,7 +487,7 @@ const CompanyFooter: React.FC = () => {
                   {link.label}
                 </a>
                 {idx < IMPORTANT_LINKS.length - 1 && (
-                  <span className="text-white/25 mx-2">|</span>
+                  <span className="text-white/60 mx-2">|</span>
                 )}
               </React.Fragment>
             ))}
