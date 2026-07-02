@@ -131,7 +131,7 @@ const CompanyFooter: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-1.5 text-white/70 text-[11px] sm:text-xs mt-1">
                   <MailIcon />
-                  <span className="wrap-break-word">support@alphamatrix.in</span>
+                  <span className="wrap-break-word">compliancesupport@alphamatrix.in</span>
                 </div>
               </div>
 

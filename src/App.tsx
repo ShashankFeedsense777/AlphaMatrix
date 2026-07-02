@@ -27,6 +27,7 @@ import InvestorCharter from './components/compliances/InvestorCharter';
 import './index.css';
 import InvestorGreviance from './components/compliances/InvestorGreviance';
 import FileComplaint from './components/compliances/FileComplaint';
+import ComplaintDetails from './components/compliances/ComplaintDetails';
 
 gsap.registerPlugin(ScrollToPlugin);
 
@@ -382,6 +383,22 @@ function App() {
                   canonical="https://alphamatrixsecurities.com/how-to-file-a-complaint"
                 />
                 <FileComplaint />
+              </>
+            }
+          />
+        </Route>
+
+            <Route element={<InfoLayout />}>
+          <Route
+            path="/investor-complaints-details"
+            element={
+              <>
+                <SEO
+                  title="Investor Complaints Details"
+                  description="Investor Complaints Details for Stock Brokers"
+                  canonical="https://alphamatrixsecurities.com/investor-complaints-details"
+                />
+                <ComplaintDetails />
               </>
             }
           />
