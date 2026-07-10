@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Menu, Settings, X } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Logo } from '../assets/index'
+import { alphaMatrix1 } from '../assets/index'
 
 interface NavbarProps {
   isAutoScrollEnabled?: boolean;
@@ -133,8 +133,16 @@ const Navbar: React.FC<NavbarProps> = ({
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-brand-saffron rounded-full"></span>
             A
           </div> */}
-          <img id="navbar-logo" src={Logo} alt="" className="h-14 w-14 sm:h-16 sm:w-16 lg:h-[50px] lg:w-[50px] shrink-0" />
-          <div className="flex min-w-0 flex-col">
+<img
+  id="navbar-logo"
+  src={alphaMatrix1}
+  alt="AlphaMatrix"
+  className="h-auto max-w-full object-contain shrink-0"
+  style={{
+   width: "clamp(30px, 4vw, 50px)",
+  }}
+/>
+         <div className="flex min-w-0 flex-col">
             <span className="text-white font-bold text-base sm:text-lg lg:text-xl tracking-[0.12em] sm:tracking-[0.18em] lg:tracking-[0.2em] uppercase leading-none truncate">AlphaMatrix</span>
             {/* <span className="text-brand-saffron text-[10px] sm:text-sm tracking-widest mt-1">Since 2026</span> */}
           </div>

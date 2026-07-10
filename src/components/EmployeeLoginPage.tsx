@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AlertCircle, ArrowLeft, CheckCircle2, KeyRound, Mail, Phone, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Logo, Nature1, Nature2, Nature3 } from '../assets/index';
+import { alphaMatrix1, Nature1, Nature2, Nature3 } from '../assets/index';
 import { requestLoginOtpAPI, validateLoginOtpAPI } from '../api/apiCalls';
 import ShapeGrid from './ui/ShapeGrid';
 import RiskDisclosureModal from './modal/RiskDisclosureModal';
@@ -82,6 +82,13 @@ const handleAcknowledgeDisclosure = () => {
   sessionStorage.setItem('fnoDisclosureAck', 'true');
   setShowDisclosure(false);
 };
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (localStorage.getItem('loggedIn') === 'true') {
+      navigate('/dashboard/live-greeks', { replace: true });
+    }
+  }, [navigate]);
 
   // Auto-slide logic
   useEffect(() => {
@@ -240,10 +247,17 @@ const handleAcknowledgeDisclosure = () => {
             <ArrowLeft size={14} /> Home
           </button>
           <div className="flex min-w-0 items-center gap-2.5 z-101">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand-saffron/20 bg-brand-saffron/10  backdrop-blur-md">
-              <img src={Logo} alt="AlphaMatrix" className="h-5 w-5 object-contain" />
-            </div>
-            <span className="truncate text-[11px] sm:text-xs font-bold uppercase tracking-[0.14em] sm:tracking-[0.22em]">AlphaMatrix</span>
+<img
+  id="employee-logo"
+  src={alphaMatrix1}
+  alt="AlphaMatrix"
+  className="h-auto max-w-full object-contain shrink-0"
+  style={{
+   width: "clamp(30px, 4vw, 50px)",
+  }}
+/>  
+
+    <span className="truncate text-[11px] sm:text-xs font-bold uppercase tracking-[0.14em] sm:tracking-[0.22em]">AlphaMatrix</span>
           </div>
         </header>
 

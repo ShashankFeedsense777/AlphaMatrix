@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import SectionReveal, { fadeUp, staggerContainer } from './SectionReveal';
-import { Logo } from '../assets/index';
+import { alphaMatrix1, Logo } from '../assets/index';
 import { motion } from 'framer-motion';
 import { getCachedVideoUrl } from '../utils/videoCache';
 import { attentionInvestorPoints, attentionInvestorQuotes, companyDetails, escalationLevels, IMPORTANT_LINKS, legalityLinks, regulatoryLinks } from '../utils/utils';
@@ -89,11 +89,19 @@ const CompanyFooter: React.FC = () => {
         <div className="grid gap-10 lg:grid-cols-[1.1fr_1.2fr_0.7fr] lg:items-start">
           <SectionReveal variants={fadeUp}>
             <div className="flex items-center gap-3 mb-6">
-              <img src={Logo} alt="AlphaMatrix" className="h-12 w-12 sm:h-14 sm:w-14" />
+              <img
+  id="footer-logo"
+  src={alphaMatrix1}
+  alt="AlphaMatrix"
+  className="h-auto max-w-full object-contain shrink-0"
+  style={{
+    width: "clamp(30px, 4vw, 50px)",
+  }}
+/>
+
+<span className="truncate text-[11px] sm:text-xs font-bold uppercase tracking-[0.14em] sm:tracking-[0.22em]">AlphaMatrix</span>
+
               <div>
-                <h2 className="text-lg sm:text-xl font-bold uppercase tracking-[0.2em] text-white">
-                  AlphaMatrix
-                </h2>
               </div>
             </div>
 

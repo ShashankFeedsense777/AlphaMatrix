@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { Logo1 } from '../assets/index';
+import { alphaMatrix1 } from '../assets/index';
 
 interface SplashScreenProps {
   onComplete: () => void;
@@ -26,20 +26,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
 
     if (!root || !logo || !eyebrow || !headline) return;
 
-    const targetLogo = document.getElementById('navbar-logo');
-    const targetRect = targetLogo?.getBoundingClientRect();
-    const logoRect = logo.getBoundingClientRect();
-    const targetX = targetRect
-      ? targetRect.left + targetRect.width / 2 - (logoRect.left + logoRect.width / 2)
-      : 0;
-    const targetY = targetRect
-      ? targetRect.top + targetRect.height / 2 - (logoRect.top + logoRect.height / 2)
-      : -window.innerHeight / 2 + 96;
-    const targetScale = targetRect ? targetRect.width / logoRect.width : 0.32;
-
     const headlineWords = Array.from(headline.children);
-
-    if (targetLogo) gsap.set(targetLogo, { autoAlpha: 0 });
 
     const tl = gsap.timeline({ defaults: { ease: 'power3.inOut' }, onComplete });
 
@@ -72,19 +59,10 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
         { y: -12, autoAlpha: 0, filter: 'blur(5px)', duration: 0.45, stagger: 0.03 },
         '+=0.25'
       )
-      .to(logo,
-        { x: targetX, y: targetY, scale: targetScale, duration: 1.2, ease: 'expo.inOut' },
-        '-=0.05'
-      )
-      .addLabel('dock')
-      .to(root, { backgroundColor: 'rgba(0,0,0,0)', duration: 0.35 }, 'dock-=0.2')
-      .to(logo, { autoAlpha: 0, duration: 0.18, ease: 'power2.out' }, 'dock')
-      .to(targetLogo, { autoAlpha: 1, duration: 0.18, ease: 'power2.out' }, 'dock')
-      .to(root, { autoAlpha: 0, duration: 0.15, ease: 'none' }, 'dock+=0.15');
+      .to(root, { autoAlpha: 0, duration: 0.35, ease: 'power2.out' }, '-=0.05');
 
     return () => {
       tl.kill();
-      if (targetLogo) gsap.set(targetLogo, { clearProps: 'visibility,opacity' });
     };
   }, [onComplete]);
 
@@ -120,22 +98,46 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
       ))}
 
       {/* Logo */}
-      <div className="relative">
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            inset: '-40px',
-            background: 'radial-gradient(circle, rgba(249,115,22,0.08) 0%, rgba(0,242,254,0.07) 40%, transparent 70%)',
-            borderRadius: '50%',
-          }}
-        />
-        <img
-          ref={logoRef}
-          src={Logo1}
-          alt="AlphaMatrix"
-          className="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 lg:w-150 lg:h-150 object-contain relative z-10"
-        />
-      </div>
+      <div className="relative flex flex-col items-center">
+  <div
+    className="absolute pointer-events-none"
+    style={{
+      inset: "-40px",
+      background:
+        "radial-gradient(circle, rgba(249,115,22,0.08) 0%, rgba(0,242,254,0.07) 40%, transparent 70%)",
+      borderRadius: "50%",
+    }}
+  />
+
+  <img
+    ref={logoRef}
+    src={alphaMatrix1}
+    alt="AlphaMatrix"
+    className="h-auto object-contain relative z-10"
+    style={{
+      width: "clamp(160px, 26vw, 360px)",
+    }}
+  />
+
+  <span
+    className="
+      relative z-10
+      mt-5
+      mb-8
+      text-xl
+      sm:text-2xl
+      md:text-3xl
+      lg:text-4xl
+      font-bold
+      uppercase
+      tracking-[0.3em]
+      text-white
+      text-center
+    "
+  >
+    AlphaMatrix
+  </span>
+</div>
 
       {/* Eyebrow */}
       <p

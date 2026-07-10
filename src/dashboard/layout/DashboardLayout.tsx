@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { LogOut } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Logo } from '../../assets';
+import { alphaMatrix1 } from '../../assets';
 
 type ActiveView =
     | 'live-greeks'
@@ -81,9 +81,15 @@ const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) 
             <header className="fixed top-0 w-full z-50 bg-[#111111]">
                 <div className="flex items-center h-[70px] px-4 sm:px-6 gap-4">
                     <div className="flex items-center gap-2.5 mr-2 shrink-0">
-                        <div className="w-10 h-10 flex items-center justify-center">
-                            <img src={Logo} alt="AlphaMatrix" className="h-9 w-9 object-contain" />
-                        </div>
+                        <img
+  id="navbar-logo"
+  src={alphaMatrix1}
+  alt="AlphaMatrix"
+  className="h-auto max-w-full object-contain shrink-0"
+  style={{
+     width: "clamp(26px, 3.5vw, 42px)",
+  }}
+/>
                         <span className="text-[16px] font-bold uppercase tracking-[0.18em] text-white hidden sm:block">
                             AlphaMatrix
                         </span>
