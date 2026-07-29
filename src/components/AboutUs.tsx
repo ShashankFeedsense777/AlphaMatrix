@@ -409,7 +409,7 @@ const handleVideoEnded = (e: React.SyntheticEvent<HTMLVideoElement>) => {
                           </p>
                           <p
                             className={`hidden sm:block text-[8px] md:text-[9px] tracking-wide uppercase mt-0.5 truncate transition-colors duration-300 ${
-                              isActive ? 'text-brand-saffron/80' : 'text-gray-600'
+                              isActive ? 'text-brand-saffron/80' : 'text-white/80'
                             }`}
                           >
                             {member.role.split(/[—,&]/)[0].trim()}
