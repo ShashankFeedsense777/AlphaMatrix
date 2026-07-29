@@ -7,7 +7,10 @@ import Nature3 from "./Nature3.webp";
 import Person1 from "./Person1.webp";
 import Person2 from "./Person2.webp";
 import Person3 from "./Person3.webp";
+import Person4 from "./Person4.webp";
+import Person5 from "./Person5.webp";
+
 import alphaMatrix1 from "./logo/Alphamatrix.svg";
 
 
-export { Logo, Logo1, alphaMatrix, alphaMatrix1,  Nature1, Nature2, Nature3, Person1, Person2, Person3 };
+export { Logo, Logo1, alphaMatrix, alphaMatrix1,  Nature1, Nature2, Nature3, Person1, Person2, Person3, Person4, Person5 };

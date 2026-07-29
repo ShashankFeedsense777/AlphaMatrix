@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import SectionReveal, { fadeLeft, scaleIn, staggerContainer, fadeUp } from './SectionReveal';
-import { Person1, Person2, Person3 } from '../assets/index';
+import { Person1, Person2, Person3, Person4, Person5 } from '../assets/index';
 import { AnimatePresence, motion } from 'framer-motion';
 import { getCachedVideoUrl } from '../utils/videoCache';
 
@@ -66,6 +66,46 @@ const teamMembers = [
       },
     ],
   },
+  {
+  name: 'Shailendra Singh',
+  image: Person4,
+  role: 'Director',
+  quote: 'Technology, discipline, and risk management are the pillars of sustainable market leadership.',
+  headings: [
+    {
+      title: '21+ Years of Capital Markets Leadership',
+      text: 'With over two decades of experience spanning institutional broking, proprietary trading, commodities, equities, and financial market infrastructure, Shailendra has successfully built and scaled technology-driven brokerage businesses across multiple asset classes.',
+    },
+    {
+      title: 'Technology-Driven Market Infrastructure',
+      text: 'Leads the development of institutional-grade trading platforms focused on low-latency execution, robust risk management, operational resilience, and comprehensive regulatory compliance, delivering world-class trading experiences.',
+    },
+    {
+      title: 'Strategic Growth & Innovation',
+      text: "Guides AlphaMatrix's long-term strategic vision by championing digital transformation, innovation, and data-driven decision-making. His leadership is centred on creating a globally competitive capital markets institution that delivers sustainable value for clients, partners, and stakeholders.",
+    },
+  ],
+},
+{
+  name: 'Vidhi Gala',
+  image: Person5,
+  role: 'Director',
+  quote: 'Informed decisions, disciplined execution, and integrity create lasting financial success.',
+  headings: [
+    {
+      title: '15+ Years of Market Expertise',
+      text: 'Brings over 15 years of experience across equity and derivatives trading, investment strategy, financial planning, portfolio management, and market research, providing clients with comprehensive market insights.',
+    },
+    {
+      title: 'Strategic Leadership',
+      text: 'As Director, Vidhi plays a key role in shaping the organisation’s strategic direction, driving innovation, strengthening business development, and navigating the evolving landscape of capital markets with a balanced approach to growth and risk.',
+    },
+    {
+      title: 'Excellence & Sustainable Growth',
+      text: 'Combines strong analytical thinking, sound risk management, and leadership with an unwavering commitment to integrity and professionalism, fostering informed decision-making and long-term sustainable growth for clients and the organisation.',
+    },
+  ],
+},
 ];
 
 const ABOUT_VIDEOS = [
