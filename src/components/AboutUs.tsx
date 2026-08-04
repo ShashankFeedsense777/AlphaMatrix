@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import SectionReveal, { fadeLeft, scaleIn, staggerContainer, fadeUp } from './SectionReveal';
-import { Person1, Person2, Person3, Person4, Person5, Paper } from '../assets/index';
+import { Person1, Person2, Person3, Person4, Person5 } from '../assets/index';
 import { AnimatePresence, motion } from 'framer-motion';
 import { getCachedVideoUrl } from '../utils/videoCache';
 
@@ -114,11 +114,10 @@ const ABOUT_VIDEOS = [
 ];
 
 const AboutUs: React.FC = () => {
-  const [activeIndex, setActiveIndex] = React.useState(0);
-  const [isPaused, setIsPaused] = React.useState(false);
-  const cachedAboutRef = useRef<string[]>([]);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const activeMember = teamMembers[activeIndex];
+const [activeIndex, setActiveIndex] = React.useState(0);
+const [isPaused, setIsPaused] = React.useState(false);
+const cachedAboutRef = useRef<string[]>([]);
+const videoRef = useRef<HTMLVideoElement>(null);
 
 React.useEffect(() => {
   if (isPaused) return;
@@ -234,211 +233,151 @@ const handleVideoEnded = (e: React.SyntheticEvent<HTMLVideoElement>) => {
 
           {/* ── Leadership team ── */}
           <motion.div
-            className="mt-20 sm:mt-28 pb-24"
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            <div className="mb-10 sm:mb-14">
-              <h2 className="text-brand-saffron text-[10px] sm:text-xs tracking-[0.3em] uppercase font-bold mb-3 sm:mb-4">
-                Leadership Team
-              </h2>
-              <h3 className="text-3xl sm:text-4xl font-light text-white">
-                The People Behind
-                <span className="block font-bold text-white">AlphaMatrix</span>
-              </h3>
-            </div>
+  className="mt-20 sm:mt-28 pb-24"
+  initial="hidden"
+  whileInView="visible"
+  viewport={{ once: true }}
+>
+  <div className="mb-8 sm:mb-12">
+    <h2 className="text-brand-saffron text-[10px] sm:text-xs tracking-[0.3em] uppercase font-bold mb-3 sm:mb-4">
+      Leadership Team
+    </h2>
+    <h3 className="text-3xl sm:text-4xl font-light text-white">
+      The People Behind
+      <span className="block font-bold text-white">AlphaMatrix</span>
+    </h3>
+  </div>
 
-            {/* Featured profile + selector — scales cleanly for 5 members */}
-            <div
-              className="rounded-2xl sm:rounded-[28px] overflow-hidden"
-              style={{
-                border: '1px solid rgba(255,255,255,0.08)',
-                background: 'linear-gradient(165deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.015) 100%)',
-                boxShadow: '0 24px 64px rgba(0,0,0,0.35)',
-              }}
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
+  {/* Cards */}
+  <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
+    {teamMembers.map((member, index) => {
+      const isActive = activeIndex === index;
+      return (
+        <motion.div
+          key={member.name}
+          layout
+          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+          animate={{ flex: isActive ? 4 : 1 }}
+          className="relative overflow-hidden rounded-2xl sm:rounded-[28px] h-[420px] sm:h-[500px] lg:h-[560px] cursor-pointer"
+          style={{ border: '1px solid rgba(255,255,255,0.07)' }}
+          onClick={() => {
+            setActiveIndex(index);
+            setIsPaused(true);       // click → lock open
+          }}
+          onMouseEnter={() => {
+            setActiveIndex(index);
+            setIsPaused(true);       // hover in → lock open
+          }}
+          onMouseLeave={() => {
+            setIsPaused(false);      // hover out → resume auto-loop
+          }}
+        >
+          <div className="h-full flex flex-col lg:flex-row overflow-hidden">
+
+            {/* Image panel */}
+            <motion.div
+              layout
+              className="relative h-[200px] sm:h-[240px] lg:h-auto lg:w-[260px] xl:w-[300px] shrink-0 overflow-hidden"
             >
-              {/* Featured member panel */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[420px] sm:min-h-[480px]">
-                {/* Portrait */}
-                <div className="relative lg:col-span-5 h-[280px] sm:h-[340px] lg:h-auto overflow-hidden">
-                  <AnimatePresence mode="wait">
-                    <motion.img
-                      key={activeMember.name}
-                      src={activeMember.image}
-                      alt={activeMember.name}
-                      initial={{ opacity: 0, scale: 1.06 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.98 }}
-                      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                      className="absolute inset-0 w-full h-full object-cover object-top"
-                    />
-                  </AnimatePresence>
-                  <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent lg:bg-linear-to-r lg:from-transparent lg:via-transparent lg:to-black/40" />
-                  <div className="absolute inset-0 ring-1 ring-inset ring-white/10" />
+              <img
+                src={member.image}
+                alt={member.name}
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${isActive ? 'saturate-100 scale-100' : 'saturate-0 scale-105'}`}
+              />
+              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
-                  {/* Mobile name overlay on photo */}
-                  <div className="absolute bottom-0 left-0 right-0 p-5 lg:hidden">
-                    <p className="text-[10px] tracking-[0.2em] uppercase text-brand-saffron font-bold mb-1">
-                      {activeMember.role}
-                    </p>
-                    <h4 className="text-white text-xl font-bold leading-tight">
-                      {activeMember.name}
-                    </h4>
-                  </div>
-                </div>
+              {/* Name overlay */}
+              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
+                <h4 className="text-white text-base sm:text-lg font-bold leading-tight drop-shadow-lg">
+                  {member.name}
+                </h4>
+              </div>
 
-                {/* Bio content */}
-                <div
-                  className="lg:col-span-7 relative flex flex-col justify-center p-6 sm:p-8 lg:p-10 xl:p-12 overflow-hidden"
+              
+            </motion.div>
+
+            {/* Expanded content panel */}
+            <AnimatePresence mode="wait">
+              {isActive && (
+                <motion.div
+                  key="content"
+                  initial={{ opacity: 0, x: 32 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  className="flex-1 overflow-y-auto"
                   style={{
-                    backgroundImage: `url(${Paper})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
+                    background: 'linear-gradient(160deg, #faf9f7 0%, #f3f1ee 100%)',
+                    borderLeft: '1px solid rgba(0,0,0,0.05)',
                   }}
                 >
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={activeMember.name}
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -12 }}
-                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                      className="relative z-10"
-                    >
-                      {/* Role pill — desktop */}
-                      <div className="hidden lg:block mb-4">
-                        <span
-                          className="inline-block text-[9px] sm:text-[10px] font-black uppercase tracking-[0.18em] px-3 py-1.5 rounded-sm"
-                          style={{ background: '#111', color: '#fff', letterSpacing: '0.18em' }}
-                        >
-                          {activeMember.role}
-                        </span>
-                      </div>
+                  <div className="p-5 sm:p-7 lg:p-8">
 
-                      {/* Name — desktop */}
-                      <h4
-                        className="hidden lg:block font-black leading-tight mb-3 text-brand-saffron"
-                        style={{ fontSize: 'clamp(1.5rem, 2.5vw, 2.15rem)', fontFamily: 'Georgia, serif' }}
+                    {/* Role pill */}
+                    <div className="mb-3">
+                      <span
+                        className="inline-block text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-sm"
+                        style={{ background: '#111', color: '#fff', letterSpacing: '0.18em' }}
                       >
-                        {activeMember.name}
-                      </h4>
+                        {member.role}
+                      </span>
+                    </div>
 
-                      {/* Quote */}
-                      <div className="flex gap-3 items-start mb-6 sm:mb-7">
-                        <div className="w-0.5 min-h-full bg-brand-saffron rounded-full shrink-0 self-stretch" />
-                        <p
-                          className="text-brand-saffron text-sm sm:text-base leading-relaxed"
-                          style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
-                        >
-                          &ldquo;{activeMember.quote}&rdquo;
-                        </p>
-                      </div>
+                    {/* Name */}
+                    <h4
+                      className="font-black leading-tight mb-2 text-brand-saffron"
+                      style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontFamily: 'Georgia, serif' }}
+                    >
+                      {member.name}
+                    </h4>
 
-                      <div className="w-10 h-0.5 bg-brand-saffron/40 mb-5 sm:mb-6" />
+                    {/* Divider */}
+                    <div className="w-10 h-0.5 bg-brand-saffron/40 mb-5" />
 
-                      {/* Headings */}
-                      <div className="space-y-4 sm:space-y-5">
-                        {activeMember.headings.map((item, idx) => (
-                          <div key={item.title} className="flex gap-3">
-                            <span className="mt-0.5 text-brand-saffron text-[10px] font-bold tracking-wider shrink-0 w-4">
-                              {String(idx + 1).padStart(2, '0')}
-                            </span>
-                            <div>
-                              <h5 className="text-gray-900 text-sm sm:text-[15px] font-semibold mb-1 leading-snug">
-                                {item.title}
-                              </h5>
+                    {/* Content items */}
+                    <div className="space-y-3 sm:space-y-4 mb-5">
+                      {member.headings.map((item, idx) => (
+                        <div key={item.title}>
+                          {idx === 0 ? (
+                            <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
+                              {item.text}
+                            </p>
+                          ) : (
+                            <div className="flex gap-2.5">
+                              <div className="mt-1.5 w-1 h-1 rounded-full bg-brand-saffron shrink-0" />
                               <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
+                                <span className="font-semibold text-gray-800">{item.title}. </span>
                                 {item.text}
                               </p>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
-              </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
 
-              {/* Member selector strip */}
-              <div
-                className="border-t border-white/8 px-3 sm:px-5 py-4 sm:py-5"
-                style={{ background: 'rgba(0,0,0,0.25)' }}
-              >
-                <div className="flex items-stretch justify-between gap-1 sm:gap-2">
-                  {teamMembers.map((member, index) => {
-                    const isActive = activeIndex === index;
-                    return (
-                      <button
-                        key={member.name}
-                        type="button"
-                        onClick={() => setActiveIndex(index)}
-                        className={`group relative flex-1 flex flex-col items-center gap-2 sm:gap-2.5 rounded-xl sm:rounded-2xl px-1 sm:px-2 py-2 sm:py-3 transition-all duration-300 cursor-pointer ${
-                          isActive
-                            ? 'bg-white/8'
-                            : 'hover:bg-white/4'
-                        }`}
-                        aria-label={`View ${member.name}`}
-                        aria-pressed={isActive}
-                      >
-                        <div
-                          className={`relative w-11 h-11 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-full overflow-hidden transition-all duration-300 ${
-                            isActive
-                              ? 'ring-2 ring-brand-saffron ring-offset-2 ring-offset-[#0a0605] scale-105'
-                              : 'ring-1 ring-white/15 opacity-100 group-hover:opacity-100 group-hover:ring-white/30'
-                          }`}
+                    {/* Blockquote */}
+                    <div className="mt-2 pt-4" style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+                      <div className="flex gap-3 items-start">
+                        <div className="w-0.5 min-h-6 bg-brand-saffron rounded-full shrink-0 self-stretch" />
+                        <p
+                          className="text-brand-saffron text-xs sm:text-sm leading-relaxed"
+                          style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
                         >
-                          <img
-                            src={member.image}
-                            alt=""
-                            className={`w-full h-full object-cover object-top transition-all duration-500 ${
-                              isActive ? 'saturate-100' : 'saturate-100 group-hover:saturate-100'
-                            }`}
-                          />
-                        </div>
+                          "{member.quote}"
+                        </p>
+                      </div>
+                    </div>
 
-                        <div className="text-center min-w-0 w-full">
-                          <p
-                            className={`text-[9px] sm:text-[11px] md:text-xs font-semibold leading-tight truncate transition-colors duration-300 ${
-                              isActive ? 'text-white' : 'text-white group-hover:text-white'
-                            }`}
-                          >
-                            {member.name.split(' ')[0]}
-                          </p>
-                          <p
-                            className={`hidden sm:block text-[8px] md:text-[9px] tracking-wide uppercase mt-0.5 truncate transition-colors duration-300 ${
-                              isActive ? 'text-brand-saffron/80' : 'text-white/80'
-                            }`}
-                          >
-                            {member.role.split(/[—,&]/)[0].trim()}
-                          </p>
-                        </div>
-
-                        {/* Active progress bar (auto-rotate indicator) */}
-                        {isActive && (
-                          <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full overflow-hidden bg-white/10">
-                            <motion.span
-                              key={`progress-${index}-${isPaused}`}
-                              className="block h-full bg-brand-saffron origin-left"
-                              initial={{ scaleX: 0 }}
-                              animate={{ scaleX: isPaused ? 0 : 1 }}
-                              transition={
-                                isPaused
-                                  ? { duration: 0 }
-                                  : { duration: 5, ease: 'linear' }
-                              }
-                            />
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </motion.div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      );
+    })}
+  </div>
+</motion.div>
         </div>
 
         {/* ── Bottom wave ── */}
