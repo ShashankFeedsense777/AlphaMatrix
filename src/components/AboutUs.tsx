@@ -1,11 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useMemo } from 'react';
 import SectionReveal, { fadeLeft, scaleIn, staggerContainer, fadeUp } from './SectionReveal';
 import { Person1, Person2, Person3, Person4, Person5 } from '../assets/index';
 import { AnimatePresence, motion } from 'framer-motion';
 import { getCachedVideoUrl } from '../utils/videoCache';
 
 const teamMembers = [
-  
   {
     name: 'Aniel Malik',
     image: Person3,
@@ -67,45 +66,45 @@ const teamMembers = [
     ],
   },
   {
-  name: 'Shailendra Singh',
-  image: Person4,
-  role: 'Director',
-  quote: 'Technology, discipline, and risk management are the pillars of sustainable market leadership.',
-  headings: [
-    {
-      title: '21+ Years of Capital Markets Leadership',
-      text: 'With over two decades of experience spanning institutional broking, proprietary trading, commodities, equities, and financial market infrastructure, Shailendra has successfully built and scaled technology-driven brokerage businesses across multiple asset classes.',
-    },
-    {
-      title: 'Technology-Driven Market Infrastructure',
-      text: 'Leads the development of institutional-grade trading platforms focused on low-latency execution, robust risk management, operational resilience, and comprehensive regulatory compliance, delivering world-class trading experiences.',
-    },
-    {
-      title: 'Strategic Growth & Innovation',
-      text: "Guides AlphaMatrix's long-term strategic vision by championing digital transformation, innovation, and data-driven decision-making. His leadership is centred on creating a globally competitive capital markets institution that delivers sustainable value for clients, partners, and stakeholders.",
-    },
-  ],
-},
-{
-  name: 'Vidhi Gala',
-  image: Person5,
-  role: 'Director',
-  quote: 'Informed decisions, disciplined execution, and integrity create lasting financial success.',
-  headings: [
-    {
-      title: '15+ Years of Market Expertise',
-      text: 'Brings over 15 years of experience across equity and derivatives trading, investment strategy, financial planning, portfolio management, and market research, providing clients with comprehensive market insights.',
-    },
-    {
-      title: 'Strategic Leadership',
-      text: 'As Director, Vidhi plays a key role in shaping the organisation’s strategic direction, driving innovation, strengthening business development, and navigating the evolving landscape of capital markets with a balanced approach to growth and risk.',
-    },
-    {
-      title: 'Excellence & Sustainable Growth',
-      text: 'Combines strong analytical thinking, sound risk management, and leadership with an unwavering commitment to integrity and professionalism, fostering informed decision-making and long-term sustainable growth for clients and the organisation.',
-    },
-  ],
-},
+    name: 'Shailendra Singh',
+    image: Person4,
+    role: 'Director',
+    quote: 'Technology, discipline, and risk management are the pillars of sustainable market leadership.',
+    headings: [
+      {
+        title: '21+ Years of Capital Markets Leadership',
+        text: 'With over two decades of experience spanning institutional broking, proprietary trading, commodities, equities, and financial market infrastructure, Shailendra has successfully built and scaled technology-driven brokerage businesses across multiple asset classes.',
+      },
+      {
+        title: 'Technology-Driven Market Infrastructure',
+        text: 'Leads the development of institutional-grade trading platforms focused on low-latency execution, robust risk management, operational resilience, and comprehensive regulatory compliance, delivering world-class trading experiences.',
+      },
+      {
+        title: 'Strategic Growth & Innovation',
+        text: "Guides AlphaMatrix's long-term strategic vision by championing digital transformation, innovation, and data-driven decision-making. His leadership is centred on creating a globally competitive capital markets institution that delivers sustainable value for clients, partners, and stakeholders.",
+      },
+    ],
+  },
+  {
+    name: 'Vidhi Gala',
+    image: Person5,
+    role: 'Director',
+    quote: 'Informed decisions, disciplined execution, and integrity create lasting financial success.',
+    headings: [
+      {
+        title: '15+ Years of Market Expertise',
+        text: 'Brings over 15 years of experience across equity and derivatives trading, investment strategy, financial planning, portfolio management, and market research, providing clients with comprehensive market insights.',
+      },
+      {
+        title: 'Strategic Leadership',
+        text: 'As Director, Vidhi plays a key role in shaping the organisation’s strategic direction, driving innovation, strengthening business development, and navigating the evolving landscape of capital markets with a balanced approach to growth and risk.',
+      },
+      {
+        title: 'Excellence & Sustainable Growth',
+        text: 'Combines strong analytical thinking, sound risk management, and leadership with an unwavering commitment to integrity and professionalism, fostering informed decision-making and long-term sustainable growth for clients and the organisation.',
+      },
+    ],
+  },
 ];
 
 const ABOUT_VIDEOS = [
@@ -113,55 +112,172 @@ const ABOUT_VIDEOS = [
   'https://res.cloudinary.com/drverjcjf/video/upload/v1780914015/Footer_rrbhuu.mp4',
 ];
 
-const AboutUs: React.FC = () => {
-const [activeIndex, setActiveIndex] = React.useState(0);
-const [isPaused, setIsPaused] = React.useState(false);
-const cachedAboutRef = useRef<string[]>([]);
-const videoRef = useRef<HTMLVideoElement>(null);
+const VISIBLE_COUNT = 3;
+const AUTO_ADVANCE_MS = 4500;
+const MOBILE_IMAGE_HEIGHT = 300; // use the larger sm: value so the reservation is never too small
+const MOBILE_GAP = 16; // use the larger sm:gap-4 value so the reservation is never too small
 
-React.useEffect(() => {
-  if (isPaused) return;
-  const interval = setInterval(() => {
-    setActiveIndex((prev) => (prev + 1) % teamMembers.length);
-  }, 5000);
-  return () => clearInterval(interval);
-}, [isPaused]);
-
-useEffect(() => {
-  Promise.all(ABOUT_VIDEOS.map(getCachedVideoUrl)).then((blobUrls) => {
-    cachedAboutRef.current = blobUrls;
-    if (videoRef.current) {
-      videoRef.current.src = blobUrls[0];
-    }
-  });
-}, []);
-
-const handleVideoEnded = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-  const video = e.currentTarget;
-  const i = Number(video.dataset.currentIndex || 0);
-  const next = (i + 1) % ABOUT_VIDEOS.length;
-  video.dataset.currentIndex = String(next);
-  video.src = cachedAboutRef.current[next] || ABOUT_VIDEOS[next];
-  video.play();
+/** Content panel — always mounted, height animates between 0 and its real
+ * measured scrollHeight on mobile. On desktop (lg) it's pinned to the fixed
+ * row height set by the parent card, matching the old side-by-side layout. */
+const ContentPanel: React.FC<{
+  isActive: boolean;
+  children: React.ReactNode;
+}> = ({ isActive, children }) => {
+  return (
+    <div
+      className="overflow-hidden lg:!h-full lg:!opacity-100 lg:flex-1 lg:overflow-y-auto"
+      style={{
+        background: 'linear-gradient(160deg, #faf9f7 0%, #f3f1ee 100%)',
+        borderLeft: '1px solid rgba(0,0,0,0.05)',
+        pointerEvents: isActive ? 'auto' : 'none',
+      }}
+    >
+      <div className="h-full">
+        {children}
+      </div>
+    </div>
+  );
 };
+
+const MemberContent: React.FC<{ member: (typeof teamMembers)[number] }> = ({ member }) => (
+  <div className="p-5 sm:p-7 lg:p-8">
+    <div className="mb-3">
+      <span
+        className="inline-block text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-sm"
+        style={{ background: '#111', color: '#fff', letterSpacing: '0.18em' }}
+      >
+        {member.role}
+      </span>
+    </div>
+
+    <h4
+      className="font-black leading-tight mb-2 text-brand-saffron"
+      style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontFamily: 'Georgia, serif' }}
+    >
+      {member.name}
+    </h4>
+
+    <div className="w-10 h-0.5 bg-brand-saffron/40 mb-5" />
+
+    <div className="space-y-3 sm:space-y-4 mb-5">
+      {member.headings.map((item, idx) => (
+        <div key={item.title}>
+          {idx === 0 ? (
+            <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">{item.text}</p>
+          ) : (
+            <div className="flex gap-2.5">
+              <div className="mt-1.5 w-1 h-1 rounded-full bg-brand-saffron shrink-0" />
+              <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
+                <span className="font-semibold text-gray-800">{item.title}. </span>
+                {item.text}
+              </p>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+
+    <div className="mt-2 pt-4" style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}>
+      <div className="flex gap-3 items-start">
+        <div className="w-0.5 min-h-6 bg-brand-saffron rounded-full shrink-0 self-stretch" />
+        <p
+          className="text-brand-saffron text-xs sm:text-sm leading-relaxed"
+          style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
+        >
+          "{member.quote}"
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const AboutUs: React.FC = () => {
+  const total = teamMembers.length;
+
+  // windowStart = index of the leftmost visible card in the circular sequence
+  const [windowStart, setWindowStart] = React.useState(0);
+  const [activeName, setActiveName] = React.useState(teamMembers[0].name);
+  const [isPaused, setIsPaused] = React.useState(false);
+
+  const cachedAboutRef = useRef<string[]>([]);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // ── Reserved-height measurement (mobile only) ──
+  // Measures every member's content height off-screen once, so the row can
+  // reserve enough space for the tallest possible expanded card. This stops
+  // sections below AboutUs from shifting when a card expands/collapses.
+  const [maxContentHeight, setMaxContentHeight] = React.useState(0);
+  const measureRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const heights = measureRefs.current.filter(Boolean).map((el) => el!.scrollHeight);
+    if (heights.length) setMaxContentHeight(Math.max(...heights));
+  }, []);
+
+  // Compute the 3 globally-indexed members currently visible, left→right
+  const visibleIndices = useMemo(
+    () => Array.from({ length: VISIBLE_COUNT }, (_, i) => (windowStart + i) % total),
+    [windowStart, total]
+  );
+  const visibleMembers = useMemo(
+    () => visibleIndices.map((idx) => teamMembers[idx]),
+    [visibleIndices]
+  );
+
+  // Auto-advance the window every interval, unless paused
+  React.useEffect(() => {
+    if (isPaused) return;
+    const interval = setInterval(() => {
+      setWindowStart((prev) => (prev + 1) % total);
+    }, AUTO_ADVANCE_MS);
+    return () => clearInterval(interval);
+  }, [isPaused, total]);
+
+  // Keep the active/expanded card if it's still visible after a slide,
+  // otherwise fall back to the new leftmost card
+  React.useEffect(() => {
+    const stillVisible = visibleMembers.some((m) => m.name === activeName);
+    if (!stillVisible) {
+      setActiveName(visibleMembers[0].name);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [windowStart]);
+
+  useEffect(() => {
+    Promise.all(ABOUT_VIDEOS.map(getCachedVideoUrl)).then((blobUrls) => {
+      cachedAboutRef.current = blobUrls;
+      if (videoRef.current) {
+        videoRef.current.src = blobUrls[0];
+      }
+    });
+  }, []);
+
+  const handleVideoEnded = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
+    const i = Number(video.dataset.currentIndex || 0);
+    const next = (i + 1) % ABOUT_VIDEOS.length;
+    video.dataset.currentIndex = String(next);
+    video.src = cachedAboutRef.current[next] || ABOUT_VIDEOS[next];
+    video.play();
+  };
+
+  const goTo = (idx: number) => {
+    setWindowStart(((idx % total) + total) % total);
+    setIsPaused(true);
+  };
 
   return (
     <>
       <section
         id="aboutus"
         className="relative px-4 sm:px-6 border-t-0"
-        style={{
-          paddingTop: '4rem',
-          paddingBottom: 0,
-          // background: 'linear-gradient(160deg, #060608 0%, #130804 40%, #1f0b05 70%, #270b08 100%)',
-        }}
+        style={{ paddingTop: '4rem', paddingBottom: 0 }}
       >
         <div className="max-w-7xl mx-auto relative z-10">
 
           {/* ── Hero row ── */}
           <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
-
-            {/* Visual side */}
             <SectionReveal
               variants={scaleIn}
               className="w-full max-w-[280px] sm:max-w-[360px] md:max-w-[420px] lg:max-w-none lg:w-1/2 relative mx-auto lg:mx-0"
@@ -194,7 +310,6 @@ const handleVideoEnded = (e: React.SyntheticEvent<HTMLVideoElement>) => {
               </div>
             </SectionReveal>
 
-            {/* Text side */}
             <motion.div
               className="w-full lg:w-1/2"
               variants={staggerContainer(0.13)}
@@ -233,151 +348,170 @@ const handleVideoEnded = (e: React.SyntheticEvent<HTMLVideoElement>) => {
 
           {/* ── Leadership team ── */}
           <motion.div
-  className="mt-20 sm:mt-28 pb-24"
-  initial="hidden"
-  whileInView="visible"
-  viewport={{ once: true }}
->
-  <div className="mb-8 sm:mb-12">
-    <h2 className="text-brand-saffron text-[10px] sm:text-xs tracking-[0.3em] uppercase font-bold mb-3 sm:mb-4">
-      Leadership Team
-    </h2>
-    <h3 className="text-3xl sm:text-4xl font-light text-white">
-      The People Behind
-      <span className="block font-bold text-white">AlphaMatrix</span>
-    </h3>
-  </div>
+            className="mt-20 sm:mt-28 pb-16"
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            <div className="mb-8 sm:mb-12">
+              <h2 className="text-brand-saffron text-[10px] sm:text-xs tracking-[0.3em] uppercase font-bold mb-3 sm:mb-4">
+                Leadership Team
+              </h2>
+              <h3 className="text-3xl sm:text-4xl font-light text-white">
+                The People Behind
+                <span className="block font-bold text-white">AlphaMatrix</span>
+              </h3>
+            </div>
 
-  {/* Cards */}
-  <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
-    {teamMembers.map((member, index) => {
-      const isActive = activeIndex === index;
-      return (
-        <motion.div
-          key={member.name}
-          layout
-          transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-          animate={{ flex: isActive ? 4 : 1 }}
-          className="relative overflow-hidden rounded-2xl sm:rounded-[28px] h-[420px] sm:h-[500px] lg:h-[560px] cursor-pointer"
-          style={{ border: '1px solid rgba(255,255,255,0.07)' }}
-          onClick={() => {
-            setActiveIndex(index);
-            setIsPaused(true);       // click → lock open
-          }}
-          onMouseEnter={() => {
-            setActiveIndex(index);
-            setIsPaused(true);       // hover in → lock open
-          }}
-          onMouseLeave={() => {
-            setIsPaused(false);      // hover out → resume auto-loop
-          }}
-        >
-          <div className="h-full flex flex-col lg:flex-row overflow-hidden">
+            {/* Hidden measurement pass — computes maxContentHeight, never visible */}
+            <div className="flex flex-col lg:flex-row gap-3 sm:gap-4 lg:!min-h-0">
+            </div>
 
-            {/* Image panel */}
-            <motion.div
-              layout
-              className="relative h-[200px] sm:h-[240px] lg:h-auto lg:w-[260px] xl:w-[300px] shrink-0 overflow-hidden"
+            {/* Sliding-window cards */}
+            <div
+              className="flex flex-col lg:flex-row gap-3 sm:gap-4 lg:!min-h-0"
+              style={{
+                // Reserve space for ALL visible cards' collapsed images + gaps,
+                // plus the tallest possible expanded content panel — not just one.
+                // This must always be >= the real rendered height, or the
+                // container still grows/shrinks and everything below drifts.
+                minHeight: maxContentHeight
+                  ? VISIBLE_COUNT * MOBILE_IMAGE_HEIGHT +
+                  (VISIBLE_COUNT - 1) * MOBILE_GAP +
+                  maxContentHeight
+                  : undefined,
+              }}
             >
-              <img
-                src={member.image}
-                alt={member.name}
-                className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${isActive ? 'saturate-100 scale-100' : 'saturate-0 scale-105'}`}
-              />
-              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
-
-              {/* Name overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
-                <h4 className="text-white text-base sm:text-lg font-bold leading-tight drop-shadow-lg">
-                  {member.name}
-                </h4>
-              </div>
-
-              
-            </motion.div>
-
-            {/* Expanded content panel */}
-            <AnimatePresence mode="wait">
-              {isActive && (
-                <motion.div
-                  key="content"
-                  initial={{ opacity: 0, x: 32 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                  className="flex-1 overflow-y-auto"
-                  style={{
-                    background: 'linear-gradient(160deg, #faf9f7 0%, #f3f1ee 100%)',
-                    borderLeft: '1px solid rgba(0,0,0,0.05)',
-                  }}
-                >
-                  <div className="p-5 sm:p-7 lg:p-8">
-
-                    {/* Role pill */}
-                    <div className="mb-3">
-                      <span
-                        className="inline-block text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1.5 rounded-sm"
-                        style={{ background: '#111', color: '#fff', letterSpacing: '0.18em' }}
-                      >
-                        {member.role}
-                      </span>
-                    </div>
-
-                    {/* Name */}
-                    <h4
-                      className="font-black leading-tight mb-2 text-brand-saffron"
-                      style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', fontFamily: 'Georgia, serif' }}
+              <AnimatePresence initial={false} mode="popLayout">
+                {visibleMembers.map((member) => {
+                  const isActive = activeName === member.name;
+                  return (
+                    <motion.div
+                      key={member.name}
+                      layout
+                      initial={{ opacity: 0, x: 80 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -80 }}
+                      transition={{
+                        layout: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+                        opacity: { duration: 0.35 },
+                        x: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+                      }}
+                      className={`relative overflow-hidden rounded-2xl sm:rounded-[28px] lg:h-[560px] cursor-pointer flex-none ${isActive ? 'lg:flex-[4]' : 'lg:flex-1'}`}
+                      style={{ border: '1px solid rgba(255,255,255,0.07)' }}
+                      onClick={() => {
+                        setActiveName(member.name);
+                        setIsPaused(true);
+                      }}
+                      onMouseEnter={() => {
+                        setActiveName(member.name);
+                        setIsPaused(true);
+                      }}
+                      onMouseLeave={() => {
+                        setIsPaused(false);
+                      }}
                     >
-                      {member.name}
-                    </h4>
+                      <div className="flex flex-col lg:flex-row lg:h-full overflow-hidden">
 
-                    {/* Divider */}
-                    <div className="w-10 h-0.5 bg-brand-saffron/40 mb-5" />
-
-                    {/* Content items */}
-                    <div className="space-y-3 sm:space-y-4 mb-5">
-                      {member.headings.map((item, idx) => (
-                        <div key={item.title}>
-                          {idx === 0 ? (
-                            <p className="text-gray-700 text-xs sm:text-sm leading-relaxed">
-                              {item.text}
-                            </p>
-                          ) : (
-                            <div className="flex gap-2.5">
-                              <div className="mt-1.5 w-1 h-1 rounded-full bg-brand-saffron shrink-0" />
-                              <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
-                                <span className="font-semibold text-gray-800">{item.title}. </span>
-                                {item.text}
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Blockquote */}
-                    <div className="mt-2 pt-4" style={{ borderTop: '1px solid rgba(0,0,0,0.08)' }}>
-                      <div className="flex gap-3 items-start">
-                        <div className="w-0.5 min-h-6 bg-brand-saffron rounded-full shrink-0 self-stretch" />
-                        <p
-                          className="text-brand-saffron text-xs sm:text-sm leading-relaxed"
-                          style={{ fontFamily: 'Georgia, serif', fontStyle: 'italic' }}
+                        {/* Image panel — fixed height at every breakpoint, never animated */}
+                        <div
+                          className="relative h-[280px] sm:h-[300px] lg:h-auto lg:w-[260px] xl:w-[300px] shrink-0 overflow-hidden"
                         >
-                          "{member.quote}"
-                        </p>
-                      </div>
-                    </div>
+                          <AnimatePresence initial={false} mode="sync">
+                            <motion.img
+                              key={member.name}
+                              src={member.image}
+                              alt={member.name}
+                              initial={{ opacity: 0, scale: 1.04 }}
+                              animate={{
+                                opacity: 1,
+                                scale: 1,
+                                filter: isActive ? 'grayscale(0)' : 'grayscale(1)',
+                              }}
+                              exit={{ opacity: 0, scale: 1.02 }}
+                              transition={{
+                                opacity: { duration: 0.45, ease: 'easeInOut' },
+                                scale: { duration: 0.7, ease: 'easeOut' },
+                                filter: { duration: 0.5 },
+                              }}
+                              className="absolute inset-0 w-full h-full object-cover object-top lg:object-center"
+                            />
+                          </AnimatePresence>
+                          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </motion.div>
-      );
-    })}
-  </div>
-</motion.div>
+                          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
+                            <h4 className="text-white text-base sm:text-lg font-bold leading-tight drop-shadow-lg">
+                              {member.name}
+                            </h4>
+                          </div>
+                        </div>
+
+                        {/* Content panel — smooth measured height on mobile, fixed on desktop */}
+                        <ContentPanel isActive={isActive}>
+                          <AnimatePresence initial={false} mode="sync">
+                            {isActive && (
+                              <motion.div
+                                key={member.name}
+                                initial={{ opacity: 0, x: 25 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -25 }}
+                                transition={{
+                                  duration: 0.4,
+                                  ease: 'easeInOut',
+                                }}
+                              >
+                                <MemberContent member={member} />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </ContentPanel>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+            </div>
+
+            {/* ── Manual slider control ── */}
+            <div className="mt-8 sm:mt-10 mb-16 sm:mb-8 max-w-md lg:max-w-none mx-auto lg:mx-0 relative z-20">
+              <input
+                type="range"
+                min={0}
+                max={total - 1}
+                step={1}
+                value={windowStart}
+                onChange={(e) => goTo(Number(e.target.value))}
+                className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-brand-saffron [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brand-saffron [&::-webkit-slider-thumb]:shadow-[0_0_0_4px_rgba(255,255,255,0.1)] [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-brand-saffron [&::-moz-range-thumb]:border-0"
+                style={{
+                  background: `linear-gradient(to right, var(--color-brand-saffron, #f5a623) 0%, var(--color-brand-saffron, #f5a623) ${(windowStart / (total - 1)) * 100}%, rgba(255,255,255,0.15) ${(windowStart / (total - 1)) * 100}%, rgba(255,255,255,0.15) 100%)`,
+                }}
+              />
+              <div className="flex justify-between mt-3">
+                {teamMembers.map((member, idx) => {
+                  const isInWindow = visibleIndices.includes(idx);
+                  return (
+                    <button
+                      key={member.name}
+                      onClick={() => goTo(idx)}
+                      className="flex flex-col items-center gap-1.5 group"
+                      aria-label={`Go to ${member.name}`}
+                    >
+                      <span
+                        className={`w-2 h-2 rounded-full transition-all duration-300 ${isInWindow ? 'bg-brand-saffron scale-125' : 'bg-white/25 group-hover:bg-white/50'
+                          }`}
+                      />
+                      <span
+                        className={`text-[9px] sm:text-[10px] uppercase tracking-wide transition-colors hidden sm:block ${isInWindow ? 'text-brand-saffron' : 'text-white/30'
+                          }`}
+                      >
+                        {member.name.split(' ')[0]}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </motion.div>
         </div>
 
         {/* ── Bottom wave ── */}
@@ -388,19 +522,13 @@ const handleVideoEnded = (e: React.SyntheticEvent<HTMLVideoElement>) => {
           <svg viewBox="0 0 1440 80" preserveAspectRatio="none" className="w-full h-full">
             <defs>
               <linearGradient id="waveGradient3" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%"   stopColor="#270b08" />
-                <stop offset="50%"  stopColor="#321009" />
+                <stop offset="0%" stopColor="#270b08" />
+                <stop offset="50%" stopColor="#321009" />
                 <stop offset="100%" stopColor="#3a150b" />
               </linearGradient>
             </defs>
-            <path
-              d="M0,0 L0,30 C240,0 480,60 720,25 C960,-10 1200,55 1440,30 L1440,0 Z"
-              fill="url(#waveGradient3)"
-            />
-            <path
-              d="M0,30 C240,0 480,60 720,25 C960,-10 1200,55 1440,30 L1440,80 L0,80 Z"
-              fill="white"
-            />
+            <path d="M0,0 L0,30 C240,0 480,60 720,25 C960,-10 1200,55 1440,30 L1440,0 Z" fill="url(#waveGradient3)" />
+            <path d="M0,30 C240,0 480,60 720,25 C960,-10 1200,55 1440,30 L1440,80 L0,80 Z" fill="white" />
           </svg>
         </div>
       </section>
