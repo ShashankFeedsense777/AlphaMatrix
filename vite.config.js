@@ -7,5 +7,8 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     host: true,
+    allowedHosts: [
+     "ikszwk-ip-14-194-112-66.tunnelmole.net"
+    ]
   },
 })

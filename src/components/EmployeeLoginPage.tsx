@@ -1,30 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AlertCircle, ArrowLeft, CheckCircle2, KeyRound, Lock, Phone, ShieldCheck, User } from 'lucide-react';
-import { Logo, Nature1, Nature2, Nature3 } from '../assets/index';
-import { loginAPI } from '../api/apiCalls';
+import { AlertCircle, ArrowLeft, CheckCircle2, KeyRound, Mail, Phone, ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { alphaMatrix1, Nature1, Nature2, Nature3 } from '../assets/index';
+import { requestLoginOtpAPI, validateLoginOtpAPI } from '../api/apiCalls';
+import ShapeGrid from './ui/ShapeGrid';
+import RiskDisclosureModal from './modal/RiskDisclosureModal';
 
-type LoginMode = 'password' | 'phone';
-type LoginResponse = { status: number; message?: string };
+type LoginMode = 'email' | 'phone';
+
 type ToastState = {
   id: number;
   type: 'success' | 'error';
   title: string;
   message: string;
 } | null;
-
-const loginWithUsernamePassword = async (_username: string, _password: string) => {
-  const response = await loginAPI(_username, _password);
-  return response as LoginResponse | undefined;
-};
-
-const requestLoginOtp = async (_mobile: string) => {
-  return { status: 200, message: 'OTP sent successfully.' };
-};
-
-const validateMobileOtp = async (_mobile: string, _otp: string) => {
-  return { status: 200, message: 'OTP validated successfully.' };
-};
 
 const slideVariants = {
   initial: { opacity: 0, x: 10 },
@@ -73,38 +63,77 @@ const SLIDE_DATA = [
 ];
 
 const EmployeeLoginPage: React.FC = () => {
-  const [mode, setMode] = useState<LoginMode>('password');
+  const navigate = useNavigate();
+  const [mode, setMode] = useState<LoginMode>('email');
   const [otpSent, setOtpSent] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState<ToastState>(null);
-  const [formValues, setFormValues] = useState({
-    username: '',
-    password: '',
-    mobile: '',
-    otp: '',
-  });
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
+
+  const [showDisclosure, setShowDisclosure] = useState(() => {
+  return sessionStorage.getItem('fnoDisclosureAck') !== 'true';
+});
+
+const handleAcknowledgeDisclosure = () => {
+  sessionStorage.setItem('fnoDisclosureAck', 'true');
+  setShowDisclosure(false);
+};
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (localStorage.getItem('loggedIn') === 'true') {
+      navigate('/dashboard/live-greeks', { replace: true });
+    }
+  }, [navigate]);
 
   // Auto-slide logic
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % SLIDE_DATA.length);
-    }, 5000); // Change slide every 5 seconds
+    }, 5000);
     return () => clearInterval(timer);
   }, []);
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  const validateEmail = (value: string) => {
+    if (!value.trim()) return '';
+    if (!emailRegex.test(value)) return 'Enter a valid email address.';
+    return '';
+  };
+
+  const validatePhone = (value: string) => {
+    if (!value) return '';
+    if (value.length < 10) return '';
+    if (!/^[6-9]/.test(value)) return 'Number must start with 6, 7, 8 or 9.';
+    return '';
+  };
+
+  const emailError = !otpSent ? validateEmail(email) : '';
+  const phoneError = !otpSent ? validatePhone(phone) : '';
+  const canSubmit = otpSent
+    ? otp.trim().length >= 4
+    : mode === 'email'
+      ? !emailError && email.trim().length > 0
+      : !phoneError && phone.length === 10;
+
+  const getIdentifier = () => (mode === 'email' ? email.trim() : `+91${phone}`);
 
   const switchMode = (nextMode: LoginMode) => {
     setMode(nextMode);
     setOtpSent(false);
-  };
-
-  const updateField = (field: keyof typeof formValues, value: string) => {
-    setFormValues((current) => ({ ...current, [field]: value }));
+    setOtp('');
+    setOtpError('');
   };
 
   const goToDashboard = () => {
+    localStorage.setItem('loggedIn', 'true');
     window.setTimeout(() => {
-      window.location.href = '/dashboard';
+      navigate('/dashboard', { replace: true });
     }, 850);
   };
 
@@ -121,34 +150,23 @@ const EmployeeLoginPage: React.FC = () => {
     event.preventDefault();
     setIsSubmitting(true);
 
-    try {
-      if (mode === 'password') {
-        const response = await loginWithUsernamePassword(formValues.username, formValues.password);
-        if (response?.status === 200) {
-          showToast({
-            type: 'success',
-            title: 'Login successful',
-            message: 'Redirecting to employee dashboard.',
-          });
-          goToDashboard();
-        } else {
-          showToast({
-            type: 'error',
-            title: 'Login failed',
-            message: response?.message || 'Invalid username or password.',
-          });
-        }
-        return;
-      }
+    const identifier = getIdentifier();
 
+    try {
       if (!otpSent) {
-        const response = await requestLoginOtp(formValues.mobile);
+        const error = mode === 'email' ? validateEmail(email) : validatePhone(phone);
+        if (error || (mode === 'email' && !email.trim()) || (mode === 'phone' && phone.length !== 10)) {
+          showToast({ type: 'error', title: 'Validation failed', message: error || 'Please check your input.' });
+          setIsSubmitting(false);
+          return;
+        }
+        const response = await requestLoginOtpAPI(identifier, mode);
         if (response?.status === 200) {
           setOtpSent(true);
           showToast({
             type: 'success',
             title: 'OTP sent',
-            message: 'Enter the OTP sent to your registered mobile number.',
+            message: `Enter the OTP sent to your registered ${mode === 'email' ? 'email' : 'phone'}.`,
           });
         } else {
           showToast({
@@ -160,7 +178,7 @@ const EmployeeLoginPage: React.FC = () => {
         return;
       }
 
-      const response = await validateMobileOtp(formValues.mobile, formValues.otp);
+      const response = await validateLoginOtpAPI(identifier, otp, mode);
       if (response?.status === 200) {
         showToast({
           type: 'success',
@@ -169,11 +187,7 @@ const EmployeeLoginPage: React.FC = () => {
         });
         goToDashboard();
       } else {
-        showToast({
-          type: 'error',
-          title: 'OTP verification failed',
-          message: response?.message || 'Please check the OTP and try again.',
-        });
+        setOtpError(response?.message || 'Incorrect OTP. Please try again.');
       }
     } finally {
       setIsSubmitting(false);
@@ -181,8 +195,23 @@ const EmployeeLoginPage: React.FC = () => {
   };
 
   return (
+    <>
+    <AnimatePresence>
+      {showDisclosure && <RiskDisclosureModal onAcknowledge={handleAcknowledgeDisclosure} />}
+    </AnimatePresence>
     <main className="relative min-h-svh overflow-x-hidden bg-[#060608] text-white selection:bg-brand-saffron selection:text-white">
-      <div className="fixed right-3 top-3 z-[120] w-[calc(100vw-1.5rem)] max-w-sm sm:right-5 sm:top-5">
+      <div className="absolute inset-0 z-100">
+        <ShapeGrid
+          speed={0.4}
+          squareSize={60}
+          direction="diagonal"
+          borderColor="rgba(255,255,255,0.06)"
+          hoverFillColor="transparent"
+          shape="square"
+          hoverTrailAmount={3}
+        />
+      </div>
+      <div className="fixed right-3 top-3 z-120 w-[calc(100vw-1.5rem)] max-w-sm sm:right-5 sm:top-5">
         <AnimatePresence mode="wait">
           {toast && (
             <motion.div
@@ -191,16 +220,14 @@ const EmployeeLoginPage: React.FC = () => {
               animate={{ opacity: 1, x: 0, y: 0, scale: 1 }}
               exit={{ opacity: 0, x: 24, y: -10, scale: 0.96 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className={`flex gap-3 rounded-2xl border p-4 shadow-2xl backdrop-blur-xl ${
-                toast.type === 'success'
+              className={`flex gap-3 rounded-2xl border p-4 shadow-2xl backdrop-blur-xl ${toast.type === 'success'
                   ? 'border-green-400/25 bg-green-500/12'
                   : 'border-red-400/25 bg-red-500/12'
-              }`}
+                }`}
             >
               <div
-                className={`mt-0.5 ${
-                  toast.type === 'success' ? 'text-green-400' : 'text-red-400'
-                }`}
+                className={`mt-0.5 ${toast.type === 'success' ? 'text-green-400' : 'text-red-400'
+                  }`}
               >
                 {toast.type === 'success' ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
               </div>
@@ -213,21 +240,24 @@ const EmployeeLoginPage: React.FC = () => {
         </AnimatePresence>
       </div>
 
-      {/* Background Decor (Grid & Radials) */}
-      <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.055) 1px,transparent 1px)', backgroundSize: 'clamp(32px, 6vw, 44px) clamp(32px, 6vw, 44px)' }} />
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 50% at 50% 0%,rgba(249,115,22,0.12) 0%,transparent 65%)' }} />
-
-      <div className="relative z-10 flex min-h-svh flex-col px-3 py-3 min-[380px]:px-4 sm:px-6 lg:px-10">
+      <div className="relative  flex min-h-svh flex-col px-3 py-3 min-[380px]:px-4 sm:px-6 lg:px-10">
         {/* Nav */}
-        <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3 border-b border-white/6 pb-3 sm:pb-4">
-          <button type="button" onClick={() => { window.location.href = '/'; }} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-3 py-2 text-[11px] font-semibold uppercase tracking-widest text-white/60 backdrop-blur-md transition-colors hover:border-brand-saffron/40 hover:text-white">
+        <header className="mx-auto flex w-full max-w-7xl items-center justify-between gap-3  pb-3 sm:pb-4">
+          <button type="button" onClick={() => { navigate('/'); }} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/4 px-3 py-2 text-[11px] font-semibold uppercase tracking-widest text-white/60 backdrop-blur-md transition-colors hover:border-brand-saffron/40 hover:text-white z-101">
             <ArrowLeft size={14} /> Home
           </button>
-          <div className="flex min-w-0 items-center gap-2.5">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-brand-saffron/20 bg-brand-saffron/10">
-              <img src={Logo} alt="Alpha Matrix" className="h-5 w-5 object-contain" />
-            </div>
-            <span className="truncate text-[11px] sm:text-xs font-bold uppercase tracking-[0.14em] sm:tracking-[0.22em]">Alpha Matrix</span>
+          <div className="flex min-w-0 items-center gap-2.5 z-101">
+<img
+  id="employee-logo"
+  src={alphaMatrix1}
+  alt="AlphaMatrix"
+  className="h-auto max-w-full object-contain shrink-0"
+  style={{
+   width: "clamp(30px, 4vw, 50px)",
+  }}
+/>  
+
+    <span className="truncate text-[11px] sm:text-xs font-bold uppercase tracking-[0.14em] sm:tracking-[0.22em]">AlphaMatrix</span>
           </div>
         </header>
 
@@ -236,11 +266,11 @@ const EmployeeLoginPage: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid w-full max-w-[460px] overflow-hidden rounded-2xl sm:rounded-3xl border border-white/8 shadow-2xl md:max-w-none md:grid-cols-[1.05fr_0.95fr] lg:grid-cols-[1.1fr_0.9fr]"
+            className="grid w-full max-w-[460px] overflow-hidden rounded-2xl sm:rounded-3xl border border-white/20 shadow-2xl md:max-w-none md:grid-cols-[1.05fr_0.95fr] lg:grid-cols-[1.1fr_0.9fr]"
           >
 
             {/* ── Left panel (The Nature Slider) ── */}
-            <div className="hidden md:flex min-h-[560px] flex-col justify-between p-7 lg:p-12 relative overflow-hidden">
+            <div className="hidden md:flex min-h-[560px] flex-col justify-between p-7 lg:p-12 relative overflow-hidden z-101">
 
               {/* Background Image Transition */}
               <AnimatePresence mode="wait">
@@ -260,7 +290,7 @@ const EmployeeLoginPage: React.FC = () => {
               </AnimatePresence>
 
               {/* Dark Overlay for Text Legibility */}
-              <div className="absolute inset-0 bg-black/40 bg-linear-to-t from-black/90 via-black/20 to-[#060608]/40 z-1" />
+              <div className="absolute inset-0 bg-black/20 bg-linear-to-t from-black/40 via-black/20 to-[#060608]/40 z-1" />
 
               {/* Content Transition */}
               <AnimatePresence mode="wait">
@@ -305,16 +335,16 @@ const EmployeeLoginPage: React.FC = () => {
             </div>
 
             {/* ── Right panel (Login Form) ── */}
-            <div className="flex min-w-0 flex-col bg-[#07070b]/95 p-5 min-[380px]:p-6 sm:p-8 lg:p-9 backdrop-blur-xl">
+            <div className="flex min-w-0 flex-col bg-transparent p-5 min-[380px]:p-6 sm:p-8 lg:p-9 backdrop-blur-xl z-101">
               <div className="mb-5 flex h-11 w-11 shrink-0 items-center justify-center rounded-[14px] border border-brand-saffron/20 bg-brand-saffron/10 text-brand-saffron">
                 <ShieldCheck size={22} />
               </div>
               <h1 className="text-[clamp(1.55rem,7vw,2rem)] font-light text-white mb-1">Employee Login</h1>
-              <p className="text-xs text-white/35 font-light mb-6 sm:mb-7 leading-relaxed">Restricted to authorized Alpha Matrix personnel.</p>
+              <p className="text-xs text-white/35 font-light mb-6 sm:mb-7 leading-relaxed">Restricted to authorized AlphaMatrix personnel.</p>
 
               {/* Toggle */}
               <div className="mb-6 grid grid-cols-2 gap-1 rounded-full border border-white/7 bg-black/40 p-1">
-                {[{ id: 'password' as const, label: 'Password', icon: User }, { id: 'phone' as const, label: 'Phone', icon: Phone }].map(({ id, label, icon: Icon }) => (
+                {[{ id: 'email' as const, label: 'Email', icon: Mail }, { id: 'phone' as const, label: 'Phone', icon: Phone }].map(({ id, label, icon: Icon }) => (
                   <button key={id} type="button" onClick={() => switchMode(id)} className={`relative flex min-h-10 items-center justify-center gap-1.5 sm:gap-2 rounded-full px-2 py-2.5 text-[10px] sm:text-[11px] font-bold uppercase transition-colors ${mode === id ? 'text-white' : 'text-white/45'}`}>
                     {mode === id && <motion.span layoutId="pill" className="absolute inset-0 rounded-full bg-brand-saffron shadow-[0_0_20px_rgba(249,115,22,0.3)]" />}
                     <Icon size={13} className="relative z-10" /><span className="relative z-10">{label}</span>
@@ -325,56 +355,59 @@ const EmployeeLoginPage: React.FC = () => {
               {/* Form Content */}
               <AnimatePresence mode="wait">
                 <motion.form key={mode} onSubmit={handleLoginSubmit} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="flex flex-col gap-4">
-                  {mode === 'password' ? (
-                    <>
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">User ID</span>
-                        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all">
-                          <User size={14} className="shrink-0 text-white/30" />
-                          {/* Added placeholder:text-white/30 below */}
-                          <input type="text" autoComplete="username" placeholder="username" value={formValues.username} onChange={(event) => updateField('username', event.target.value)} className="employee-login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
-                        </div>
+                  {mode === 'email' ? (
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Email</span>
+                      <div className={`flex min-w-0 items-center gap-3 rounded-xl border bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all ${emailError ? 'border-red-400/50' : 'border-white/10'}`}>
+                        <Mail size={14} className="shrink-0 text-white/30" />
+                        <input type="email" autoComplete="email" placeholder="email@example.com" value={email} onChange={(e) => setEmail(e.target.value)} className="login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
                       </div>
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Password</span>
-                        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all">
-                          <Lock size={14} className="shrink-0 text-white/30" />
-                          {/* Added placeholder:text-white/30 below */}
-                          <input type="password" autoComplete="current-password" placeholder="password" value={formValues.password} onChange={(event) => updateField('password', event.target.value)} className="employee-login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
-                        </div>
-                      </div>
-                    </>
+                      {emailError && (
+                        <p className="text-[11px] text-red-400/80 mt-0.5">{emailError}</p>
+                      )}
+                    </div>
                   ) : (
-                    <>
-                      <div className="flex flex-col gap-1.5">
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Mobile</span>
-                        <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all">
-                          <Phone size={14} className="shrink-0 text-white/30" />
-                          {/* Added placeholder:text-white/30 below */}
-                            <input type="tel" autoComplete="tel" placeholder="+91 00000 00000" value={formValues.mobile} onChange={(event) => updateField('mobile', event.target.value)} className="employee-login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
-                        </div>
+                    <div className="flex flex-col gap-1.5">
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">Phone</span>
+                      <div className={`flex min-w-0 items-center gap-3 rounded-xl border bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all ${phoneError ? 'border-red-400/50' : 'border-white/10'}`}>
+                        <Phone size={14} className="shrink-0 text-white/30" />
+                        <span className="text-sm text-white/50 font-mono shrink-0">+91</span>
+                        <input type="text" inputMode="numeric" maxLength={10} placeholder="0000000000" value={phone} onChange={(e) => {
+                          const digits = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          setPhone(digits);
+                        }} className="login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35 font-mono tracking-wider" />
                       </div>
-                      <AnimatePresence>
-                        {otpSent && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0, y: -8 }}
-                            animate={{ opacity: 1, height: 'auto', y: 0 }}
-                            exit={{ opacity: 0, height: 0, y: -8 }}
-                            transition={{ duration: 0.28 }}
-                            className="flex flex-col gap-1.5 overflow-hidden"
-                          >
-                            <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">OTP</span>
-                            <div className="flex min-w-0 items-center gap-3 rounded-xl border border-white/10 bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all">
-                              <KeyRound size={14} className="shrink-0 text-white/30" />
-                              <input type="text" inputMode="numeric" maxLength={6} placeholder="6 digit code" value={formValues.otp} onChange={(event) => updateField('otp', event.target.value)} className="employee-login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </>
+                      {phoneError && (
+                        <p className="text-[11px] text-red-400/80 mt-0.5">{phoneError}</p>
+                      )}
+                    </div>
                   )}
-                  <button type="submit" disabled={isSubmitting} className="mt-2 rounded-xl bg-brand-saffron py-3.5 px-4 text-[11px] font-bold uppercase tracking-widest hover:bg-orange-500 transition-colors shadow-lg shadow-brand-saffron/20 disabled:cursor-wait disabled:opacity-70">
-                    {isSubmitting ? 'Please Wait...' : mode === 'password' || otpSent ? 'Access Platform →' : 'Send OTP →'}
+                  <AnimatePresence>
+                    {otpSent && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0, y: -8 }}
+                        animate={{ opacity: 1, height: 'auto', y: 0 }}
+                        exit={{ opacity: 0, height: 0, y: -8 }}
+                        transition={{ duration: 0.28 }}
+                        className="flex flex-col gap-1.5 overflow-hidden"
+                      >
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-white/30">OTP</span>
+                        <div className={`flex min-w-0 items-center gap-3 rounded-xl border bg-black/25 px-4 py-3 focus-within:border-brand-saffron/50 transition-all ${otpError ? 'border-red-400/50' : 'border-white/10'}`}>
+                          <KeyRound size={14} className="shrink-0 text-white/30" />
+                          <input type="text" inputMode="numeric" maxLength={6} placeholder="6 digit code" value={otp} onChange={(e) => {
+                            const digits = e.target.value.replace(/\D/g, '').slice(0, 6);
+                            setOtp(digits);
+                            setOtpError('');
+                          }} className="login-input min-w-0 bg-transparent text-sm text-white outline-none w-full placeholder:text-white/35" />
+                        </div>
+                        {otpError && (
+                          <p className="text-[11px] text-red-400/80 mt-0.5">{otpError}</p>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                  <button type="submit" disabled={isSubmitting || !canSubmit} className="mt-2 rounded-xl bg-brand-saffron py-3.5 px-4 text-[11px] font-bold uppercase tracking-widest hover:bg-orange-500 transition-colors shadow-lg shadow-brand-saffron/20 disabled:opacity-40" style={{ cursor: isSubmitting || !canSubmit ? 'not-allowed' : 'pointer' }}>
+                    {isSubmitting ? 'Please Wait...' : otpSent ? 'Access Platform →' : 'Get OTP →'}
                   </button>
                 </motion.form>
               </AnimatePresence>
@@ -384,8 +417,9 @@ const EmployeeLoginPage: React.FC = () => {
           </motion.div>
         </section>
       </div>
-      
+
     </main>
+    </>
   );
 };
 

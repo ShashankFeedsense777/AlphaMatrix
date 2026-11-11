@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-scroll';
 import { Menu, Settings, X } from 'lucide-react';
-import { Logo } from '../assets/index'
+import { useNavigate, useLocation } from 'react-router-dom';
+import { alphaMatrix1 } from '../assets/index'
 
 interface NavbarProps {
   isAutoScrollEnabled?: boolean;
@@ -16,16 +16,22 @@ const navItems = [
   { name: 'Vision', to: 'vision' },
   { name: 'Locations', to: 'locations' },
   { name: 'About Us', to: 'aboutus' },
+  { name: 'Connect With Us', to: 'contact' },
 ] as const;
+
+const getNavHref = (sectionId: string) => (sectionId === 'hero' ? '/' : `/#${sectionId}`);
 
 const Navbar: React.FC<NavbarProps> = ({
   isAutoScrollEnabled = false,
-  setIsAutoScrollEnabled = () => {},
+  setIsAutoScrollEnabled = () => { },
   scrollSpeed = 15,
-  setScrollSpeed = () => {},
+  setScrollSpeed = () => { },
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === '/';
   const [scrolled, setScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState<String>(navItems[0].to);
+  const [activeSection, setActiveSection] = useState<String | null>(isHome ? navItems[0].to : null);
   const [showSettings, setShowSettings] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
@@ -42,15 +48,19 @@ const Navbar: React.FC<NavbarProps> = ({
 
         setScrolled(scrollPosition > 50);
 
-        const currentSection = navItems.reduce((current:any, item) => {
-          const section = document.getElementById(item.to);
-          if (!section) return current;
+        if (!isHome) {
+          setActiveSection(null);
+        } else {
+          const currentSection = navItems.reduce((current: any, item) => {
+            const section = document.getElementById(item.to);
+            if (!section) return current;
 
-          const sectionTop = section.getBoundingClientRect().top + scrollPosition;
-          return sectionTop <= activationPoint ? item.to : current;
-        }, navItems[0].to);
+            const sectionTop = section.getBoundingClientRect().top + scrollPosition;
+            return sectionTop <= activationPoint ? item.to : current;
+          }, navItems[0].to);
 
-        setActiveSection(currentSection);
+          setActiveSection(currentSection);
+        }
         frameId = null;
       });
     };
@@ -66,7 +76,7 @@ const Navbar: React.FC<NavbarProps> = ({
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', handleScroll);
     };
-  }, []);
+  }, [isHome]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -80,61 +90,91 @@ const Navbar: React.FC<NavbarProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showSettings]);
 
-  const handleNavClick = (sectionId: string) => {
+  const scrollToSection = (sectionId: string) => {
+    const section = document.getElementById(sectionId);
+    if (!section) return false;
+
+    const sectionTop = section.getBoundingClientRect().top + window.scrollY - 80;
+    window.scrollTo({
+      top: sectionTop,
+      behavior: 'smooth',
+    });
+
+    return true;
+  };
+
+  const handleNavClick = (event: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
     setIsAutoScrollEnabled(false);
     setActiveSection(sectionId);
     setShowMobileMenu(false);
+
+    if (isHome && scrollToSection(sectionId)) {
+      event.preventDefault();
+      return;
+    }
+
+    if (!isHome) {
+      event.preventDefault();
+      navigate(sectionId === 'hero' ? '/' : `/?scrollTo=${sectionId}`);
+    }
   };
 
   const openEmployeeLogin = () => {
     setIsAutoScrollEnabled(false);
-    window.location.href = '/employee-login';
+    window.open('/login', '_blank');
   };
 
   return (
     <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled || showMobileMenu ? 'bg-brand-black/92 backdrop-blur-md shadow-lg py-3 md:py-4' : 'bg-transparent py-4 md:py-6'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex justify-between items-center gap-3">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 flex justify-between items-center gap-3">
         {/* Logo Placeholder */}
-        <div className="flex min-w-0 items-center space-x-2 cursor-pointer">
+        <div className="flex min-w-fit items-center space-x-2 cursor-pointer">
           {/* <div className="w-10 h-10 border-2 border-brand-saffron flex items-center justify-center text-brand-saffron font-bold text-xl relative">
             <span className="absolute -top-1 -right-1 w-3 h-3 bg-brand-saffron rounded-full"></span>
             A
           </div> */}
-          <img id="navbar-logo" src={Logo} alt="" className="h-14 w-14 sm:h-16 sm:w-16 lg:h-[50px] lg:w-[50px] shrink-0" />
-          <div className="flex min-w-0 flex-col">
-            <span className="text-white font-bold text-base sm:text-lg lg:text-xl tracking-[0.12em] sm:tracking-[0.18em] lg:tracking-[0.2em] uppercase leading-none truncate">Alpha Matrix</span>
-            <span className="text-brand-saffron text-[10px] sm:text-sm tracking-widest mt-1">Since 2026</span>
+<img
+  id="navbar-logo"
+  src={alphaMatrix1}
+  alt="AlphaMatrix"
+  className="h-auto max-w-full object-contain shrink-0"
+  style={{
+   width: "clamp(30px, 4vw, 50px)",
+  }}
+/>
+         <div className="flex min-w-0 flex-col">
+            <span className="text-white font-bold text-base sm:text-lg lg:text-xl tracking-[0.12em] sm:tracking-[0.18em] lg:tracking-[0.2em] uppercase leading-none truncate">AlphaMatrix</span>
+            {/* <span className="text-brand-saffron text-[10px] sm:text-sm tracking-widest mt-1">Since 2026</span> */}
           </div>
         </div>
 
         {/* Nav Links */}
         <div className="hidden lg:flex items-center space-x-5 xl:space-x-8">
-          {navItems.map((item) => (
-            <Link
-              key={item.name}
-              to={item.to}
-              smooth={true}
-              spy={false}
-              duration={50}
-              delay={0}
-              offset={-80}
-              onClick={() => handleNavClick(item.to)}
-              className={`transition-colors cursor-pointer text-xs xl:text-sm tracking-wide uppercase whitespace-nowrap ${
-                activeSection === item.to
-                  ? 'text-brand-saffron font-bold'
-                  : 'text-gray-300 hover:text-brand-saffron font-medium'
-              }`}
-            >
-              {item.name}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const className = `transition-colors cursor-pointer text-sm xl:text-sm tracking-wide uppercase whitespace-nowrap ${
+              activeSection === item.to
+                ? 'text-brand-saffron font-bold'
+                : 'text-gray-300 hover:text-brand-saffron font-medium'
+            }`;
+
+            return (
+              <a
+                key={item.name}
+                href={getNavHref(item.to)}
+                onClick={(event) => handleNavClick(event, item.to)}
+                className={className}
+              >
+                {item.name}
+              </a>
+            );
+          })}
         </div>
 
         {/* Controls and Actions */}
         <div className="flex items-center gap-2 sm:gap-3 lg:gap-6">
           {/* Auto Scroll Settings Dropdown */}
           <div className="relative" ref={settingsRef}>
-            <button 
+            <button
               onClick={() => setShowSettings(!showSettings)}
               className={`p-2 rounded-full transition-colors ${showSettings || isAutoScrollEnabled ? 'text-brand-saffron bg-brand-saffron/10' : 'text-gray-400 hover:text-white bg-white/5'}`}
               aria-label="Auto scroll settings"
@@ -168,11 +208,11 @@ const Navbar: React.FC<NavbarProps> = ({
                       {scrollSpeed === 10 ? 'Fast' : scrollSpeed === 15 ? 'Medium' : 'Low'}
                     </span>
                   </div>
-                  <input 
-                    type="range" 
-                    min="10" 
-                    max="20" 
-                    step="5" 
+                  <input
+                    type="range"
+                    min="10"
+                    max="20"
+                    step="5"
                     value={scrollSpeed}
                     onChange={(e) => setScrollSpeed(Number(e.target.value))}
                     className="w-full h-1.5 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-brand-saffron"
@@ -190,13 +230,14 @@ const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={openEmployeeLogin}
-            className="hidden xl:block text-white hover:text-brand-saffron transition-colors text-sm tracking-wide font-medium whitespace-nowrap"
+            className="hidden xl:flex items-center gap-2 px-4 py-2 rounded-full border border-white/15 bg-white/5 hover:border-brand-saffron/50 hover:bg-brand-saffron/10 transition-all duration-200 text-white/70 hover:text-white text-[11px] font-semibold tracking-[0.15em] uppercase whitespace-nowrap cursor-pointer backdrop-blur-sm"
           >
-            EMPLOYEE LOGIN
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shrink-0" />
+            Employee Login
           </button>
-          <button className="hidden sm:block bg-brand-saffron text-white px-4 lg:px-6 py-2 rounded-sm text-xs lg:text-sm font-bold tracking-wider uppercase hover:bg-orange-600 transition-colors shadow-[0_0_15px_rgba(249,115,22,0.5)] whitespace-nowrap">
+          {/* <button className="hidden sm:block bg-brand-saffron text-white px-4 lg:px-6 py-2 rounded-sm text-xs lg:text-sm font-bold tracking-wider uppercase hover:bg-orange-600 transition-colors shadow-[0_0_15px_rgba(249,115,22,0.5)] whitespace-nowrap">
             Get Started
-          </button>
+          </button> */}
           <button
             type="button"
             onClick={() => setShowMobileMenu((value) => !value)}
@@ -211,25 +252,24 @@ const Navbar: React.FC<NavbarProps> = ({
       {showMobileMenu && (
         <div className="lg:hidden border-t border-white/10 bg-brand-black/95 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-4 py-4 grid gap-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.to}
-                smooth={true}
-                spy={false}
-                duration={120}
-                delay={0}
-                offset={-76}
-                onClick={() => handleNavClick(item.to)}
-                className={`px-3 py-3 rounded-md text-sm uppercase tracking-wide cursor-pointer ${
-                  activeSection === item.to
-                    ? 'bg-brand-saffron/10 text-brand-saffron font-bold'
-                    : 'text-gray-300 hover:bg-white/5'
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
+            {navItems.map((item) => {
+              const className = `px-3 py-3 rounded-md text-sm uppercase tracking-wide cursor-pointer ${
+                activeSection === item.to
+                  ? 'bg-brand-saffron/10 text-brand-saffron font-bold'
+                  : 'text-gray-300 hover:bg-white/5'
+              }`;
+
+              return (
+                <a
+                  key={item.name}
+                  href={getNavHref(item.to)}
+                  onClick={(event) => handleNavClick(event, item.to)}
+                  className={className}
+                >
+                  {item.name}
+                </a>
+              );
+            })}
             <button
               type="button"
               onClick={openEmployeeLogin}

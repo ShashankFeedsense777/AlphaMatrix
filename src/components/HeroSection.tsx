@@ -1,18 +1,23 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SectionReveal, { fadeIn, staggerContainer, fadeUp } from './SectionReveal';
+import { getCachedVideoUrl } from '../utils/videoCache';
 
 const heroVideos = [
-  'https://res.cloudinary.com/donk8eyno/video/upload/v1780050731/Frame1_qigxfh.mp4',
-  'https://res.cloudinary.com/donk8eyno/video/upload/v1780050734/Frame2_pbeird.mp4',
-  'https://res.cloudinary.com/donk8eyno/video/upload/v1780050733/Frame4_hj4tuc.mp4',
-  'https://res.cloudinary.com/donk8eyno/video/upload/v1780050731/Frame3_iz8gke.mp4',
+  'public/videos/Frame1.mp4',
+  'public/videos/Frame2.mp4',
+  'public/videos/Frame3.mp4',
+  'public/videos/Frame4.mp4',
+  'public/videos/Frame5.mp4',
+  'public/videos/Frame6.mp4',
+  'public/videos/Frame7.mp4',
 ];
 
 const HeroSection: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const preloadedVideosRef = useRef<HTMLVideoElement[]>([]);
   const [currentVideo, setCurrentVideo] = useState(0);
+  const [cachedUrls, setCachedUrls] = useState<string[]>([]);
 
   const orderedVideos = useMemo(
     () =>
@@ -25,9 +30,14 @@ const HeroSection: React.FC = () => {
   );
 
   useEffect(() => {
-    preloadedVideosRef.current = orderedVideos.map((url) => {
+    Promise.all(orderedVideos.map(getCachedVideoUrl)).then(setCachedUrls);
+  }, [orderedVideos]);
+
+  useEffect(() => {
+    if (cachedUrls.length === 0) return;
+    preloadedVideosRef.current = cachedUrls.map((blobUrl) => {
       const video = document.createElement('video');
-      video.src = url;
+      video.src = blobUrl;
       video.preload = 'auto';
       video.muted = true;
       video.playsInline = true;
@@ -38,7 +48,7 @@ const HeroSection: React.FC = () => {
     return () => {
       preloadedVideosRef.current = [];
     };
-  }, [orderedVideos]);
+  }, [cachedUrls]);
 
   useEffect(() => {
     if (!videoRef.current) return;
@@ -47,16 +57,18 @@ const HeroSection: React.FC = () => {
     videoRef.current.play().catch(() => {
       // Browser autoplay policies can reject briefly until the muted video is ready.
     });
-  }, [currentVideo]);
+  }, [currentVideo, cachedUrls]);
+
+  const currentSrc = cachedUrls[currentVideo] || orderedVideos[currentVideo];
 
   return (
     <section id="hero" className="relative min-h-svh w-full flex items-center justify-center overflow-hidden px-4 py-28 sm:px-6 lg:py-32">
       {/* Background video sequence */}
       <AnimatePresence mode="wait">
         <motion.video
-          key={orderedVideos[currentVideo]}
+          key={currentSrc}
           ref={videoRef}
-          src={orderedVideos[currentVideo]}
+          src={currentSrc}
           muted
           autoPlay
           playsInline
@@ -77,7 +89,6 @@ const HeroSection: React.FC = () => {
       </AnimatePresence>
 
       {/* Gradient overlay */}
-      {/* <div className="absolute inset-0 z-1 bg-gradient-to-br from-[#1a0505]/72 via-[#1a0505]/45 to-brand-saffron/16" /> */}
       <div className="absolute inset-0 z-1 bg-linear-to-br from-[#1a0505]/40 via-[#1a0505]/20 to-brand-saffron/8" />
 
       {/* Staggered hero text */}
@@ -91,46 +102,31 @@ const HeroSection: React.FC = () => {
           variants={fadeUp}
           className="inline-block text-[10px] sm:text-xs tracking-[0.24em] sm:tracking-[0.35em] text-brand-saffron uppercase mb-4 sm:mb-6 font-semibold"
         >
-          AI · Quant · Trading
-        </motion.span>
-
-                <motion.span
-          variants={fadeUp}
-          className="inline-block text-[10px] sm:text-xs tracking-[0.24em] sm:tracking-[0.35em] text-brand-saffron uppercase mb-4 sm:mb-6 font-semibold"
-        >
-          AI · Quant · Trading
+          AI · Investing · Quant · Trading
         </motion.span>
 
         <motion.h1
           variants={fadeUp}
           className="mt-5 sm:mt-8 text-[clamp(1.5rem,6vw,4rem)] text-gray-300 font-light leading-tight"
         >
+          <span className="text-white font-semibold">AlphaMatrix</span>
+          <br/>
           We are building the{' '}
           <br/>
           <span className="text-white font-semibold">best-in-class</span>
         </motion.h1>
-        
 
         <motion.p
           variants={fadeUp}
-          className="text-[clamp(2.25rem,8vw,4.5rem)] font-extrabold text-white leading-[1.05] "
+          className="text-[clamp(2.25rem,8vw,4.5rem)] font-extrabold text-white leading-[1.05]"
         >
-          quintessential AI ready 
+          Quintessential{' '}
+          <span className="text-brand-saffron">AlphaMatrix</span>{' '}AI ready
           <br/>
-          <strong className=" text-brand-saffron block mt-2">  humanoid{' '} Quant Firm</strong>
+          <strong className="text-brand-saffron block mt-2">Humanoid Quant Firm</strong>
         </motion.p>
 
-        <motion.div
-          variants={fadeUp}
-          className="mt-8 sm:mt-12 flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-4"
-        >
-          <button className="bg-brand-saffron hover:bg-orange-600 text-white px-6 sm:px-8 py-3 rounded text-xs sm:text-sm font-bold tracking-widest uppercase transition-all duration-300 shadow-[0_0_20px_rgba(249,115,22,0.55)] hover:shadow-[0_0_35px_rgba(249,115,22,0.8)] hover:-translate-y-0.5">
-            Explore Systems
-          </button>
-          <button className="border border-white/30 hover:border-brand-saffron text-white px-6 sm:px-8 py-3 rounded text-xs sm:text-sm font-bold tracking-widest uppercase transition-all duration-300 backdrop-blur-sm hover:-translate-y-0.5">
-            Our Performance
-          </button>
-        </motion.div>
+       
       </motion.div>
 
       {/* Scroll indicator */}

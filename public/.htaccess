@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Serve prerendered HTML to search engine crawlers & social media bots
+  RewriteCond %{HTTP_USER_AGENT} (googlebot|bingbot|yandexbot|baiduspider|facebookexternalhit|twitterbot|whatsapp|linkedinbot|slackbot|discordbot|telegrambot) [NC]
+  RewriteRule ^$ /index.prerendered.html [L]
+
+  # SPA fallback — serve index.html for all other routes
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>

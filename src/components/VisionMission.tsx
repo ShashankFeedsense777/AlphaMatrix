@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import SectionReveal, { fadeUp, fadeLeft, fadeRight, scaleIn, staggerContainer } from './SectionReveal';
+import ShapeGrid from './ui/ShapeGrid';
 
 const cards = [
   {
@@ -28,8 +29,18 @@ const cards = [
 
 const VisionMission: React.FC = () => {
   return (
-    <section id="vision" className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 relative overflow-hidden" >
-
+    <section id="vision" className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 relative overflow-hidden " >
+<div className="absolute inset-0 z-0">
+        <ShapeGrid
+          speed={0.4}
+          squareSize={55}
+          direction="diagonal"
+          borderColor="rgba(255,255,255,0.06)"
+          hoverFillColor="transparent"
+          shape="square"
+          hoverTrailAmount={3}
+        />
+      </div>
       {/* ── Cards ── staggered side-by-side reveal */}
       <motion.div
         className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8 lg:gap-10"
@@ -45,9 +56,9 @@ const VisionMission: React.FC = () => {
             whileHover={{ scale: 1.018, transition: { duration: 0.3 } }}
             className="relative min-w-0 overflow-hidden rounded-2xl sm:rounded-3xl cursor-default group p-6 sm:p-8 lg:p-10"
             style={{
-              background: i === 0
-                ? 'radial-gradient(ellipse 80% 80% at 110% -10%, rgba(249,115,22,0.18) 0%, rgba(255,255,255,0.03) 50%, rgba(99,102,241,0.08) 100%)'
-                : 'radial-gradient(ellipse 80% 80% at -10% 110%, rgba(249,115,22,0.18) 0%, rgba(255,255,255,0.03) 50%, rgba(99,102,241,0.08) 100%)',
+              background: "#2d0e0a",
+                // ? 'radial-gradient(ellipse 80% 80% at 110% -10%, rgba(249,115,22,0.18) 0%, rgba(255,255,255,0.03) 50%, rgba(99,102,241,0.08) 100%)'
+                // : 'radial-gradient(ellipse 80% 80% at -10% 110%, rgba(249,115,22,0.18) 0%, rgba(255,255,255,0.03) 50%, rgba(99,102,241,0.08) 100%)',
               backdropFilter: 'blur(24px) saturate(160%)',
               WebkitBackdropFilter: 'blur(24px) saturate(160%)',
               border: '1px solid rgba(255,255,255,0.08)',
@@ -68,17 +79,44 @@ const VisionMission: React.FC = () => {
       {/* ── Closing statement ── */}
       <SectionReveal
         variants={scaleIn}
-        className="max-w-4xl mx-auto mt-14 sm:mt-20 lg:mt-28 text-center"
+        className="max-w-6xl mx-auto mt-14 sm:mt-20 lg:mt-28 text-center"
         margin="-40px"
       >
         <p className="text-xl sm:text-2xl lg:text-3xl text-gray-300 font-light leading-snug">
-          Simply put, turning market complexity into{' '}
+          Turning market complexity into{' '}
           <span className="inline text-white font-bold border-b-2 border-brand-saffron pb-1">
             intelligent opportunities
           </span>{' '}
           — that's what drives us.
         </p>
       </SectionReveal>
+       <div className="absolute bottom-0 left-0 right-0 w-full overflow-hidden leading-none pointer-events-none" style={{ height: 80 }}>
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" className="w-full h-full">
+          <defs>
+            <linearGradient
+              id="waveGradient1"
+              x1="0%"
+              y1="0%"
+              x2="100%"
+              y2="0%"
+            >
+              <stop offset="0%" stopColor="#3d150c" />
+              <stop offset="50%" stopColor="#3d130b" />
+              <stop offset="100%" stopColor="#2d0e0a" />
+            </linearGradient>
+          </defs>
+
+          <path
+            d="M0,0 L0,30 C240,0 480,60 720,25 C960,-10 1200,55 1440,30 L1440,0 Z"
+            fill="url(#waveGradient1)"
+          />
+          {/* Dark fill below the wave — matches next section bg */}
+          <path
+            d="M0,30 C240,0 480,60 720,25 C960,-10 1200,55 1440,30 L1440,80 L0,80 Z"
+            fill="white"
+          />
+        </svg>
+      </div>
     </section>
   );
 };

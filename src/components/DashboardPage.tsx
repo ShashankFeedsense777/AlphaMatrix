@@ -1,8 +1,13 @@
 import React from 'react';
-import Layout from '../dashboard/layout/Layout';
+import { Outlet } from 'react-router-dom';
+import DashboardLayout from '../dashboard/layout/DashboardLayout';
 
 const Dashboard: React.FC = () => {
-  return <Layout />;
+  return (
+    <DashboardLayout>
+      <Outlet />
+    </DashboardLayout>
+  );
 };
 
 export default Dashboard;
