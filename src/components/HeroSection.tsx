@@ -4,13 +4,13 @@ import SectionReveal, { fadeIn, staggerContainer, fadeUp } from './SectionReveal
 import { getCachedVideoUrl } from '../utils/videoCache';
 
 const heroVideos = [
-  'https://res.cloudinary.com/drverjcjf/video/upload/v1780913982/Frame1_za36iw.mp4',
-  'https://res.cloudinary.com/drverjcjf/video/upload/v1780913981/Frame2_yqwhp2.mp4',
-  'https://res.cloudinary.com/drverjcjf/video/upload/v1780913979/Frame3_vaahnp.mp4',
-  'https://res.cloudinary.com/drverjcjf/video/upload/v1780913980/Frame4_qrqjqt.mp4',
-  'https://res.cloudinary.com/drverjcjf/video/upload/v1780913983/Frame5_iweisg.mp4',
-  'https://res.cloudinary.com/drverjcjf/video/upload/v1781008757/Frame6_lfixvv.mp4',
-  'https://res.cloudinary.com/drverjcjf/video/upload/v1780919603/Frame7_bkz6dk.mp4',
+  'public/videos/Frame1.mp4',
+  'public/videos/Frame2.mp4',
+  'public/videos/Frame3.mp4',
+  'public/videos/Frame4.mp4',
+  'public/videos/Frame5.mp4',
+  'public/videos/Frame6.mp4',
+  'public/videos/Frame7.mp4',
 ];
 
 const HeroSection: React.FC = () => {

@@ -50,9 +50,9 @@ const CARDS: CardConfig[] = [
   },
 ];
 
-const VIDEO_RES_SRC = 'https://res.cloudinary.com/drverjcjf/video/upload/v1780914332/Research_people_t83yqf.mp4';
-const VIDEO_TRD_SRC = 'https://res.cloudinary.com/drverjcjf/video/upload/v1780914332/Research_people_t83yqf.mp4';
-const VIDEO_TEC_SRC = 'https://res.cloudinary.com/drverjcjf/video/upload/v1780914332/Research_people_t83yqf.mp4';
+const VIDEO_RES_SRC = 'public/videos/Research_people.mp4';
+const VIDEO_TRD_SRC = 'public/videos/Research_people.mp4';
+const VIDEO_TEC_SRC = 'public/videos/Research_people.mp4';
 
 const ConnectWithUs: React.FC = () => {
   const [active, setActive] = useState<CardId | null>(null);

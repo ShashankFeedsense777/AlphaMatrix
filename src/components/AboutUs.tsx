@@ -108,8 +108,8 @@ const teamMembers = [
 ];
 
 const ABOUT_VIDEOS = [
-  'https://res.cloudinary.com/drverjcjf/video/upload/v1780914017/Circle_Frame1_ddntd8.mp4',
-  'https://res.cloudinary.com/drverjcjf/video/upload/v1780914015/Footer_rrbhuu.mp4',
+  'public/videos/Circle_Frame1.mp4',
+  'public/videos/Footer.mp4',
 ];
 
 const VISIBLE_COUNT = 3;

@@ -30,7 +30,7 @@ const ArrowIcon = () => (
 );
 
 
-const FOOTER_VIDEO = 'https://res.cloudinary.com/drverjcjf/video/upload/v1780914015/Footer_rrbhuu.mp4';
+const FOOTER_VIDEO = 'public/videos/Footer.mp4';
 
 const CompanyFooter: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);

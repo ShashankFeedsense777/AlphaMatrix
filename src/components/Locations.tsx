@@ -15,21 +15,21 @@ const locations: Location[] = [
     role: 'Headquarters',
     desc: 'The maximum city — where conviction meets velocity.',
     coords: '19.0760° N, 72.8777° E',
-    img: 'https://res.cloudinary.com/drverjcjf/image/upload/v1781084361/Mumbai_f3jgrf.png',
+    img: 'public/images/Mumbai.png',
   },
   {
     city: 'Delhi',
     role: 'Partner Desk',
     desc: 'Where Capital Flows Meet Intelligent Strategies.',
     coords: '28.7041° N, 77.1025° E',
-    img: 'https://res.cloudinary.com/drverjcjf/image/upload/v1781084587/Delhi_y2scu1.png',
+    img: 'public/images/Delhi.png',
   },
   {
     city: 'Kolkata',
     role: 'Partner Desk',
     desc: 'Where heritage meets modern market opportunities.',
     coords: '22.5726° N, 88.3639° E',
-    img: 'https://res.cloudinary.com/drverjcjf/image/upload/v1781096157/victoria_sdviwv.png',
+    img: 'public/images/victoria.png',
   } 
 ];
 
